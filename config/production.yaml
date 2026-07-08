@@ -1,0 +1,9 @@
+﻿app:
+  environment: production
+
+logging:
+  level: INFO
+  format: json
+  console_enabled: true
+  file_enabled: true
+  use_colors: false

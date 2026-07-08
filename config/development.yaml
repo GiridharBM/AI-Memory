@@ -1,0 +1,8 @@
+﻿app:
+  environment: development
+
+logging:
+  level: DEBUG
+  console_enabled: true
+  file_enabled: true
+  use_colors: true

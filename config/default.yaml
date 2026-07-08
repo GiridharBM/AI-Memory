@@ -1,0 +1,28 @@
+app:
+  name: personal-ai-memory
+  environment: development
+
+paths:
+  vault_root: ./vault
+  inbox_root: ./data/inbox
+  staging_root: ./data/staging
+  manifest_root: ./data/manifests
+  cache_root: ./data/cache
+  log_root: ./data/logs
+
+ollama:
+  host: http://localhost:11434
+  model: qwen3:8b
+  timeout_seconds: 120
+  request_retries: 3
+  retry_backoff_seconds: 1.0
+
+logging:
+  level: INFO
+  format: console
+  console_enabled: true
+  file_enabled: true
+  use_colors: true
+  filename: personal-ai-memory.log
+  max_bytes: 5242880
+  backup_count: 5

@@ -1,0 +1,45 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.so
+.python-version
+.venv/
+venv/
+.env
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime data
+data/cache/*
+data/logs/*
+data/staging/*
+
+# Keep directory structure
+!data/cache/.gitkeep
+!data/logs/.gitkeep
+!data/staging/.gitkeep
+!data/inbox/.gitkeep
+!data/manifests/.gitkeep
+
+# Obsidian workspace noise
+.obsidian/workspace*.json
+.obsidian/cache/
+.obsidian/workspace.json
