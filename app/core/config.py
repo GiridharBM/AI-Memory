@@ -158,7 +158,7 @@ def load_settings(
 def _discover_project_root() -> Path:
     current = Path(__file__).resolve()
     for candidate in (current.parent, *current.parents):
-        if (candidate / "pyproject.toml").exists():
+        if (candidate / "MIT").exists():
             return candidate
     raise ConfigurationError("Unable to determine the project root from the current file path.")
 
