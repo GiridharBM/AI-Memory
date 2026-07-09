@@ -1,474 +1,502 @@
-# Personal AI Memory System
+﻿<div align="center">
 
-A local-first Personal AI Memory System for turning documents, repositories, and transcripts into an evolving Obsidian wiki.
+# 🧠 AI Memory
 
-The system runs on your machine with Python, Ollama, Qwen3:8B, Markdown, and Obsidian. It ingests source material, cleans the text, asks a local model for structured knowledge, generates Obsidian-compatible notes, and updates the vault without overwriting user-written content.
+**Build your own offline AI-powered second brain using Python, Ollama, and Obsidian.**
 
-## Status
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge)
+![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-v1.0-blue?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-36%20Passing-success?style=for-the-badge)
 
-Version 1 includes:
+[Overview](#-overview) •
+[Features](#-features) •
+[Installation](#-installation) •
+[Usage](#-cli-usage) •
+[Architecture](#%EF%B8%8F-project-architecture) •
+[Configuration](#%EF%B8%8F-configuration) •
+[License](#-license)
 
-- Configuration and environment variable support
-- Reusable logging with console and rotating file logs
-- PDF, Markdown, TXT, GitHub README, and YouTube transcript ingestion
-- Text preprocessing that preserves headings, lists, paragraphs, and fenced code blocks
-- Ollama integration with structured JSON validation and retries
-- Obsidian Markdown generation
-- Vault writing, wiki index updates, and duplicate-note protection
-- Typer CLI with Rich terminal output
-- Pytest coverage for configuration, logging, ingestion, processing, Markdown generation, wiki management, CLI, and the complete workflow
+</div>
 
-Version 1 intentionally does not include vector databases, RAG, graph databases, or a web UI.
+---
 
-## Installation
+## 📖 Overview
+
+**AI Memory** is a local-first personal AI memory system that continuously transforms documents, research papers, GitHub repositories, YouTube transcripts, and personal notes into an interconnected Obsidian knowledge base.
+
+Unlike traditional note-taking apps, AI Memory doesn't just store information — it **analyzes, organizes, summarizes, links, and enriches** your knowledge while keeping everything completely offline.
+
+- Your data never leaves your machine
+- No cloud APIs
+- No subscriptions
+- No vendor lock-in
+
+---
+
+## ✨ Features
+
+### 🤖 AI Powered
+- Local inference using Ollama
+- Qwen3:8B integration
+- Structured JSON generation with automatic retries and validation
+- Modular, swappable prompt system
+
+### 📄 Document Ingestion
+Supports:
+- PDF documents
+- Markdown files
+- Plain text files
+- GitHub repository READMEs
+- YouTube transcripts
+
+### 🧠 Knowledge Extraction
+Automatically extracts:
+- Summaries
+- Key concepts & definitions
+- Important entities
+- Related topics & references
+- Tags and suggested titles
+
+### 📚 Obsidian Integration
+- Markdown generation with YAML frontmatter
+- Automatic wiki links (`[[...]]`)
+- Automatic index generation & vault updates
+- Duplicate protection
+- Preserves your own edits — never overwrites user content
+
+### 🖥️ Developer Friendly
+- Typer-based CLI with a Rich terminal UI
+- YAML-driven configuration
+- Rotating logs
+- Comprehensive test suite
+- Type-safe, clean architecture built on SOLID principles
+
+---
+
+## 🚀 Current Status
+
+**Version:** `v1.0.0`  **Status:** 🟢 Actively Developed
+
+| Completed | In Progress |
+|---|---|
+| Local-first architecture | Folder ingestion |
+| Ollama integration | Automatic vault watching |
+| PDF / Markdown / TXT ingestion | Better PDF parsing |
+| GitHub README ingestion | Incremental processing |
+| YouTube transcript ingestion | |
+| Markdown generation & vault management | |
+| CLI interface, logging, config management | |
+| Comprehensive testing | |
+
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+|---|---|
+| Programming Language | Python 3.11+ |
+| Local LLM | Ollama |
+| Default Model | Qwen3:8B |
+| CLI | Typer |
+| Terminal UI | Rich |
+| Configuration | YAML |
+| Validation | Pydantic |
+| Testing | Pytest |
+| Linting | Ruff |
+| Type Checking | MyPy |
+| Knowledge Base | Obsidian |
+| Version Control | Git |
+
+---
+
+## 📂 Repository
+
+**GitHub:** [github.com/GiridharBM/AI-Memory](https://github.com/GiridharBM/AI-Memory)
+
+```bash
+git clone https://github.com/GiridharBM/AI-Memory.git
+cd AI-Memory
+```
+
+---
+
+## ⚡ Installation
 
 ### Requirements
-
-- Python 3.11 or newer
+- Python 3.11+
 - Git
 - Ollama
 - Obsidian
-- Qwen3:8B pulled in Ollama
+- Windows, macOS, or Linux
 
-### Clone The Repository
-
+### 1. Clone the repository
 ```bash
-git clone <repository-url>
-cd LLM-Wiki
+git clone https://github.com/GiridharBM/AI-Memory.git
+cd AI-Memory
 ```
 
-### Create A Virtual Environment
+### 2. Create a virtual environment
 
-Windows PowerShell:
-
+**Windows (PowerShell)**
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-macOS or Linux:
-
+**macOS/Linux**
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### Install Dependencies
-
+### 3. Install dependencies
 ```bash
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m pip install -e ".[dev]"
+pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
-### Verify Installation
-
+### 4. Verify installation
 ```bash
 python -m pytest
 pam doctor
 ```
 
-The test suite should pass without requiring a live Ollama model because model calls are mocked in tests.
-
-## Ollama Setup
-
-Install Ollama from the official Ollama website, then pull the model:
-
-```bash
-ollama pull qwen3:8b
-```
-
-Start Ollama if it is not already running:
-
-```bash
-ollama serve
-```
-
-The default endpoint is:
-
+Expected output:
 ```text
-http://localhost:11434
+36 passed
+
+✔ Configuration loaded
+✔ Ollama available
+✔ Vault available
+✔ Inbox available
 ```
 
-The default model is:
+---
 
-```text
-qwen3:8b
-```
+## 🤖 Ollama Setup
 
-You can override these values with configuration or environment variables:
+1. Install Ollama from [ollama.com](https://ollama.com)
+2. Pull the default model:
+   ```bash
+   ollama pull qwen3:8b
+   ```
+3. Verify installation:
+   ```bash
+   ollama list
+   ```
+   Expected:
+   ```text
+   qwen3:8b
+   ```
+4. Start Ollama (if not already running):
+   ```bash
+   ollama serve
+   ```
 
+**Defaults**
+
+| Setting | Value |
+|---|---|
+| Endpoint | `http://localhost:11434` |
+| Model | `qwen3:8b` |
+
+Override with environment variables:
 ```bash
 PAM_OLLAMA__HOST=http://localhost:11434
 PAM_OLLAMA__MODEL=qwen3:8b
 ```
 
-## Obsidian Setup
+---
 
-The application writes Markdown files into the configured vault path.
+## 📚 Obsidian Setup
 
-By default, the vault path is:
+AI Memory generates Markdown files directly into an Obsidian vault. By default, the vault lives at `./vault`.
 
-```text
-./vault
-```
+**Option 1 — Recommended:** Open the project's `vault/` folder directly as an Obsidian vault via `File → Open Folder as Vault`, and select `AI-Memory/vault`.
 
-You can either:
-
-- Open the project `vault/` folder as an Obsidian vault.
-- Point the application at an existing Obsidian vault.
-
-Example environment override:
-
+**Option 2:** Point AI Memory at your existing vault using an environment variable:
 ```bash
 PAM_PATHS__VAULT_ROOT=D:\Obsidian\PersonalAIWiki
 ```
-
-The wiki manager maintains these files in the vault root:
-
-- `index.md`
-- `overview.md`
-- `log.md`
-
-Generated notes are stored under:
-
-```text
-Notes/
+or edit `config/default.yaml`:
+```yaml
+paths:
+  vault_root: D:/Obsidian/PersonalAIWiki
 ```
 
-Generated content is wrapped in managed markers so user-written content is preserved:
+### Generated wiki structure
+```text
+vault/
+├── Notes/
+├── index.md
+├── overview.md
+└── log.md
+```
 
+### Managed sections
+
+AI-generated content is wrapped in managed markers:
 ```markdown
 <!-- PAM:BEGIN MANAGED -->
-Generated content
+Generated AI content
 <!-- PAM:END MANAGED -->
 ```
+Everything outside these markers is preserved, so you can freely edit your notes without AI overwriting your work.
 
-## CLI Usage
+---
 
-The CLI entrypoint is:
+## 💻 CLI Usage
 
 ```bash
-pam
+pam --help          # General help
+pam status           # Configuration, vault, and Ollama status
+pam doctor           # Full health check
+pam config            # View current configuration
+pam config --json    # View configuration as JSON
 ```
 
-Show status:
+### 📥 Ingest Documents
 
+| Type | Command |
+|---|---|
+| Markdown | `pam ingest markdown path/to/file.md` |
+| PDF | `pam ingest pdf path/to/file.pdf` |
+| TXT | `pam ingest txt path/to/file.txt` |
+| GitHub repo | `pam ingest github https://github.com/owner/repository` |
+| YouTube | `pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID` |
+
+Examples:
 ```bash
-pam status
-```
-
-Run local health checks:
-
-```bash
-pam doctor
-```
-
-Show resolved configuration:
-
-```bash
-pam config
-pam config --json
-```
-
-Ingest a PDF:
-
-```bash
-pam ingest pdf path/to/file.pdf
-```
-
-Ingest Markdown:
-
-```bash
-pam ingest markdown path/to/file.md
-```
-
-Ingest TXT:
-
-```bash
-pam ingest txt path/to/file.txt
-```
-
-Ingest a GitHub repository README:
-
-```bash
-pam ingest github https://github.com/owner/repository
-```
-
-Ingest a YouTube transcript:
-
-```bash
+pam ingest markdown data/inbox/notes.md
+pam ingest pdf data/inbox/ai-paper.pdf
+pam ingest github https://github.com/ollama/ollama
 pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
-## Examples
+> If a YouTube transcript is unavailable, AI Memory exits gracefully with an informative message.
 
-### Example: Local Markdown Note
+---
 
+## 🔄 Processing Workflow
+
+Every document follows the same pipeline:
+
+```text
+Document → Ingestion → Text Cleaning → Prompt Construction
+→ Ollama Processing → Structured JSON → Markdown Generation
+→ Wiki Update → Obsidian Vault
+```
+
+**Example — Markdown:**
 ```bash
-pam ingest markdown ./data/inbox/agent-notes.md
+pam ingest markdown data/inbox/python.md
 ```
+produces `vault/Notes/Python.md` and updates `index.md`, `overview.md`, and `log.md`.
 
-Workflow:
-
-```text
-Markdown file -> cleaned text -> Ollama JSON -> Obsidian note -> vault update
-```
-
-Output:
-
-```text
-vault/
-  Notes/
-    Suggested Note Title.md
-  index.md
-  overview.md
-  log.md
-```
-
-### Example: GitHub Repository README
-
+**Example — GitHub Repository:**
 ```bash
 pam ingest github https://github.com/ollama/ollama
 ```
+downloads and analyzes the repository README, then generates linked notes in the vault.
 
-The system downloads the repository README, extracts clean Markdown, analyzes it with Ollama, and saves the generated note into Obsidian.
-
-### Example: YouTube Transcript
-
+**Example — YouTube:**
 ```bash
 pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID
 ```
+pulls the transcript, extracts knowledge, and generates vault notes.
 
-If a transcript is unavailable, the command exits gracefully with a clear error message.
+---
 
-## Project Architecture
-
-The system is organized as a clean, local-first pipeline.
-
-```text
-Input
-  -> Ingestion
-  -> Text preprocessing
-  -> Ollama processing
-  -> JSON validation
-  -> Markdown generation
-  -> Wiki update
-  -> Obsidian vault write
-```
-
-Primary layers:
-
-- `app.cli`: Typer command-line interface.
-- `app.core`: configuration, logging, and shared technical foundations.
-- `app.domain`: typed business objects such as source documents, analyses, and generated notes.
-- `app.infrastructure`: adapters for ingestion, Ollama, vault persistence, and external systems.
-- `app.application`: application services such as AI processing.
-- `app.pipelines`: end-to-end workflows.
-- `app.prompts`: prompt templates sent to Ollama.
-- `app.templates`: Markdown generation for Obsidian notes.
-
-See [docs/architecture.md](docs/architecture.md) for the detailed architecture.
-
-## Folder Structure
+## 🏗️ Project Architecture
 
 ```text
-personal-ai-memory/
-  app/
-    application/
-    cli/
-    core/
-    domain/
-    infrastructure/
-      ingestion/
-      llm/
-      logging/
-      state/
-      vault/
-    pipelines/
-    prompts/
-    templates/
-  config/
-    default.yaml
-    development.yaml
-    production.yaml
-  data/
-    cache/
-    inbox/
-    logs/
-    manifests/
-    staging/
-  docs/
-  scripts/
-  tests/
-    integration/
-    unit/
-  vault/
-  pyproject.toml
-  requirements.txt
-  README.md
+Source Document
+      │
+      ▼
+  Ingestion
+      │
+      ▼
+Text Preprocessing
+      │
+      ▼
+ Prompt Builder
+      │
+      ▼
+ Ollama (Qwen3)
+      │
+      ▼
+JSON Validation
+      │
+      ▼
+Markdown Generator
+      │
+      ▼
+ Wiki Manager
+      │
+      ▼
+ Obsidian Vault
 ```
 
-Important folders:
+---
 
-- `app/`: production Python package.
-- `config/`: YAML configuration files.
-- `data/inbox/`: optional local drop zone for source files.
-- `data/logs/`: rotating application logs.
-- `data/manifests/`: reserved for persistent processing state.
-- `tests/`: unit and integration tests.
-- `vault/`: default Obsidian vault output folder.
+## 📁 Folder Structure
 
-## Configuration
+```text
+AI-Memory/
+├── app/
+│   ├── application/
+│   ├── cli/
+│   ├── core/
+│   ├── domain/
+│   ├── infrastructure/
+│   │   ├── ingestion/
+│   │   ├── llm/
+│   │   ├── logging/
+│   │   ├── state/
+│   │   └── vault/
+│   ├── pipelines/
+│   ├── prompts/
+│   └── templates/
+├── config/
+│   ├── default.yaml
+│   ├── development.yaml
+│   └── production.yaml
+├── data/
+│   ├── inbox/
+│   ├── cache/
+│   ├── manifests/
+│   ├── staging/
+│   └── logs/
+├── docs/
+├── scripts/
+├── tests/
+│   ├── integration/
+│   └── unit/
+├── vault/
+├── README.md
+├── requirements.txt
+└── pyproject.toml
+```
 
-Configuration is loaded in this order:
+| Directory | Purpose |
+|---|---|
+| `app/` | Main application source code |
+| `config/` | YAML configuration files |
+| `data/inbox/` | Input files for ingestion |
+| `data/cache/` | Temporary cached data |
+| `data/logs/` | Application logs |
+| `data/manifests/` | Reserved for persistent processing state |
+| `tests/` | Unit and integration tests |
+| `vault/` | Generated Obsidian vault |
+| `docs/` | Project documentation |
 
+### Design Principles
+Clean Architecture · SOLID Principles · Modular Components · Type Safety · Local-first Design · Offline AI · Extensibility · Production-ready Code · Comprehensive Testing
+
+---
+
+## ⚙️ Configuration
+
+Configuration is loaded in layers, in this order:
 1. `config/default.yaml`
 2. `config/<environment>.yaml`
-3. Environment variables prefixed with `PAM_`
+3. Environment variables (`PAM_*`)
 
-Default environment:
-
-```text
-development
-```
-
-Select another environment:
-
+Default environment: `development`. Switch with:
 ```bash
 PAM_ENVIRONMENT=production
 ```
 
-Nested environment variables use double underscores:
-
+Nested config values use double underscores:
 ```bash
+PAM_OLLAMA__HOST=http://localhost:11434
 PAM_OLLAMA__MODEL=qwen3:8b
-PAM_LOGGING__LEVEL=DEBUG
 PAM_PATHS__VAULT_ROOT=D:\Obsidian\PersonalAIWiki
 ```
 
-Key configuration sections:
+Default configuration:
+```yaml
+app:
+  name: AI Memory
+  environment: development
 
-- `app`: app name and environment.
-- `paths`: vault, inbox, staging, manifest, cache, and log paths.
-- `ollama`: endpoint, model, timeout, retry count, and retry backoff.
-- `logging`: console logging, file logging, colors, rotation size, and backup count.
+paths:
+  vault_root: ./vault
+  inbox_root: ./data/inbox
+  cache_root: ./data/cache
+  logs_root: ./data/logs
 
-Show resolved config:
+ollama:
+  host: http://localhost:11434
+  model: qwen3:8b
+  timeout_seconds: 120
 
-```bash
-pam config
+logging:
+  level: INFO
 ```
 
-## Generated Note Format
+View current configuration with `pam config`.
+
+### Generated Note Format
 
 Each generated note includes:
-
-- YAML frontmatter
-- Title
-- Summary
-- Key Concepts
-- Definitions
-- Important Entities
-- Related Topics
-- Tags
-- References
-- Generated date
-- Source
+- YAML frontmatter, title, and summary
+- Key concepts, definitions, and important entities
+- Related topics, tags, and references
+- Generated date and source
 - Obsidian wiki links where useful
 
-Concepts, definitions, entities, and related topics are rendered with `[[wiki links]]` so the vault can grow into a connected knowledge base over time.
+Concepts, definitions, entities, and related topics are rendered as `[[wiki links]]` so the vault grows into a connected knowledge base over time.
 
-## Development Guide
+---
 
-### Install Development Dependencies
+## 🧑‍💻 Development Guide
 
 ```bash
+# Install development dependencies
 python -m pip install -e ".[dev]"
-```
 
-### Run Tests
-
-```bash
+# Run the full test suite
 python -m pytest
-```
 
-### Run A Specific Test File
-
-```bash
+# Run a specific test file
 python -m pytest tests/integration/test_complete_workflow.py
-```
 
-### Lint
-
-```bash
+# Lint
 ruff check .
-```
 
-### Type Check
-
-```bash
+# Type check
 mypy app
 ```
 
 ### Development Principles
+- Keep the project runnable after every change
+- Prefer typed models for cross-module communication
+- Keep Ollama access behind `app.infrastructure.llm`
+- Keep vault writes behind `app.infrastructure.vault`
+- Do not overwrite user-written Obsidian content
+- Add tests when changing shared behavior
 
-- Keep the project runnable after every change.
-- Prefer typed models for cross-module communication.
-- Keep Ollama access behind `app.infrastructure.llm`.
-- Keep vault writes behind `app.infrastructure.vault`.
-- Do not overwrite user-written Obsidian content.
-- Add tests when changing shared behavior.
+---
 
-## Testing Strategy
+## 🤝 Contributing
 
-The test suite uses pytest and mocks external model behavior.
+Contributions, issues, and feature requests are welcome. Feel free to check the [issues page](https://github.com/GiridharBM/AI-Memory/issues) or open a pull request.
 
-Coverage includes:
+---
 
-- Configuration validation and environment overrides
-- Logging setup and file output
-- Ingestion adapters
-- Text preprocessing
-- Ollama client behavior with mocked transport
-- AI processing and malformed JSON retries
-- Markdown generation
-- Wiki manager and vault writer behavior
-- CLI command behavior
-- Complete end-to-end workflow
+## 📄 License
 
-Run the full suite:
+This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
 
-```bash
-python -m pytest
-```
+---
 
-Current expected result:
+<div align="center">
 
-```text
-36 passed
-```
+Made with 🧠 by [GiridharBM](https://github.com/GiridharBM)
 
-## Future Roadmap
-
-Planned future versions may add:
-
-- Incremental source manifests and change detection
-- Folder ingestion
-- Full GitHub repository ingestion beyond README files
-- Research paper-specific extraction
-- Better transcript metadata
-- Local embeddings
-- Vector search with ChromaDB, FAISS, or Qdrant
-- RAG over the generated vault
-- Knowledge graph support
-- Obsidian backlink refinement
-- Scheduled ingestion
-- Conflict-aware note merging
-- Web or desktop UI
-
-The current architecture is designed so these capabilities can be added without rewriting ingestion, AI processing, Markdown generation, or vault persistence.
-
-## License
-
-This project is currently marked as proprietary in `pyproject.toml`.
+</div>
