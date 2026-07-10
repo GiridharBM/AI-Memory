@@ -16,6 +16,28 @@ from app.core.config import LoggingSettings, Settings
 _LOGGING_CONFIGURED = False
 
 
+class LoggerNameFilter(logging.Filter):
+    """Allow records from loggers with a matching name prefix."""
+
+    def __init__(self, *prefixes: str) -> None:
+        super().__init__()
+        self._prefixes = prefixes
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return any(record.name.startswith(prefix) for prefix in self._prefixes)
+
+
+class MinimumLevelFilter(logging.Filter):
+    """Allow records at or above a minimum level."""
+
+    def __init__(self, minimum_level: int) -> None:
+        super().__init__()
+        self._minimum_level = minimum_level
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return record.levelno >= self._minimum_level
+
+
 class JsonFormatter(logging.Formatter):
     """Serialize log records as JSON for structured file output."""
 
@@ -50,18 +72,27 @@ def setup_logging(settings: Settings, *, force: bool = False) -> None:
 
     root_logger = logging.getLogger()
     root_logger.setLevel(_resolve_level(logging_settings.level))
-    root_logger.handlers.clear()
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+        handler.close()
 
     if logging_settings.console_enabled:
         root_logger.addHandler(_build_console_handler(logging_settings, debug_mode))
 
     if logging_settings.file_enabled:
         root_logger.addHandler(_build_file_handler(settings.paths.log_root, logging_settings))
+        for handler in _build_component_file_handlers(settings.paths.log_root, logging_settings):
+            root_logger.addHandler(handler)
 
     root_logger.propagate = False
     logging.captureWarnings(True)
+    # Keep application diagnostics visible without exposing verbose HTTP transport traces.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
 
     application_logger = logging.getLogger("app")
+    application_logger.info("Application started")
+    application_logger.info("Configuration loaded")
     application_logger.debug(
         "Logging configured.",
         extra={
@@ -126,6 +157,28 @@ def _build_file_handler(log_root: Path, logging_settings: LoggingSettings) -> lo
         )
 
     return file_handler
+
+
+def _build_component_file_handlers(
+    log_root: Path,
+    logging_settings: LoggingSettings,
+) -> list[logging.Handler]:
+    handlers: list[logging.Handler] = []
+    component_specs: list[tuple[str, logging.Filter]] = [
+        ("watcher.log", LoggerNameFilter("app.watcher")),
+        ("processing.log", LoggerNameFilter("app.queue", "app.pipelines", "app.application")),
+        ("errors.log", MinimumLevelFilter(logging.ERROR)),
+    ]
+    for filename, log_filter in component_specs:
+        if filename == logging_settings.filename:
+            continue
+        handler = _build_file_handler(
+            log_root,
+            logging_settings.model_copy(update={"filename": filename}),
+        )
+        handler.addFilter(log_filter)
+        handlers.append(handler)
+    return handlers
 
 
 def _resolve_level(level_name: str) -> int:

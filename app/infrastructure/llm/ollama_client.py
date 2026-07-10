@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from json import JSONDecodeError
 from typing import Any, Literal, TypeVar
 
+import httpx
 import ollama
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -102,9 +103,32 @@ class OllamaClient:
         try:
             self._client.ps()
         except Exception as exc:
-            logger.debug("Ollama availability check failed: %s", exc)
+            logger.debug("Ollama availability check failed: %s", exc, exc_info=True)
             return False
         return True
+
+    def model_exists(self, model_name: str | None = None) -> bool:
+        """Check whether a model appears in the local Ollama model list."""
+
+        target = model_name or self._settings.model
+        try:
+            response = self._normalize_response(self._client.list())
+        except Exception as exc:
+            logger.debug("Ollama model check failed: %s", exc, exc_info=True)
+            return False
+
+        models = response.get("models", [])
+        if not isinstance(models, list):
+            return False
+        for model in models:
+            try:
+                model_data = self._normalize_response(model)
+            except OllamaResponseError:
+                continue
+            name = model_data.get("name") or model_data.get("model")
+            if name == target:
+                return True
+        return False
 
     def generate_text(self, request: OllamaRequest) -> OllamaTextResponse:
         """Generate a plain-text response using the configured Ollama model."""
@@ -199,14 +223,21 @@ class OllamaClient:
 
                 response = self._client.generate(**generate_kwargs)
 
-                if not isinstance(response, dict):
-                    response = dict(response)
+                response = self._normalize_response(response)
 
                 if not response.get("response"):
                     raise OllamaResponseError("Ollama returned an empty response body.")
 
                 return response
             except ollama.ResponseError as exc:
+                logger.exception(
+                    "Ollama returned an HTTP response error.",
+                    extra={
+                        "model_name": model_name,
+                        "endpoint": self.endpoint,
+                        "status_code": exc.status_code,
+                    },
+                )
                 if exc.status_code == 404:
                     raise OllamaResponseError(
                         f"Ollama model '{model_name}' was not found at {self.endpoint}."
@@ -218,6 +249,10 @@ class OllamaClient:
                     f"Ollama request failed with status code {exc.status_code}."
                 ) from exc
             except TimeoutError as exc:
+                logger.exception(
+                    "Ollama request timed out.",
+                    extra={"model_name": model_name, "endpoint": self.endpoint},
+                )
                 if attempt < max_attempts:
                     self._sleep_before_retry(attempt)
                     continue
@@ -226,13 +261,34 @@ class OllamaClient:
                 ) from exc
             except OllamaClientError:
                 raise
-            except Exception as exc:
-                if self._should_retry(exc) and attempt < max_attempts:
+            except httpx.TimeoutException as exc:
+                logger.exception(
+                    "Ollama transport timed out.",
+                    extra={"model_name": model_name, "endpoint": self.endpoint},
+                )
+                if attempt < max_attempts:
+                    self._sleep_before_retry(attempt)
+                    continue
+                raise OllamaTimeoutError(
+                    f"Ollama request timed out after {self._settings.timeout_seconds} seconds."
+                ) from exc
+            except httpx.TransportError as exc:
+                logger.exception(
+                    "Ollama transport request failed.",
+                    extra={"model_name": model_name, "endpoint": self.endpoint},
+                )
+                if attempt < max_attempts:
                     self._sleep_before_retry(attempt)
                     continue
                 raise OllamaConnectionError(
                     f"Failed to communicate with Ollama at {self.endpoint}."
                 ) from exc
+            except Exception:
+                logger.exception(
+                    "Unexpected Ollama client failure.",
+                    extra={"model_name": model_name, "endpoint": self.endpoint},
+                )
+                raise
 
         raise OllamaClientError("Ollama request exhausted all retry attempts.")
 
@@ -243,21 +299,25 @@ class OllamaClient:
         return response_text.strip()
 
     def _sleep_before_retry(self, attempt: int) -> None:
-        delay = self._settings.retry_backoff_seconds * attempt
+        delay = self._settings.retry_backoff_seconds * (2 ** (attempt - 1))
         if delay <= 0:
             return
         time.sleep(delay)
 
     @staticmethod
-    def _should_retry(exc: Exception) -> bool:
-        retryable_exception_names = {
-            "ConnectError",
-            "ConnectionError",
-            "ConnectTimeout",
-            "ReadTimeout",
-            "RemoteProtocolError",
-            "TimeoutException",
-            "TransportError",
-            "WriteTimeout",
-        }
-        return exc.__class__.__name__ in retryable_exception_names
+    def _normalize_response(response: Any) -> dict[str, Any]:
+        """Convert supported Ollama SDK responses to a plain mapping."""
+
+        if isinstance(response, dict):
+            return response
+
+        model_dump = getattr(response, "model_dump", None)
+        if callable(model_dump):
+            payload = model_dump()
+            if isinstance(payload, dict):
+                return payload
+
+        try:
+            return dict(response)
+        except (TypeError, ValueError) as exc:
+            raise OllamaResponseError("Ollama returned an unsupported response object.") from exc

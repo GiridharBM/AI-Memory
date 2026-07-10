@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 
 from app.domain.notes import ObsidianNote
 from app.infrastructure.vault import VaultWriter
 from app.infrastructure.vault.wiki_manager import MANAGED_BEGIN, WikiManager
 
 
-def test_wiki_manager_creates_note_and_core_files(tmp_path) -> None:
+def test_wiki_manager_creates_note_and_core_files(tmp_path: Path) -> None:
     result = WikiManager(tmp_path).upsert_note(_note())
 
     assert result.created is True
@@ -28,7 +29,7 @@ def test_wiki_manager_creates_note_and_core_files(tmp_path) -> None:
     assert "[[Local AI Memory|Local AI Memory]]" in index_text
 
 
-def test_wiki_manager_updates_existing_note_by_source(tmp_path) -> None:
+def test_wiki_manager_updates_existing_note_by_source(tmp_path: Path) -> None:
     manager = WikiManager(tmp_path)
     first = manager.upsert_note(_note(title="Local AI Memory", filename="Local AI Memory.md"))
     second = manager.upsert_note(
@@ -44,7 +45,7 @@ def test_wiki_manager_updates_existing_note_by_source(tmp_path) -> None:
     assert "# Renamed Memory Note" in note_text
 
 
-def test_wiki_manager_prevents_filename_conflicts_for_different_sources(tmp_path) -> None:
+def test_wiki_manager_prevents_filename_conflicts_for_different_sources(tmp_path: Path) -> None:
     manager = WikiManager(tmp_path)
     first = manager.upsert_note(
         _note(source="first.md", title="Shared Title", filename="Shared Title.md")
@@ -60,7 +61,7 @@ def test_wiki_manager_prevents_filename_conflicts_for_different_sources(tmp_path
     )
 
 
-def test_wiki_manager_does_not_overwrite_user_written_content(tmp_path) -> None:
+def test_wiki_manager_does_not_overwrite_user_written_content(tmp_path: Path) -> None:
     manager = WikiManager(tmp_path)
     result = manager.upsert_note(_note())
 
@@ -74,7 +75,7 @@ def test_wiki_manager_does_not_overwrite_user_written_content(tmp_path) -> None:
     assert "# Local AI Memory Updated" in note_text
 
 
-def test_vault_writer_saves_to_configured_vault(tmp_path) -> None:
+def test_vault_writer_saves_to_configured_vault(tmp_path: Path) -> None:
     result = VaultWriter(tmp_path).save(_note())
 
     assert result.created is True

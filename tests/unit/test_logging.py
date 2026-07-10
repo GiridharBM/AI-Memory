@@ -37,10 +37,38 @@ def test_setup_logging_supports_json_file_format(tmp_path: Path) -> None:
     setup_logging(settings, force=True)
     logging.getLogger("app.tests.json").warning("json message")
 
-    log_line = (tmp_path / "logs" / "json.log").read_text(encoding="utf-8").strip()
+    log_lines = (tmp_path / "logs" / "json.log").read_text(encoding="utf-8").splitlines()
+    log_line = log_lines[-1]
     payload = json.loads(log_line)
     assert payload["level"] == "WARNING"
     assert payload["message"] == "json message"
+
+
+def test_setup_logging_writes_component_logs(tmp_path: Path) -> None:
+    settings = _settings(
+        tmp_path,
+        logging_settings=LoggingSettings(
+            level="INFO",
+            format="console",
+            console_enabled=False,
+            file_enabled=True,
+            filename="application.log",
+        ),
+    )
+
+    setup_logging(settings, force=True)
+    logging.getLogger("app.watcher.service").info("Watcher started")
+    logging.getLogger("app.queue.worker").info("Processing python.md")
+    logging.getLogger("app.infrastructure.llm.ollama_client").error("Ollama timeout")
+
+    assert "Watcher started" in (tmp_path / "logs" / "watcher.log").read_text(encoding="utf-8")
+    assert "Processing python.md" in (tmp_path / "logs" / "processing.log").read_text(
+        encoding="utf-8"
+    )
+    assert "Ollama timeout" in (tmp_path / "logs" / "errors.log").read_text(encoding="utf-8")
+    application_log = (tmp_path / "logs" / "application.log").read_text(encoding="utf-8")
+    assert "Application started" in application_log
+    assert "Configuration loaded" in application_log
 
 
 def _settings(

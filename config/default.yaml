@@ -23,6 +23,34 @@ logging:
   console_enabled: true
   file_enabled: true
   use_colors: true
-  filename: personal-ai-memory.log
-  max_bytes: 5242880
+  filename: application.log
+  max_bytes: 10485760
   backup_count: 5
+
+watcher:
+  enabled: true
+  inbox_path: ./data/inbox
+  processed_path: ./data/processed
+  failed_path: ./data/failed
+  recursive: true
+  interval_seconds: 1
+  supported_extensions:
+    - .md
+    - .txt
+    - .pdf
+
+queue:
+  enabled: true
+  workers: 1
+  max_size: 1000
+  state_path: ./data/manifests/queue_state.json
+
+manifest:
+  enabled: true
+  path: ./data/manifests/processed_files.json
+
+processing:
+  move_processed: true
+  move_failed: true
+  processed_path: ./data/processed
+  failed_path: ./data/failed
