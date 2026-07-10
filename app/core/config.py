@@ -80,8 +80,8 @@ class LoggingSettings(BaseModel):
     console_enabled: bool = True
     file_enabled: bool = True
     use_colors: bool = True
-    filename: str = "personal-ai-memory.log"
-    max_bytes: int = Field(default=5_242_880, ge=1024)
+    filename: str = "application.log"
+    max_bytes: int = Field(default=10_485_760, ge=1024)
     backup_count: int = Field(default=5, ge=1)
 
     @field_validator("level")
@@ -107,6 +107,82 @@ class LoggingSettings(BaseModel):
         return normalized
 
 
+class WatcherSettings(BaseModel):
+    """Settings for the inbox folder watcher."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    inbox_path: Path = Field(default_factory=lambda: Path("./data/inbox"))
+    processed_path: Path = Field(default_factory=lambda: Path("./data/processed"))
+    failed_path: Path = Field(default_factory=lambda: Path("./data/failed"))
+    recursive: bool = True
+    interval_seconds: float = Field(default=1.0, ge=0.1)
+    supported_extensions: list[str] = Field(default_factory=lambda: [".md"])
+
+    @field_validator("inbox_path", "processed_path", "failed_path", mode="before")
+    @classmethod
+    def _coerce_path(cls, value: str | Path) -> Path:
+        return Path(value)
+
+    @field_validator("supported_extensions")
+    @classmethod
+    def _normalize_extensions(cls, value: list[str]) -> list[str]:
+        normalized = []
+        for extension in value:
+            candidate = extension.lower()
+            if not candidate.startswith("."):
+                candidate = f".{candidate}"
+            normalized.append(candidate)
+        return normalized
+
+
+class QueueSettings(BaseModel):
+    """Settings for the file processing queue."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    workers: int = Field(default=1, ge=1, le=1)
+    max_size: int = Field(default=1000, ge=1)
+    state_path: Path = Field(default_factory=lambda: Path("./data/manifests/queue_state.json"))
+
+    @field_validator("state_path", mode="before")
+    @classmethod
+    def _coerce_path(cls, value: str | Path) -> Path:
+        return Path(value)
+
+
+class ManifestSettings(BaseModel):
+    """Settings for the processed file manifest."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    path: Path = Field(default_factory=lambda: Path("./data/manifests/processed_files.json"))
+
+    @field_validator("path", mode="before")
+    @classmethod
+    def _coerce_path(cls, value: str | Path) -> Path:
+        return Path(value)
+
+
+class ProcessingSettings(BaseModel):
+    """Settings for post-processing file movement."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    move_processed: bool = True
+    move_failed: bool = True
+    processed_path: Path = Field(default_factory=lambda: Path("./data/processed"))
+    failed_path: Path = Field(default_factory=lambda: Path("./data/failed"))
+
+    @field_validator("processed_path", "failed_path", mode="before")
+    @classmethod
+    def _coerce_path(cls, value: str | Path) -> Path:
+        return Path(value)
+
+
 class Settings(BaseSettings):
     """Validated application settings with environment variable support."""
 
@@ -120,6 +196,10 @@ class Settings(BaseSettings):
     paths: PathSettings
     ollama: OllamaSettings
     logging: LoggingSettings
+    watcher: WatcherSettings = Field(default_factory=WatcherSettings)
+    queue: QueueSettings = Field(default_factory=QueueSettings)
+    manifest: ManifestSettings = Field(default_factory=ManifestSettings)
+    processing: ProcessingSettings = Field(default_factory=ProcessingSettings)
 
 
 def load_settings(
@@ -149,6 +229,21 @@ def load_settings(
     config_data["paths"]["project_root"] = project_root
     config_data["paths"] = _resolve_paths(config_data["paths"], project_root)
 
+    config_data.setdefault("watcher", {})
+    config_data["watcher"] = _resolve_watcher_paths(config_data["watcher"], project_root)
+
+    config_data.setdefault("processing", {})
+    config_data["processing"] = _resolve_processing_paths(
+        config_data["processing"],
+        project_root,
+    )
+
+    config_data.setdefault("queue", {})
+    config_data["queue"] = _resolve_queue_paths(config_data["queue"], project_root)
+
+    config_data.setdefault("manifest", {})
+    config_data["manifest"] = _resolve_manifest_paths(config_data["manifest"], project_root)
+
     try:
         return Settings(**config_data)
     except ValidationError as exc:
@@ -158,7 +253,7 @@ def load_settings(
 def _discover_project_root() -> Path:
     current = Path(__file__).resolve()
     for candidate in (current.parent, *current.parents):
-        if (candidate / "MIT").exists():
+        if (candidate / "pyproject.toml").exists():
             return candidate
     raise ConfigurationError("Unable to determine the project root from the current file path.")
 
@@ -202,6 +297,57 @@ def _resolve_paths(path_config: dict[str, Any], project_root: Path) -> dict[str,
             candidate if candidate.is_absolute() else (project_root / candidate).resolve()
         )
     return resolved_paths
+
+
+def _resolve_watcher_paths(watcher_config: dict[str, Any], project_root: Path) -> dict[str, Any]:
+    resolved_config = dict(watcher_config)
+    for key in ("inbox_path", "processed_path", "failed_path"):
+        if key not in resolved_config:
+            continue
+        candidate = Path(resolved_config[key])
+        resolved_config[key] = (
+            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
+        )
+    return resolved_config
+
+
+def _resolve_processing_paths(
+    processing_config: dict[str, Any],
+    project_root: Path,
+) -> dict[str, Any]:
+    resolved_config = dict(processing_config)
+    for key in ("processed_path", "failed_path"):
+        if key not in resolved_config:
+            continue
+
+        candidate = Path(resolved_config[key])
+        resolved_config[key] = (
+            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
+        )
+    return resolved_config
+
+
+def _resolve_queue_paths(queue_config: dict[str, Any], project_root: Path) -> dict[str, Any]:
+    resolved_config = dict(queue_config)
+    if "state_path" in resolved_config:
+        candidate = Path(resolved_config["state_path"])
+        resolved_config["state_path"] = (
+            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
+        )
+    return resolved_config
+
+
+def _resolve_manifest_paths(
+    manifest_config: dict[str, Any],
+    project_root: Path,
+) -> dict[str, Any]:
+    resolved_config = dict(manifest_config)
+    if "path" in resolved_config:
+        candidate = Path(resolved_config["path"])
+        resolved_config["path"] = (
+            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
+        )
+    return resolved_config
 
 
 def _apply_environment_overrides(config_data: dict[str, Any]) -> dict[str, Any]:

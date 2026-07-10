@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from app.application import AIProcessingResult
@@ -24,7 +25,7 @@ class FakeDocumentProcessor:
         )
 
 
-def test_complete_workflow_from_markdown_to_obsidian_vault(tmp_path) -> None:
+def test_complete_workflow_from_markdown_to_obsidian_vault(tmp_path: Path) -> None:
     source_path = tmp_path / "input.md"
     vault_path = tmp_path / "vault"
     source_path.write_text(
@@ -68,7 +69,7 @@ value    = "keep spacing"
     assert "[[index]]" in note_text
 
 
-def test_complete_workflow_updates_existing_note_without_user_content_loss(tmp_path) -> None:
+def test_complete_workflow_updates_existing_note_without_user_content_loss(tmp_path: Path) -> None:
     source_path = tmp_path / "input.md"
     vault_path = tmp_path / "vault"
     source_path.write_text("# Local Memory\n\nOriginal text.", encoding="utf-8")
