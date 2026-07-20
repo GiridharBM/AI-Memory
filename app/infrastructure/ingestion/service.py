@@ -13,10 +13,18 @@ from app.infrastructure.ingestion.base import (
     SourceReference,
     UnsupportedSourceError,
 )
+from app.infrastructure.ingestion.audio_ingestor import AudioIngestor
+from app.infrastructure.ingestion.code_ingestor import CodeIngestor
+from app.infrastructure.ingestion.csv_ingestor import CSVIngestor
+from app.infrastructure.ingestion.docx_ingestor import DocxIngestor
 from app.infrastructure.ingestion.github_readme_ingestor import GitHubReadmeIngestor
+from app.infrastructure.ingestion.image_ingestor import ImageIngestor
 from app.infrastructure.ingestion.markdown_ingestor import MarkdownIngestor
 from app.infrastructure.ingestion.pdf_ingestor import PdfIngestor
+from app.infrastructure.ingestion.pptx_ingestor import PptxIngestor
+from app.infrastructure.ingestion.spreadsheet_ingestor import SpreadsheetIngestor
 from app.infrastructure.ingestion.txt_ingestor import TextIngestor
+from app.infrastructure.ingestion.video_ingestor import VideoIngestor
 from app.infrastructure.ingestion.youtube_transcript_ingestor import YouTubeTranscriptIngestor
 
 logger = get_logger(__name__)
@@ -32,6 +40,14 @@ class DocumentIngestionService:
             PdfIngestor(),
             MarkdownIngestor(),
             TextIngestor(),
+            CodeIngestor(),
+            CSVIngestor(),
+            SpreadsheetIngestor(),
+            ImageIngestor(),
+            DocxIngestor(),
+            PptxIngestor(),
+            AudioIngestor(),
+            VideoIngestor(),
         ]
 
     def ingest(self, source: str | Path) -> DocumentIngestionResult:

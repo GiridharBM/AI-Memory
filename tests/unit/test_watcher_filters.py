@@ -14,18 +14,18 @@ def test_markdown_detected(tmp_path: Path) -> None:
     assert should_watch_file(path)
 
 
-def test_txt_ignored(tmp_path: Path) -> None:
+def test_txt_supported(tmp_path: Path) -> None:
     path = tmp_path / "notes.txt"
     path.write_text("Notes", encoding="utf-8")
 
-    assert not should_watch_file(path)
+    assert should_watch_file(path)
 
 
-def test_pdf_ignored(tmp_path: Path) -> None:
+def test_pdf_supported(tmp_path: Path) -> None:
     path = tmp_path / "paper.pdf"
     path.write_bytes(b"%PDF")
 
-    assert not should_watch_file(path)
+    assert should_watch_file(path)
 
 
 def test_hidden_ignored(tmp_path: Path) -> None:

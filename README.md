@@ -9,7 +9,7 @@
 ![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-v2.0.0-blue?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-36%20Passing-success?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-250%20Passing-success?style=for-the-badge)
 
 [Overview](#-overview) •
 [Features](#-features) •

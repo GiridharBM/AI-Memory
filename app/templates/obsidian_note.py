@@ -5,7 +5,15 @@ from __future__ import annotations
 import re
 from datetime import UTC, datetime
 
-from app.domain.analysis import DocumentAnalysis, ImportantEntity
+from app.domain.analysis import (
+    DocumentAnalysis,
+    Flashcard,
+    ImportantEntity,
+    LongAnswerQuestion,
+    MultipleChoiceQuestion,
+    RevisionNote,
+    ShortAnswerQuestion,
+)
 from app.domain.documents import SourceDocument
 from app.domain.notes import ObsidianNote
 
@@ -22,54 +30,99 @@ class ObsidianMarkdownGenerator:
         document: SourceDocument,
         analysis: DocumentAnalysis,
         generated_at: datetime | None = None,
+        ocr_confidence: float | None = None,
+        processing_confidence: float | None = None,
     ) -> ObsidianNote:
         """Generate an Obsidian note from a source document and its analysis."""
 
         timestamp = generated_at or datetime.now(tz=UTC)
         title = _clean_title(analysis.suggested_note_title)
         tags = _clean_tags(analysis.tags)
-        markdown = "\n".join(
-            [
-                _frontmatter(
-                    title=title,
-                    document=document,
-                    generated_at=timestamp,
-                    tags=tags,
-                ),
-                f"# {title}",
-                "",
-                "## Summary",
-                "",
-                analysis.summary.short.strip(),
-                "",
-                analysis.summary.detailed.strip(),
-                "",
-                "## Key Concepts",
-                "",
-                _key_concepts_section(analysis),
-                "",
-                "## Definitions",
-                "",
-                _definitions_section(analysis),
-                "",
-                "## Important Entities",
-                "",
-                _important_entities_section(analysis),
-                "",
-                "## Related Topics",
-                "",
-                _related_topics_section(analysis),
-                "",
-                "## Tags",
-                "",
-                _tags_section(tags),
-                "",
-                "## References",
-                "",
-                _references_section(document, timestamp),
-                "",
-            ]
-        )
+        sections = [
+            _frontmatter(
+                title=title,
+                document=document,
+                generated_at=timestamp,
+                tags=tags,
+                analysis=analysis,
+                ocr_confidence=ocr_confidence,
+                processing_confidence=processing_confidence,
+            ),
+            f"# {title}",
+            "",
+            "## Summary",
+            "",
+            analysis.summary.short.strip(),
+            "",
+            analysis.summary.detailed.strip(),
+            "",
+        ]
+
+        toc_entries: list[str] = []
+        if analysis.keywords:
+            sections.extend(["## Keywords", "", _keywords_section(analysis), ""])
+            toc_entries.append("Keywords")
+        if analysis.categories:
+            sections.extend(["## Categories", "", _categories_section(analysis), ""])
+            toc_entries.append("Categories")
+
+        sections.extend([
+            "## Key Concepts", "",
+            _key_concepts_section(analysis), "",
+            "## Definitions", "",
+            _definitions_section(analysis), "",
+            "## Important Entities", "",
+            _important_entities_section(analysis), "",
+            "## Related Topics", "",
+            _related_topics_section(analysis), "",
+        ])
+        toc_entries.extend(["Key Concepts", "Definitions", "Important Entities", "Related Topics"])
+
+        if analysis.suggested_related_notes:
+            sections.extend(["## Suggested Related Notes", "", _suggested_related_notes_section(analysis), ""])
+            toc_entries.append("Suggested Related Notes")
+        if analysis.suggested_backlinks:
+            sections.extend(["## Suggested Backlinks", "", _suggested_backlinks_section(analysis), ""])
+            toc_entries.append("Suggested Backlinks")
+        if analysis.questions_and_answers:
+            sections.extend(["## Frequently Asked Questions", "", _qa_section(analysis), ""])
+            toc_entries.append("Frequently Asked Questions")
+        if analysis.flashcards:
+            sections.extend(["## Flashcards", "", _flashcards_section(analysis), ""])
+            toc_entries.append("Flashcards")
+        if analysis.multiple_choice_questions:
+            sections.extend(["## Multiple Choice Questions", "", _mcq_section(analysis), ""])
+            toc_entries.append("Multiple Choice Questions")
+        if analysis.short_answer_questions:
+            sections.extend(["## Short Answer Questions", "", _short_answer_section(analysis), ""])
+            toc_entries.append("Short Answer Questions")
+        if analysis.long_answer_questions:
+            sections.extend(["## Long Answer Questions", "", _long_answer_section(analysis), ""])
+            toc_entries.append("Long Answer Questions")
+        if analysis.revision_notes:
+            sections.extend(["## Revision Notes", "", _revision_notes_section(analysis), ""])
+            toc_entries.append("Revision Notes")
+
+        toc_entries.extend(["Tags", "References"])
+
+        toc_md = "\n".join(f"- [[#{entry}|{entry}]]" for entry in toc_entries)
+        sections.insert(5, "## Table of Contents")
+        sections.insert(6, "")
+        sections.insert(7, toc_md)
+        sections.insert(8, "")
+
+        sections.extend([
+            "## Tags",
+            "",
+            _tags_section(tags),
+            "",
+            "## References",
+            "",
+            _references_section(document, timestamp, ocr_confidence, processing_confidence),
+            "",
+        ])
+
+        markdown = "\n".join(sections)
 
         return ObsidianNote(
             title=title,
@@ -88,6 +141,9 @@ def _frontmatter(
     document: SourceDocument,
     generated_at: datetime,
     tags: list[str],
+    analysis: DocumentAnalysis,
+    ocr_confidence: float | None,
+    processing_confidence: float | None,
 ) -> str:
     lines = [
         "---",
@@ -96,11 +152,35 @@ def _frontmatter(
         f"source_type: {_yaml_string(document.source_type)}",
         f"filename: {_yaml_string(document.filename)}",
         f"generated_date: {_yaml_string(generated_at.isoformat())}",
-        "tags:",
+        f"reading_time_minutes: {analysis.reading_time_minutes}",
+        f"difficulty: {_yaml_string(analysis.difficulty)}",
     ]
+    if analysis.categories:
+        lines.append("categories:")
+        lines.extend(f"  - {_yaml_string(c)}" for c in analysis.categories)
+    if analysis.keywords:
+        lines.append("keywords:")
+        lines.extend(f"  - {_yaml_string(k)}" for k in analysis.keywords)
+    lines.append("tags:")
     lines.extend(f"  - {_yaml_string(tag)}" for tag in tags)
+    if ocr_confidence is not None:
+        lines.append(f"ocr_confidence: {ocr_confidence:.2f}")
+    if processing_confidence is not None:
+        lines.append(f"processing_confidence: {processing_confidence:.2f}")
     lines.append("---")
     return "\n".join(lines)
+
+
+def _keywords_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.keywords:
+        return "- No keywords identified."
+    return ", ".join(f"`{kw}`" for kw in analysis.keywords)
+
+
+def _categories_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.categories:
+        return "- No categories identified."
+    return "\n".join(f"- {cat}" for cat in analysis.categories)
 
 
 def _key_concepts_section(analysis: DocumentAnalysis) -> str:
@@ -143,13 +223,103 @@ def _related_topics_section(analysis: DocumentAnalysis) -> str:
     )
 
 
+def _suggested_related_notes_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.suggested_related_notes:
+        return "- No related notes suggested."
+    return "\n".join(f"- {_wiki_link(note)}" for note in analysis.suggested_related_notes)
+
+
+def _suggested_backlinks_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.suggested_backlinks:
+        return "- No backlinks suggested."
+    return "\n".join(f"- {_wiki_link(note)}" for note in analysis.suggested_backlinks)
+
+
+def _qa_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.questions_and_answers:
+        return "- No questions and answers generated."
+    parts: list[str] = []
+    for i, qa in enumerate(analysis.questions_and_answers, 1):
+        parts.append(f"**Q{i}: {qa.question.strip()}**")
+        parts.append(f"A{i}: {qa.answer.strip()}")
+        parts.append("")
+    return "\n".join(parts).rstrip()
+
+
+def _flashcards_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.flashcards:
+        return "- No flashcards generated."
+    parts: list[str] = []
+    for i, card in enumerate(analysis.flashcards, 1):
+        parts.append(f"**Card {i} - Front:** {card.front.strip()}")
+        parts.append(f"**Back:** {card.back.strip()}")
+        parts.append("")
+    return "\n".join(parts).rstrip()
+
+
+def _mcq_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.multiple_choice_questions:
+        return "- No MCQs generated."
+    parts: list[str] = []
+    for i, mcq in enumerate(analysis.multiple_choice_questions, 1):
+        parts.append(f"**{i}. {mcq.question.strip()}**")
+        for j, option in enumerate(mcq.options):
+            marker = "X" if option == mcq.correct_answer else " "
+            parts.append(f"   {chr(65 + j)}. [{marker}] {option}")
+        if mcq.explanation:
+            parts.append(f"   *Explanation: {mcq.explanation.strip()}*")
+        parts.append("")
+    return "\n".join(parts).rstrip()
+
+
+def _short_answer_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.short_answer_questions:
+        return "- No short answer questions generated."
+    parts: list[str] = []
+    for i, qa in enumerate(analysis.short_answer_questions, 1):
+        parts.append(f"**{i}. {qa.question.strip()}**")
+        parts.append(f"*Answer: {qa.answer.strip()}*")
+        parts.append("")
+    return "\n".join(parts).rstrip()
+
+
+def _long_answer_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.long_answer_questions:
+        return "- No long answer questions generated."
+    parts: list[str] = []
+    for i, qa in enumerate(analysis.long_answer_questions, 1):
+        parts.append(f"**{i}. {qa.question.strip()}**")
+        parts.append("")
+        parts.append(qa.answer.strip())
+        parts.append("")
+    return "\n".join(parts).rstrip()
+
+
+def _revision_notes_section(analysis: DocumentAnalysis) -> str:
+    if not analysis.revision_notes:
+        return "- No revision notes generated."
+    parts: list[str] = []
+    for note in analysis.revision_notes:
+        parts.append(f"### {note.heading.strip()}")
+        parts.append("")
+        for point in note.points:
+            parts.append(f"- {point.strip()}")
+        parts.append("")
+    return "\n".join(parts).rstrip()
+
+
 def _tags_section(tags: list[str]) -> str:
     if not tags:
         return "- No tags generated."
     return "\n".join(f"- #{tag}" for tag in tags)
 
 
-def _references_section(document: SourceDocument, generated_at: datetime) -> str:
+def _references_section(
+    document: SourceDocument,
+    generated_at: datetime,
+    ocr_confidence: float | None,
+    processing_confidence: float | None,
+) -> str:
     lines = [
         f"- Source: {document.source}",
         f"- Source type: {document.source_type}",
@@ -161,6 +331,10 @@ def _references_section(document: SourceDocument, generated_at: datetime) -> str
         lines.append(f"- Source title: {document.metadata.title}")
     if document.metadata.author:
         lines.append(f"- Author: {document.metadata.author}")
+    if ocr_confidence is not None:
+        lines.append(f"- OCR Confidence: {ocr_confidence:.0%}")
+    if processing_confidence is not None:
+        lines.append(f"- Processing Confidence: {processing_confidence:.0%}")
 
     return "\n".join(lines)
 

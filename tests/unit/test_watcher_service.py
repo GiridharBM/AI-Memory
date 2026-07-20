@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import logging
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -11,6 +14,7 @@ from app.core.config import (
     AppSettings,
     LoggingSettings,
     ManifestSettings,
+    ModelRoutingSettings,
     OllamaSettings,
     PathSettings,
     ProcessingSettings,
@@ -18,13 +22,19 @@ from app.core.config import (
     Settings,
     WatcherSettings,
 )
-from app.watcher.service import WatchService
+from app.queue import QueueItem, QueueManager
+from app.watcher.events import FileCreatedEvent
+from app.watcher.service import WatchService, _InboxCreatedHandler
 
 
 class FakeObserver:
-    def __init__(self) -> None:
+    def __init__(self, alive: bool = True) -> None:
         self.stopped = False
         self.joined = False
+        self._alive = alive
+
+    def start(self) -> None:
+        pass
 
     def stop(self) -> None:
         self.stopped = True
@@ -32,13 +42,23 @@ class FakeObserver:
     def join(self) -> None:
         self.joined = True
 
+    def is_alive(self) -> bool:
+        return self._alive
+
+    def schedule(self, *args: Any, **kwargs: Any) -> None:
+        pass
+
 
 class FakeWorker:
     def __init__(self) -> None:
         self.drain: bool | None = None
+        self.started = False
 
     def stop(self, *, drain: bool = False) -> None:
         self.drain = drain
+
+    def start(self) -> None:
+        self.started = True
 
 
 def test_watcher_stop_drains_saves_flushes_and_reports_clean_shutdown(
@@ -89,6 +109,183 @@ def test_watcher_creates_missing_runtime_directories(tmp_path: Path) -> None:
         assert path.exists()
 
 
+def test_watcher_start_disabled(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    settings.watcher.enabled = False
+    service = WatchService(settings)
+    service.start()
+    assert service._observer is None
+    assert service._started is False
+
+
+def test_watcher_start_creates_observer(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    service = WatchService(settings)
+    fake_observer = FakeObserver()
+    with patch("app.watcher.service.Observer", return_value=fake_observer):
+        service.start()
+    assert service._observer is fake_observer
+    assert service._started is True
+
+
+def test_watcher_start_queue_worker_started(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    service = WatchService(settings)
+    fake_worker = FakeWorker()
+    fake_observer = FakeObserver()
+    service.queue_worker = cast(Any, fake_worker)
+    with patch("app.watcher.service.Observer", return_value=fake_observer):
+        service.start()
+    assert fake_worker.started is True
+
+
+def test_watcher_stop_not_started_returns_early(tmp_path: Path) -> None:
+    service = WatchService(_settings(tmp_path))
+    service._started = False
+    service.stop()
+    assert service._started is False
+
+
+def test_watcher_stop_without_drain(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    service = WatchService(_settings(tmp_path))
+    observer = FakeObserver()
+    worker = FakeWorker()
+    service._observer = observer
+    service.queue_worker = cast(Any, worker)
+    service._started = True
+    service.stop(drain=False)
+    assert worker.drain is False
+    assert "Waiting for current task..." not in capsys.readouterr().out
+
+
+def test_watcher_is_running_property(tmp_path: Path) -> None:
+    service = WatchService(_settings(tmp_path))
+    assert service.is_running is False
+    service._observer = FakeObserver(alive=True)
+    assert service.is_running is True
+    service._observer = FakeObserver(alive=False)
+    assert service.is_running is False
+
+
+def test_watcher_display_path_relative(tmp_path: Path) -> None:
+    service = WatchService(_settings(tmp_path))
+    result = service._display_path(tmp_path / "inbox" / "test.md")
+    assert "inbox" in result
+
+
+def test_watcher_display_path_absolute(tmp_path: Path) -> None:
+    service = WatchService(_settings(tmp_path))
+    foreign = Path("C:/other/dir/file.md") if Path("C:/").exists() else Path("/tmp/file.md")
+    result = service._display_path(foreign)
+    assert "file.md" in result
+
+
+def test_watcher_stop_flushes_handlers(tmp_path: Path) -> None:
+    service = WatchService(_settings(tmp_path))
+    observer = FakeObserver()
+    worker = FakeWorker()
+    service._observer = observer
+    service.queue_worker = cast(Any, worker)
+    service._started = True
+    handler = MagicMock(spec=logging.Handler)
+    with patch("app.watcher.service.logging.getLogger") as mock_get_logger:
+        mock_root = MagicMock()
+        mock_root.handlers = [handler]
+        mock_get_logger.return_value = mock_root
+        service.stop()
+    handler.flush.assert_called()
+
+
+def test_handler_skips_directories(tmp_path: Path) -> None:
+    handler = _InboxCreatedHandler(
+        supported_extensions={".md"},
+        queue_manager=QueueManager(),
+        queue_state_store=MagicMock(),
+        stats=MagicMock(),
+    )
+    event = MagicMock()
+    event.is_directory = True
+    event.src_path = str(tmp_path / "subdir")
+    handler.on_created(event)
+
+
+def test_handler_skips_unsupported_extensions(tmp_path: Path) -> None:
+    handler = _InboxCreatedHandler(
+        supported_extensions={".md"},
+        queue_manager=QueueManager(),
+        queue_state_store=MagicMock(),
+        stats=MagicMock(),
+    )
+    event = MagicMock()
+    event.is_directory = False
+    event.src_path = str(tmp_path / "image.png")
+    handler.on_created(event)
+
+
+def test_handler_skips_bytes_path() -> None:
+    handler = _InboxCreatedHandler(
+        supported_extensions={".md"},
+        queue_manager=QueueManager(),
+        queue_state_store=MagicMock(),
+        stats=MagicMock(),
+    )
+    event = MagicMock()
+    event.is_directory = False
+    event.src_path = b"/some/path/file.md"
+    handler.on_created(event)
+
+
+def test_handler_enqueues_markdown_file(tmp_path: Path) -> None:
+    qm = QueueManager()
+    stats = MagicMock()
+    handler = _InboxCreatedHandler(
+        supported_extensions={".md"},
+        queue_manager=qm,
+        queue_state_store=MagicMock(),
+        stats=stats,
+    )
+    md_file = tmp_path / "note.md"
+    md_file.write_text("# Test", encoding="utf-8")
+    event = MagicMock()
+    event.is_directory = False
+    event.src_path = str(md_file)
+    handler.on_created(event)
+    stats.record_detection.assert_called_once()
+    assert qm.size() == 1
+
+
+def test_handler_rejects_duplicate_enqueue(tmp_path: Path) -> None:
+    qm = QueueManager()
+    stats = MagicMock()
+    handler = _InboxCreatedHandler(
+        supported_extensions={".md"},
+        queue_manager=qm,
+        queue_state_store=MagicMock(),
+        stats=stats,
+    )
+    md_file = tmp_path / "note.md"
+    md_file.write_text("# Test", encoding="utf-8")
+    event = MagicMock()
+    event.is_directory = False
+    event.src_path = str(md_file)
+    handler.on_created(event)
+    handler.on_created(event)
+    assert qm.size() == 1
+
+
+def test_watcher_run_calls_start_and_stop(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    service = WatchService(settings)
+    fake_observer = FakeObserver(alive=False)
+    with patch.object(service, "start") as mock_start, \
+         patch.object(service, "stop") as mock_stop, \
+         patch("app.watcher.service.Observer", return_value=fake_observer), \
+         patch("app.watcher.service.time"):
+        service.run()
+    mock_start.assert_called_once()
+    mock_stop.assert_called_once_with(drain=True)
+
+
 def _settings(tmp_path: Path) -> Settings:
     return Settings(
         app=AppSettings(name="personal-ai-memory", environment="development"),
@@ -103,6 +300,7 @@ def _settings(tmp_path: Path) -> Settings:
         ),
         ollama=OllamaSettings(),
         logging=LoggingSettings(console_enabled=False, file_enabled=False),
+        models=ModelRoutingSettings(),
         watcher=WatcherSettings(
             inbox_path=tmp_path / "inbox",
             processed_path=tmp_path / "processed",

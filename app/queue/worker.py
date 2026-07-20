@@ -22,6 +22,7 @@ from rich.progress import (
 
 from app.application import AIProcessingError
 from app.core.config import Settings
+from app.core.extensions import AUDIO_EXTENSIONS, CODE_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
 from app.core.logging import get_logger
 from app.infrastructure.llm import OllamaClient, OllamaClientError
 from app.infrastructure.state.manifest import ManifestManager
@@ -34,7 +35,10 @@ from app.queue.stats import RuntimeStats
 
 logger = get_logger(__name__)
 
-SUPPORTED_PROCESSING_EXTENSIONS = {".md", ".txt", ".pdf"}
+SUPPORTED_PROCESSING_EXTENSIONS = (
+    {".md", ".txt", ".pdf", ".csv", ".xlsx"}
+    | CODE_EXTENSIONS | IMAGE_EXTENSIONS | AUDIO_EXTENSIONS | VIDEO_EXTENSIONS
+)
 
 
 class ProcessingWorkflow(Protocol):
@@ -220,9 +224,24 @@ class QueueWorker:
 
     def _build_workflow(self, settings: Settings) -> ProcessingWorkflow:
         ollama_client = OllamaClient(settings.ollama)
+        vision_client = None
+        transcriber = None
+        try:
+            from app.infrastructure.llm.vision_client import OllamaVisionClient
+            vision_client = OllamaVisionClient(settings.ollama)
+        except Exception:
+            logger.debug("Vision client unavailable.")
+        try:
+            from app.infrastructure.llm.whisper_transcriber import WhisperTranscriber
+            transcriber = WhisperTranscriber()
+        except Exception:
+            logger.debug("Whisper transcriber unavailable.")
         return IngestionWorkflow.from_runtime(
             ollama_client=ollama_client,
             writer=VaultWriter.from_settings(settings),
+            routing=settings.models,
+            vision_client=vision_client,
+            transcriber=transcriber,
         )
 
     def _source_type_for_extension(self, extension: str) -> str | None:
@@ -233,6 +252,18 @@ class QueueWorker:
             return "text"
         if normalized == ".pdf":
             return "pdf"
+        if normalized in CODE_EXTENSIONS:
+            return "code"
+        if normalized == ".csv":
+            return "csv"
+        if normalized == ".xlsx":
+            return "spreadsheet"
+        if normalized in IMAGE_EXTENSIONS:
+            return "image"
+        if normalized in AUDIO_EXTENSIONS:
+            return "audio"
+        if normalized in VIDEO_EXTENSIONS:
+            return "video"
         return None
 
     def _move_to_processed(self, source_path: Path) -> Path:

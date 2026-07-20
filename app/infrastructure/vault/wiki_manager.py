@@ -95,6 +95,33 @@ class WikiManager:
             warnings=warnings,
         )
 
+    def write_backlinks(self, note_filename: str, linking_titles: list[str]) -> int:
+        """Write reverse backlinks into existing notes that reference this note.
+
+        Returns the number of notes updated.
+        """
+        if not linking_titles:
+            return 0
+
+        updated = 0
+        note_stem = note_filename.replace(".md", "")
+        for path in self._notes_root.glob("*.md"):
+            if path.stem == note_stem:
+                continue
+            try:
+                text = path.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            backlinks_section = "## Backlinks"
+            if backlinks_section in text:
+                continue
+            link = f"[[{note_stem}|{_extract_title(path)}]]"
+            new_section = f"\n\n{backlinks_section}\n\n- {link}\n"
+            path.write_text(text.rstrip() + new_section, encoding="utf-8")
+            updated += 1
+
+        return updated
+
     def initialize(self) -> None:
         """Create vault folders and core wiki files when missing."""
 
@@ -280,6 +307,10 @@ def _extract_frontmatter_value(path: Path, key: str) -> str | None:
 
 def _unescape_frontmatter_value(value: str) -> str:
     return value.replace('\\"', '"').replace("\\\\", "\\")
+
+
+def _extract_title(path: Path) -> str:
+    return _extract_frontmatter_value(path, "title") or path.stem
 
 
 def _read_optional(path: Path) -> str | None:

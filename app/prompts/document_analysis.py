@@ -23,6 +23,10 @@ The JSON must use this exact structure:
     "short": "string",
     "detailed": "string"
   },
+  "keywords": ["string"],
+  "categories": ["string"],
+  "reading_time_minutes": 0,
+  "difficulty": "beginner | intermediate | advanced",
   "key_concepts": [
     {
       "name": "string",
@@ -43,13 +47,51 @@ The JSON must use this exact structure:
       "description": "string"
     }
   ],
-  "tags": [
-    "string"
-  ],
+  "tags": ["string"],
   "related_topics": [
     {
       "topic": "string",
       "reason": "string"
+    }
+  ],
+  "suggested_related_notes": ["string"],
+  "suggested_backlinks": ["string"],
+  "questions_and_answers": [
+    {
+      "question": "string",
+      "answer": "string"
+    }
+  ],
+  "flashcards": [
+    {
+      "front": "string",
+      "back": "string"
+    }
+  ],
+  "multiple_choice_questions": [
+    {
+      "question": "string",
+      "options": ["string", "string", "string", "string"],
+      "correct_answer": "string",
+      "explanation": "string"
+    }
+  ],
+  "short_answer_questions": [
+    {
+      "question": "string",
+      "answer": "string"
+    }
+  ],
+  "long_answer_questions": [
+    {
+      "question": "string",
+      "answer": "string"
+    }
+  ],
+  "revision_notes": [
+    {
+      "heading": "string",
+      "points": ["string"]
     }
   ]
 }
@@ -65,11 +107,26 @@ Rules:
 - Limit definitions to 10.
 - Limit important entities to 15.
 - Limit tags to 8.
+- Limit keywords to 15.
+- Limit categories to 5.
 - Limit related topics to 10.
-- Tags must be lowercase.
-- Tags must use hyphens instead of spaces.
-- Tags must not include "#".
+- Limit suggested_related_notes to 10.
+- Limit suggested_backlinks to 10.
+- Limit questions_and_answers to 10.
+- Limit flashcards to 15.
+- Limit multiple_choice_questions to 10.
+- Limit short_answer_questions to 10.
+- Limit long_answer_questions to 5.
+- Limit revision_notes to 10.
+- Each revision_note must have 1-10 bullet points.
+- Each MCQ must have 2-6 options and exactly one correct_answer matching one of the options.
+- Tags must be lowercase, use hyphens instead of spaces, no "#".
+- Keywords must be lowercase.
+- Categories must be Title Case.
+- reading_time_minutes must be estimated from the source text length.
 - The suggested note title must be clear, specific, and suitable for an Obsidian note filename.
+- suggested_related_notes should suggest Obsidian note titles that would complement this note.
+- suggested_backlinks should suggest notes that should link TO this note.
 """.strip()
 
 

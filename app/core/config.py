@@ -183,6 +183,24 @@ class ProcessingSettings(BaseModel):
         return Path(value)
 
 
+class ModelRoutingSettings(BaseModel):
+    """Settings for multi-model routing by content type."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    general_text: str = "qwen3:8b"
+    programming: str = "qwen2.5-coder:7b"
+    vision: str = "qwen2.5vl:7b"
+    handwriting_ocr: str = "qwen2.5vl:7b"
+    scanned_ocr: str = "qwen2.5vl:7b"
+    audio: str = "faster-whisper"
+    embeddings: str = "nomic-embed-text"
+
+    def model_for(self, key: str) -> str:
+        """Return the model name for a routing key, falling back to general_text."""
+        return getattr(self, key, self.general_text)
+
+
 class Settings(BaseSettings):
     """Validated application settings with environment variable support."""
 
@@ -200,6 +218,7 @@ class Settings(BaseSettings):
     queue: QueueSettings = Field(default_factory=QueueSettings)
     manifest: ManifestSettings = Field(default_factory=ManifestSettings)
     processing: ProcessingSettings = Field(default_factory=ProcessingSettings)
+    models: ModelRoutingSettings = Field(default_factory=ModelRoutingSettings)
 
 
 def load_settings(
@@ -243,6 +262,8 @@ def load_settings(
 
     config_data.setdefault("manifest", {})
     config_data["manifest"] = _resolve_manifest_paths(config_data["manifest"], project_root)
+
+    config_data.setdefault("models", {})
 
     try:
         return Settings(**config_data)

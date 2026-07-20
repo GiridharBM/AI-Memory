@@ -36,7 +36,19 @@ class PdfIngestor(BaseIngestor):
 
         cleaned_text = clean_text("\n\n".join(extracted_pages))
         if not cleaned_text:
-            raise IngestionError(f"PDF file '{source_path}' does not contain extractable text.")
+            # Scanned PDF — no extractable text, return with scanned_pdf source type
+            return SourceDocument(
+                source=str(resolved_path),
+                source_path=resolved_path,
+                source_type="scanned_pdf",
+                filename=source_path.name,
+                text="",
+                metadata=DocumentMetadata(
+                    title=source_path.stem,
+                    page_count=len(reader.pages),
+                    mime_type="application/pdf",
+                ),
+            )
 
         metadata: dict[str, object] = dict(reader.metadata or {})
         resolved_path = source_path.resolve()

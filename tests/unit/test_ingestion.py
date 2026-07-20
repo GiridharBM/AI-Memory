@@ -40,7 +40,7 @@ def test_ingests_txt_file(tmp_path: Path) -> None:
 
 
 def test_unsupported_file_returns_structured_error(tmp_path: Path) -> None:
-    path = tmp_path / "data.csv"
+    path = tmp_path / "data.xyz"
     path.write_text("a,b", encoding="utf-8")
 
     result = DocumentIngestionService().ingest(path)

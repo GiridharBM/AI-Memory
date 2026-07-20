@@ -49,9 +49,11 @@ class DocumentAIProcessor:
         self,
         ollama_client: JsonGeneratingClient,
         *,
+        model: str | None = None,
         validation_retries: int = 2,
     ) -> None:
         self._ollama_client = ollama_client
+        self._model = model
         self._validation_retries = validation_retries
 
     def process(self, document: SourceDocument) -> AIProcessingResult:
@@ -97,6 +99,7 @@ class DocumentAIProcessor:
         request = OllamaRequest(
             system_prompt=DOCUMENT_ANALYSIS_SYSTEM_PROMPT,
             prompt=prompt,
+            model=self._model,
         )
         response = self._ollama_client.generate_json(request, response_model=DocumentAnalysis)
 

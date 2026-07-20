@@ -13,7 +13,7 @@ paths:
 ollama:
   host: http://localhost:11434
   model: qwen3:8b
-  timeout_seconds: 120
+  timeout_seconds: 900
   request_retries: 3
   retry_backoff_seconds: 1.0
 
@@ -38,6 +38,33 @@ watcher:
     - .md
     - .txt
     - .pdf
+    - .py
+    - .js
+    - .ts
+    - .java
+    - .c
+    - .cpp
+    - .cs
+    - .go
+    - .rb
+    - .rs
+    - .php
+    - .sh
+    - .csv
+    - .xls
+    - .xlsx
+    - .png
+    - .jpg
+    - .jpeg
+    - .gif
+    - .webp
+    - .mp3
+    - .wav
+    - .m4a
+    - .flac
+    - .mp4
+    - .mkv
+    - .mov
 
 queue:
   enabled: true
@@ -54,3 +81,12 @@ processing:
   move_failed: true
   processed_path: ./data/processed
   failed_path: ./data/failed
+
+models:
+  general_text: qwen3:8b
+  programming: qwen2.5-coder:7b
+  vision: qwen2.5vl:7b
+  handwriting_ocr: qwen2.5vl:7b
+  scanned_ocr: qwen2.5vl:7b
+  audio: faster-whisper
+  embeddings: nomic-embed-text
