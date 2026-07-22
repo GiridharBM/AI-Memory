@@ -18,7 +18,7 @@ class SpreadsheetIngestor(BaseIngestor):
     """Read spreadsheet files into normalized source documents."""
 
     source_type = "spreadsheet"
-    supported_suffixes = (".xls", ".xlsx")
+    supported_suffixes = (".xls", ".xlsx", ".ods")
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="Spreadsheet ingestor")

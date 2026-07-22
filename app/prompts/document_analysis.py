@@ -93,7 +93,18 @@ The JSON must use this exact structure:
       "heading": "string",
       "points": ["string"]
     }
-  ]
+  ],
+  "extracted_metadata": {
+    "author": "string",
+    "word_count": 0,
+    "page_count": 0,
+    "language": "string",
+    "source_url": "string",
+    "creation_date": "string",
+    "publisher": "string",
+    "version": "string",
+    "license": "string"
+  }
 }
 
 Rules:
@@ -127,6 +138,7 @@ Rules:
 - The suggested note title must be clear, specific, and suitable for an Obsidian note filename.
 - suggested_related_notes should suggest Obsidian note titles that would complement this note.
 - suggested_backlinks should suggest notes that should link TO this note.
+- extracted_metadata: extract author, word_count, language, and any other metadata from the source. Use empty strings and 0 when not determinable.
 """.strip()
 
 

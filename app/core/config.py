@@ -65,7 +65,7 @@ class OllamaSettings(BaseModel):
 
     host: HttpUrl = Field(default_factory=lambda: HttpUrl("http://localhost:11434"))
     model: str = "qwen3:8b"
-    timeout_seconds: int = Field(default=120, ge=1)
+    timeout_seconds: int = Field(default=300, ge=1)
     request_retries: int = Field(default=3, ge=0)
     retry_backoff_seconds: float = Field(default=1.0, ge=0.0)
 
@@ -190,9 +190,9 @@ class ModelRoutingSettings(BaseModel):
 
     general_text: str = "qwen3:8b"
     programming: str = "qwen2.5-coder:7b"
-    vision: str = "qwen2.5vl:7b"
-    handwriting_ocr: str = "qwen2.5vl:7b"
-    scanned_ocr: str = "qwen2.5vl:7b"
+    vision: str = "qwen2.5vl:latest"
+    handwriting_ocr: str = "qwen2.5vl:latest"
+    scanned_ocr: str = "qwen2.5vl:latest"
     audio: str = "faster-whisper"
     embeddings: str = "nomic-embed-text"
 

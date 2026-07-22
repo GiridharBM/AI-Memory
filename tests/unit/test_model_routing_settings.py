@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from app.core.config import ModelRoutingSettings
 
 
@@ -12,7 +10,7 @@ class TestModelRoutingSettings:
         settings = ModelRoutingSettings()
         assert settings.general_text == "qwen3:8b"
         assert settings.programming == "qwen2.5-coder:7b"
-        assert settings.vision == "qwen2.5vl:7b"
+        assert settings.vision == "qwen2.5vl:latest"
         assert settings.audio == "faster-whisper"
         assert settings.embeddings == "nomic-embed-text"
 
@@ -26,7 +24,7 @@ class TestModelRoutingSettings:
 
     def test_model_for_vision(self) -> None:
         settings = ModelRoutingSettings()
-        assert settings.model_for("vision") == "qwen2.5vl:7b"
+        assert settings.model_for("vision") == "qwen2.5vl:latest"
 
     def test_model_for_unknown_falls_back(self) -> None:
         settings = ModelRoutingSettings()
@@ -39,4 +37,4 @@ class TestModelRoutingSettings:
         )
         assert settings.general_text == "llama3.1:8b"
         assert settings.programming == "deepseek-coder:6.7b"
-        assert settings.vision == "qwen2.5vl:7b"  # unchanged
+        assert settings.vision == "qwen2.5vl:latest"  # unchanged

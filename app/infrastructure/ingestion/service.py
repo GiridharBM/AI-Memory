@@ -7,21 +7,29 @@ from urllib.parse import urlparse
 
 from app.core.logging import get_logger
 from app.domain.documents import DocumentIngestionError, DocumentIngestionResult, SourceDocument
+from app.infrastructure.ingestion.archive_ingestor import ArchiveIngestor
+from app.infrastructure.ingestion.audio_ingestor import AudioIngestor
 from app.infrastructure.ingestion.base import (
     BaseIngestor,
     IngestionError,
     SourceReference,
     UnsupportedSourceError,
 )
-from app.infrastructure.ingestion.audio_ingestor import AudioIngestor
 from app.infrastructure.ingestion.code_ingestor import CodeIngestor
+from app.infrastructure.ingestion.config_ingestor import ConfigIngestor
 from app.infrastructure.ingestion.csv_ingestor import CSVIngestor
+from app.infrastructure.ingestion.database_ingestor import DatabaseIngestor
+from app.infrastructure.ingestion.diagram_ingestor import DiagramIngestor
 from app.infrastructure.ingestion.docx_ingestor import DocxIngestor
+from app.infrastructure.ingestion.email_ingestor import EmailIngestor
+from app.infrastructure.ingestion.epub_ingestor import EpubIngestor
 from app.infrastructure.ingestion.github_readme_ingestor import GitHubReadmeIngestor
 from app.infrastructure.ingestion.image_ingestor import ImageIngestor
 from app.infrastructure.ingestion.markdown_ingestor import MarkdownIngestor
+from app.infrastructure.ingestion.notebook_ingestor import NotebookIngestor
 from app.infrastructure.ingestion.pdf_ingestor import PdfIngestor
 from app.infrastructure.ingestion.pptx_ingestor import PptxIngestor
+from app.infrastructure.ingestion.research_ingestor import ResearchIngestor
 from app.infrastructure.ingestion.spreadsheet_ingestor import SpreadsheetIngestor
 from app.infrastructure.ingestion.txt_ingestor import TextIngestor
 from app.infrastructure.ingestion.video_ingestor import VideoIngestor
@@ -38,9 +46,12 @@ class DocumentIngestionService:
             YouTubeTranscriptIngestor(),
             GitHubReadmeIngestor(),
             PdfIngestor(),
+            NotebookIngestor(),
+            EpubIngestor(),
             MarkdownIngestor(),
-            TextIngestor(),
             CodeIngestor(),
+            ConfigIngestor(),
+            TextIngestor(),
             CSVIngestor(),
             SpreadsheetIngestor(),
             ImageIngestor(),
@@ -48,6 +59,11 @@ class DocumentIngestionService:
             PptxIngestor(),
             AudioIngestor(),
             VideoIngestor(),
+            DiagramIngestor(),
+            ArchiveIngestor(),
+            EmailIngestor(),
+            DatabaseIngestor(),
+            ResearchIngestor(),
         ]
 
     def ingest(self, source: str | Path) -> DocumentIngestionResult:

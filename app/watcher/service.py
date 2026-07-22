@@ -46,7 +46,7 @@ class WatchService:
             while self.is_running:
                 time.sleep(self.settings.watcher.interval_seconds)
         except KeyboardInterrupt:
-            print("Stopping AI Memory...", flush=True)
+            logger.info("Stopping AI Memory...")
         finally:
             self.stop(drain=True)
 
@@ -60,8 +60,7 @@ class WatchService:
         self._ensure_runtime_directories()
         recovered = self.queue_state_store.restore_into(self.queue_manager)
         if recovered:
-            print("Recovered", flush=True)
-            print(f"{recovered} pending files.", flush=True)
+            logger.info("Recovered %d pending files.", recovered)
 
         handler = _InboxCreatedHandler(
             supported_extensions=set(self.settings.watcher.supported_extensions),
@@ -78,7 +77,6 @@ class WatchService:
 
         if self.settings.queue.enabled:
             logger.info("Queue started")
-            print("Queue started", flush=True)
             self.queue_worker.start()
 
         observer.start()
@@ -87,7 +85,6 @@ class WatchService:
 
         logger.info("Watcher started")
         logger.info("Watching %s", self._display_path(self.inbox_root))
-        print("Waiting...", flush=True)
 
     def stop(self, *, drain: bool = False) -> None:
         """Stop the watchdog observer."""
@@ -101,19 +98,15 @@ class WatchService:
             self._observer = None
 
         if drain:
-            print("Waiting for current task...", flush=True)
+            logger.info("Waiting for current task...")
         self.queue_worker.stop(drain=drain)
-        print("Queue stopped.", flush=True)
         self.queue_state_store.save(self.queue_manager)
         if self.queue_manager.is_empty():
-            print("Queue empty.", flush=True)
+            logger.info("Queue empty.")
 
         for handler in logging.getLogger().handlers:
             handler.flush()
-        print("Logs flushed.", flush=True)
         logger.info("Watcher stopped")
-        print("Watcher stopped.", flush=True)
-        print("Goodbye.", flush=True)
         self._started = False
 
     @property
@@ -178,8 +171,6 @@ class _InboxCreatedHandler(FileSystemEventHandler):
         )
         logger.info("Markdown detected: %s", created_event.path.name)
         self.stats.record_detection()
-        print("New Markdown detected:", flush=True)
-        print(created_event.path.name, flush=True)
 
         queue_item = QueueItem(
             path=created_event.path,
@@ -191,10 +182,6 @@ class _InboxCreatedHandler(FileSystemEventHandler):
             logger.info("Added to queue: %s", created_event.path.name)
             logger.info("Queue size: %s", queue_size)
             self.queue_state_store.save(self.queue_manager)
-            print("Added to queue", flush=True)
-            print(f"Queue size: {queue_size}", flush=True)
             return
 
         logger.info("Already queued: %s", created_event.path.name)
-        print("Already queued:", flush=True)
-        print(created_event.path.name, flush=True)

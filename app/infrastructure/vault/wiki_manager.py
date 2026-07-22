@@ -122,6 +122,30 @@ class WikiManager:
 
         return updated
 
+    def create_placeholder(self, title: str, backlink_source: str) -> Path | None:
+        """Create a stub note for an unresolved wiki-link. Returns path if created."""
+        self._ensure_folders()
+        safe_title = re.sub(r'[\\/:*?"<>|]', "_", title)
+        note_path = self._notes_root / f"{safe_title}.md"
+        if note_path.exists():
+            return None
+
+        content = (
+            f"---\n"
+            f'title: "{title}"\n'
+            f"source_type: placeholder\n"
+            f"tags:\n  - stub\n  - auto-generated\n"
+            f"---\n\n"
+            f"# {title}\n\n"
+            f"> This is an auto-generated placeholder note.\n"
+            f"> It was referenced by [[{backlink_source}]].\n\n"
+            f"## Backlinks\n\n"
+            f"- [[{backlink_source}]]\n"
+        )
+        note_path.write_text(content, encoding="utf-8")
+        logger.info("Created placeholder note.", extra={"path": str(note_path), "backlink": backlink_source})
+        return note_path
+
     def initialize(self) -> None:
         """Create vault folders and core wiki files when missing."""
 

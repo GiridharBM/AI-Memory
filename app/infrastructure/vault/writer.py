@@ -53,6 +53,10 @@ class VaultWriter:
 
         return result
 
+    def create_placeholder(self, title: str, backlink_source: str) -> None:
+        """Create a stub note for an unresolved wiki-link."""
+        self._wiki_manager.create_placeholder(title, backlink_source)
+
     def initialize(self) -> None:
         """Create the configured vault folder structure and core wiki files."""
 

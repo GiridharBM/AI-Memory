@@ -5,7 +5,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from app.core.logging import get_logger
 from app.domain.semantic_chunking import DocumentChunk
+
+logger = get_logger(__name__)
 
 _HEADING_PATTERN = re.compile(r"^#{1,6}\s+.+", re.MULTILINE)
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z\d])")
@@ -58,6 +61,10 @@ class SemanticChunker:
                     ))
                     chunk_index += 1
 
+        logger.debug(
+            "Document chunked.",
+            extra={"source": source, "chunks": len(chunks), "text_length": len(text)},
+        )
         return chunks
 
     def _split_by_headings(self, text: str) -> list[tuple[int, str]]:

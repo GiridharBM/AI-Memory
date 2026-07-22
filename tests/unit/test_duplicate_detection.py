@@ -23,9 +23,9 @@ class DuplicateWorkflow:
 
 
 def test_duplicate_skip(
-    tmp_settings: "Settings",
+    tmp_settings: Settings,
     tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     manager = ManifestManager(tmp_settings.manifest.path, project_root=tmp_path)
 
@@ -41,12 +41,10 @@ def test_duplicate_skip(
     queue.enqueue(item)
     worker = QueueWorker(queue, tmp_settings, manager, workflow=DuplicateWorkflow())
 
-    assert worker.process_next()
+    with caplog.at_level("INFO"):
+        assert worker.process_next()
 
-    output = capsys.readouterr().out
-    assert "Duplicate?" in output
-    assert "YES" in output
-    assert "Skipping" in output
+    assert "Duplicate detected" in caplog.text
     assert item.status == QueueStatus.DONE
     assert source.exists()
     assert manager.count() == 1

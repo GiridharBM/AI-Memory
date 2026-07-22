@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal
 
 NodeType = Literal["entity", "concept", "topic", "note", "definition"]
@@ -75,6 +77,39 @@ class KnowledgeGraph:
                     graph.add_node(neighbor)
                     graph.add_edge(edge)
                     queue.append((neighbor.id, d + 1))
+        return graph
+
+    def save(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        data = {
+            "nodes": [
+                {"id": n.id, "label": n.label, "node_type": n.node_type,
+                 "source": n.source, "metadata": n.metadata}
+                for n in self.nodes.values()
+            ],
+            "edges": [
+                {"source_id": e.source_id, "target_id": e.target_id,
+                 "edge_type": e.edge_type, "weight": e.weight, "metadata": e.metadata}
+                for e in self.edges
+            ],
+        }
+        path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    @classmethod
+    def load(cls, path: Path) -> KnowledgeGraph:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        graph = cls()
+        for n in data.get("nodes", []):
+            graph.add_node(KnowledgeNode(
+                id=n["id"], label=n["label"], node_type=n["node_type"],
+                source=n.get("source", ""), metadata=n.get("metadata", {}),
+            ))
+        for e in data.get("edges", []):
+            graph.add_edge(KnowledgeEdge(
+                source_id=e["source_id"], target_id=e["target_id"],
+                edge_type=e["edge_type"], weight=e.get("weight", 1.0),
+                metadata=e.get("metadata", {}),
+            ))
         return graph
 
 

@@ -7,7 +7,6 @@ from pathlib import Path
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.infrastructure.ingestion.base import (
     BaseIngestor,
-    IngestionError,
     SourceReference,
     require_path_source,
 )

@@ -6,8 +6,6 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 from app.core.config import ModelRoutingSettings
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.infrastructure.routing.processor_impls import (
@@ -16,8 +14,8 @@ from app.infrastructure.routing.processor_impls import (
     OCRProcessor,
     VisionProcessor,
 )
-from app.infrastructure.routing.router import ProcessorRouter
 from app.infrastructure.routing.processors import default_processors
+from app.infrastructure.routing.router import ProcessorRouter
 
 
 def _make_document(

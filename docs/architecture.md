@@ -13,18 +13,24 @@ The system is designed to be:
 - Testable
 - Extensible
 
-Version 1 avoids vector databases, RAG, graph databases, and a web UI. The focus is a reliable document-to-wiki pipeline.
+The system processes documents through a multi-stage pipeline: ingestion, classification, routing, AI analysis, knowledge extraction, and vault storage.
 
 ## End-To-End Workflow
 
 ```text
 Input
   -> Read document
-  -> Clean text
-  -> Send to Ollama
-  -> Receive structured JSON
-  -> Validate JSON
-  -> Generate Markdown
+  -> Classify (18 kinds)
+  -> Route to processor (20 processors)
+  -> Process (OCR/Vision/Audio/Text)
+  -> AI Analysis (21 fields via Ollama)
+  -> Semantic chunking
+  -> Embedding generation
+  -> Vector store update
+  -> Knowledge graph update
+  -> Cross-document linking
+  -> Generate Markdown note
+  -> Create placeholder notes
   -> Update wiki files
   -> Save into Obsidian vault
 ```

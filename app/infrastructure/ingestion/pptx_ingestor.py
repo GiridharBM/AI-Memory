@@ -18,7 +18,7 @@ class PptxIngestor(BaseIngestor):
     """Read PPTX files into normalized source documents."""
 
     source_type = "pptx"
-    supported_suffixes = (".pptx",)
+    supported_suffixes = (".pptx", ".ppt", ".odp")
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="PPTX ingestor")

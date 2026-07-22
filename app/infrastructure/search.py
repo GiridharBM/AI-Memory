@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.domain.vector_store import VectorEntry, SearchResult
+from app.core.logging import get_logger
 from app.infrastructure.vector_store import VectorStore
+
+logger = get_logger(__name__)
 
 
 @dataclass(slots=True)
@@ -34,7 +36,7 @@ class SemanticSearch:
         results = self._store.search(
             query_embedding, top_k=top_k, min_score=min_score,
         )
-        return [
+        hits = [
             SearchHit(
                 text=r.entry.text,
                 source=r.entry.source,
@@ -43,6 +45,8 @@ class SemanticSearch:
             )
             for r in results
         ]
+        logger.debug("Semantic search completed.", extra={"hits": len(hits), "top_score": hits[0].score if hits else 0})
+        return hits
 
 
 class HybridSearch:

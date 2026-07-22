@@ -4,25 +4,31 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.domain.processed_document import ProcessedDocument
 from app.infrastructure.routing.processor_impls import (
+    ArchiveProcessor,
     AudioProcessor,
     CodeProcessor,
+    ConfigProcessor,
+    DatabaseProcessor,
+    DiagramProcessor,
     DocxProcessor,
+    EmailProcessor,
     HandwritingProcessor,
     MarkdownProcessor,
+    NotebookProcessor,
     OCRProcessor,
     PDFProcessor,
     PptxProcessor,
+    ResearchProcessor,
     TableProcessor,
     TextProcessor,
     VideoProcessor,
     VisionProcessor,
+    WebProcessor,
     get_processor_by_name,
 )
 
@@ -379,9 +385,12 @@ class TestGetProcessorByName:
 
 class TestProcessedDocumentStructure:
     ALL_PROCESSORS = [
-        TextProcessor(), MarkdownProcessor(), CodeProcessor(), PDFProcessor(),
-        VisionProcessor(), TableProcessor(), AudioProcessor(), VideoProcessor(),
-        DocxProcessor(), PptxProcessor(), OCRProcessor(), HandwritingProcessor(),
+        TextProcessor(), MarkdownProcessor(), WebProcessor(), CodeProcessor(),
+        ConfigProcessor(), PDFProcessor(), DocxProcessor(), PptxProcessor(),
+        ResearchProcessor(), TableProcessor(), DatabaseProcessor(),
+        NotebookProcessor(), VisionProcessor(), AudioProcessor(), VideoProcessor(),
+        OCRProcessor(), HandwritingProcessor(), ArchiveProcessor(),
+        EmailProcessor(), DiagramProcessor(),
     ]
 
     def test_all_return_processed_document(self) -> None:

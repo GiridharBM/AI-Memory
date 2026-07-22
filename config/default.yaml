@@ -35,12 +35,22 @@ watcher:
   recursive: true
   interval_seconds: 1
   supported_extensions:
-    - .md
+    # Documents
     - .txt
+    - .md
+    - .markdown
+    - .rtf
+    - .docx
+    - .odt
     - .pdf
+    - .tex
+    - .epub
+    # Programming
     - .py
     - .js
     - .ts
+    - .jsx
+    - .tsx
     - .java
     - .c
     - .cpp
@@ -50,21 +60,86 @@ watcher:
     - .rs
     - .php
     - .sh
+    - .bash
+    - .kt
+    - .swift
+    - .dart
+    - .scala
+    - .r
+    - .m
+    - .ps1
+    - .sql
+    - .css
+    - .scss
+    - .less
+    - .vue
+    - .svelte
+    - .toml
+    - .ini
+    - .cfg
+    - .conf
+    - .env
+    # Notebooks
+    - .ipynb
+    # Spreadsheets
     - .csv
+    - .tsv
     - .xls
     - .xlsx
+    - .ods
+    # Presentations
+    - .pptx
+    - .ppt
+    - .odp
+    # Images
     - .png
     - .jpg
     - .jpeg
     - .gif
     - .webp
+    - .bmp
+    - .tiff
+    - .heic
+    - .svg
+    # Diagrams
+    - .drawio
+    - .mmd
+    # Audio
     - .mp3
     - .wav
     - .m4a
+    - .aac
+    - .ogg
     - .flac
+    # Video
     - .mp4
     - .mkv
     - .mov
+    - .avi
+    - .webm
+    # Archives
+    - .zip
+    - .tar
+    - .gz
+    - .7z
+    - .rar
+    # Email
+    - .eml
+    # Databases
+    - .sqlite
+    - .db
+    # Research
+    - .bib
+    - .ris
+    # Config
+    - .yaml
+    - .yml
+    # Web
+    - .html
+    - .htm
+    - .xml
+    - .json
+    - .rss
 
 queue:
   enabled: true
@@ -85,8 +160,8 @@ processing:
 models:
   general_text: qwen3:8b
   programming: qwen2.5-coder:7b
-  vision: qwen2.5vl:7b
-  handwriting_ocr: qwen2.5vl:7b
-  scanned_ocr: qwen2.5vl:7b
+  vision: qwen2.5vl:latest
+  handwriting_ocr: qwen2.5vl:latest
+  scanned_ocr: qwen2.5vl:latest
   audio: faster-whisper
   embeddings: nomic-embed-text

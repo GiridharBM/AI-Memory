@@ -7,12 +7,8 @@ from datetime import UTC, datetime
 
 from app.domain.analysis import (
     DocumentAnalysis,
-    Flashcard,
     ImportantEntity,
-    LongAnswerQuestion,
-    MultipleChoiceQuestion,
-    RevisionNote,
-    ShortAnswerQuestion,
+    ExtractedMetadata,
 )
 from app.domain.documents import SourceDocument
 from app.domain.notes import ObsidianNote
@@ -56,9 +52,17 @@ class ObsidianMarkdownGenerator:
             "",
             analysis.summary.detailed.strip(),
             "",
+            "## Reading Time",
+            "",
+            f"**{analysis.reading_time_minutes} minutes**",
+            "",
+            "## Difficulty Level",
+            "",
+            f"**{analysis.difficulty.title()}**",
+            "",
         ]
 
-        toc_entries: list[str] = []
+        toc_entries: list[str] = ["Reading Time", "Difficulty Level"]
         if analysis.keywords:
             sections.extend(["## Keywords", "", _keywords_section(analysis), ""])
             toc_entries.append("Keywords")
@@ -103,18 +107,22 @@ class ObsidianMarkdownGenerator:
             sections.extend(["## Revision Notes", "", _revision_notes_section(analysis), ""])
             toc_entries.append("Revision Notes")
 
-        toc_entries.extend(["Tags", "References"])
+        toc_entries.extend(["Tags", "Metadata", "References"])
 
         toc_md = "\n".join(f"- [[#{entry}|{entry}]]" for entry in toc_entries)
-        sections.insert(5, "## Table of Contents")
-        sections.insert(6, "")
-        sections.insert(7, toc_md)
-        sections.insert(8, "")
+        sections.insert(9, "## Table of Contents")
+        sections.insert(10, "")
+        sections.insert(11, toc_md)
+        sections.insert(12, "")
 
         sections.extend([
             "## Tags",
             "",
             _tags_section(tags),
+            "",
+            "## Metadata",
+            "",
+            _metadata_section(analysis.extracted_metadata),
             "",
             "## References",
             "",
@@ -312,6 +320,29 @@ def _tags_section(tags: list[str]) -> str:
     if not tags:
         return "- No tags generated."
     return "\n".join(f"- #{tag}" for tag in tags)
+
+
+def _metadata_section(meta: ExtractedMetadata) -> str:
+    lines: list[str] = []
+    if meta.author:
+        lines.append(f"- **Author:** {meta.author}")
+    if meta.word_count:
+        lines.append(f"- **Word Count:** {meta.word_count:,}")
+    if meta.page_count:
+        lines.append(f"- **Page Count:** {meta.page_count}")
+    if meta.language:
+        lines.append(f"- **Language:** {meta.language}")
+    if meta.source_url:
+        lines.append(f"- **Source URL:** {meta.source_url}")
+    if meta.creation_date:
+        lines.append(f"- **Creation Date:** {meta.creation_date}")
+    if meta.publisher:
+        lines.append(f"- **Publisher:** {meta.publisher}")
+    if meta.version:
+        lines.append(f"- **Version:** {meta.version}")
+    if meta.license:
+        lines.append(f"- **License:** {meta.license}")
+    return "\n".join(lines) if lines else "- No metadata extracted."
 
 
 def _references_section(

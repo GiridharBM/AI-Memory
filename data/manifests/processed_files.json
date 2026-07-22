@@ -27,6 +27,51 @@
       "extension": ".md",
       "status": "processed",
       "generated_note": "Machine_Learning.md"
+    },
+    {
+      "sha256": "b292f5a7a304ae4e1eb92d974724d6106ec57b4bf9e2460e8935798c0e997135",
+      "original_filename": "ai-basics.md",
+      "original_path": "data\\inbox\\ai-basics.md",
+      "processed_at": "2026-07-22T13:59:37Z",
+      "extension": ".md",
+      "status": "processed",
+      "generated_note": "Artificial Intelligence Basics.md"
+    },
+    {
+      "sha256": "d7bf9a0bfd56f8e2eced4b607fa4a46cc50bede4a35c938f0cdf12cf6745e504",
+      "original_filename": "AI_News_&_Artificial_Intelligence.md",
+      "original_path": "data\\inbox\\AI_News_&_Artificial_Intelligence.md",
+      "processed_at": "2026-07-22T14:49:27Z",
+      "extension": ".md",
+      "status": "processed",
+      "generated_note": "AI_News_and_Artificial_Intelligence.md"
+    },
+    {
+      "sha256": "b9f81734f17ccebe6f0864d89de6cc1e397567e90822227212c0fedc930fcc73",
+      "original_filename": "test-functional.md",
+      "original_path": "data\\inbox\\test-functional.md",
+      "processed_at": "2026-07-22T18:38:52Z",
+      "extension": ".md",
+      "status": "processed",
+      "generated_note": "Python Decorators.md"
+    },
+    {
+      "sha256": "63c0329ed6cb2bd19a5749793261f43b0046da4b7654d4b93309271413d575f1",
+      "original_filename": "python.md",
+      "original_path": "data\\inbox\\python.md",
+      "processed_at": "2026-07-22T18:56:45Z",
+      "extension": ".md",
+      "status": "processed",
+      "generated_note": "Python-Programming.md"
+    },
+    {
+      "sha256": "a926b873b7a7c031be422df3f8b292f04ff4d4dd5489cba0da2d06d897936030",
+      "original_filename": "Chinese open-weight models are cheap. Washington is deciding what that costs.md",
+      "original_path": "data\\inbox\\Chinese open-weight models are cheap. Washington is deciding what that costs.md",
+      "processed_at": "2026-07-22T19:04:02Z",
+      "extension": ".md",
+      "status": "processed",
+      "generated_note": "Chinese Open-Weight Models and U.S. Policy Uncertainty.md"
     }
   ]
 }

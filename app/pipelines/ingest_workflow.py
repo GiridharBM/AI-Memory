@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
 
@@ -11,6 +11,7 @@ from app.core.config import ModelRoutingSettings
 from app.core.logging import get_logger
 from app.domain.analysis import DocumentAnalysis
 from app.domain.documents import SourceDocument
+from app.domain.knowledge_graph import KnowledgeGraph
 from app.domain.notes import ObsidianNote
 from app.infrastructure.ingestion import DocumentIngestionService
 from app.infrastructure.llm import OllamaClient
@@ -56,6 +57,9 @@ class IngestionWorkflowResult:
     ai_result: AIProcessingResult
     note: ObsidianNote
     write_result: WikiUpdateResult
+    knowledge_graph: KnowledgeGraph | None = None
+    chunks_stored: int = 0
+    cross_links_added: int = 0
 
 
 class IngestionWorkflow:
@@ -72,6 +76,11 @@ class IngestionWorkflow:
         transcriber: object | None = None,
         note_generator: NoteGenerator,
         writer: NoteWriter,
+        chunker: object | None = None,
+        embedding_service: object | None = None,
+        vector_store: object | None = None,
+        knowledge_graph_builder: object | None = None,
+        graph_persistence_path: Path | None = None,
     ) -> None:
         self._ingestion_service = ingestion_service
         self._note_generator = note_generator
@@ -92,6 +101,12 @@ class IngestionWorkflow:
         else:
             raise ValueError("Either processor or ollama_client must be provided.")
 
+        self._chunker = chunker
+        self._embedding_service = embedding_service
+        self._vector_store = vector_store
+        self._kg_builder = knowledge_graph_builder
+        self._graph_path = graph_persistence_path
+
     @classmethod
     def from_runtime(
         cls,
@@ -101,6 +116,11 @@ class IngestionWorkflow:
         routing: ModelRoutingSettings | None = None,
         vision_client: object | None = None,
         transcriber: object | None = None,
+        chunker: object | None = None,
+        embedding_service: object | None = None,
+        vector_store: object | None = None,
+        knowledge_graph_builder: object | None = None,
+        graph_persistence_path: Path | None = None,
     ) -> IngestionWorkflow:
         """Create the production workflow from runtime integrations."""
 
@@ -112,6 +132,11 @@ class IngestionWorkflow:
             transcriber=transcriber,
             note_generator=ObsidianMarkdownGenerator(),
             writer=writer,
+            chunker=chunker,
+            embedding_service=embedding_service,
+            vector_store=vector_store,
+            knowledge_graph_builder=knowledge_graph_builder,
+            graph_persistence_path=graph_persistence_path,
         )
 
     def run(
@@ -165,12 +190,32 @@ class IngestionWorkflow:
             )
             ai_result = processor.process(document)
 
+        kg, chunks_stored, cross_links = self._run_knowledge_engine(
+            document, ai_result.analysis,
+        )
+
+        if cross_links:
+            existing = set(ai_result.analysis.suggested_related_notes)
+            existing.update(ai_result.analysis.suggested_backlinks)
+            for link in cross_links:
+                if link not in existing:
+                    ai_result.analysis.suggested_backlinks.append(link)
+
+        ocr_confidence = processing_confidence if selection.processor_name in (
+            "OCRProcessor", "HandwritingProcessor", "VisionProcessor",
+        ) else None
+
         note = self._note_generator.generate(
             document=document,
             analysis=ai_result.analysis,
+            ocr_confidence=ocr_confidence,
             processing_confidence=processing_confidence,
         )
         write_result = self._writer.save(note)
+
+        if hasattr(self._writer, "create_placeholder"):
+            for related_title in ai_result.analysis.suggested_related_notes:
+                self._writer.create_placeholder(related_title, note.title)
 
         logger.info(
             "Completed ingestion workflow.",
@@ -186,6 +231,9 @@ class IngestionWorkflow:
             ai_result=ai_result,
             note=note,
             write_result=write_result,
+            knowledge_graph=kg,
+            chunks_stored=chunks_stored,
+            cross_links_added=cross_links,
         )
 
     def _run_routed_processor(
@@ -238,10 +286,121 @@ class IngestionWorkflow:
                 },
             )
             return enriched, result.confidence
-        except Exception:
+        except Exception as e:
+            # For vision-required types (image, scanned_pdf, handwritten), don't silently
+            # fall back to original document (which has no text) - that sends images to
+            # text-only model causing "this model does not support image input" errors.
+            vision_required = {"VisionProcessor", "OCRProcessor", "HandwritingProcessor"}
+            if processor_name in vision_required:
+                logger.error(
+                    "Vision processor failed for vision-required type, not falling back.",
+                    extra={"processor": processor_name, "source": document.source},
+                    exc_info=True,
+                )
+                raise
             logger.warning(
                 "Routed processor failed, falling back to original document.",
                 extra={"processor": processor_name, "source": document.source},
                 exc_info=True,
             )
             return document, None
+
+    def _run_knowledge_engine(
+        self,
+        document: SourceDocument,
+        analysis: DocumentAnalysis,
+    ) -> tuple[KnowledgeGraph | None, int, int]:
+        """Run knowledge engine steps: chunk, embed, store, graph, cross-links."""
+        if self._chunker is None or self._embedding_service is None or self._vector_store is None:
+            return None, 0, 0
+
+        from app.domain.semantic_chunking import DocumentChunk
+        from app.domain.vector_store import VectorEntry
+        from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
+
+        graph = None
+        chunks_stored = 0
+        cross_links = 0
+
+        try:
+            chunks = self._chunker.chunk(
+                document.text, str(document.source), document.source_type,
+            )
+
+            if chunks:
+                texts = [c.text for c in chunks]
+                embeddings = self._embedding_service.embed_batch(texts)
+                entries = []
+                for chunk, emb_result in zip(chunks, embeddings, strict=False):
+                    if emb_result.embedding:
+                        entries.append(VectorEntry(
+                            id=chunk.chunk_id,
+                            text=chunk.text,
+                            embedding=emb_result.embedding,
+                            source=chunk.source,
+                            source_type=chunk.source_type,
+                            chunk_index=chunk.chunk_index,
+                        ))
+                if entries:
+                    self._vector_store.add_batch(entries)
+                    chunks_stored = len(entries)
+                    self._vector_store.save()
+
+            if self._kg_builder is None:
+                self._kg_builder = KnowledgeGraphBuilder()
+            result = self._kg_builder.build_from_analysis(
+                analysis, str(document.source),
+            )
+            graph = result.graph
+
+            if self._graph_path:
+                existing = KnowledgeGraph.load(self._graph_path) if self._graph_path.exists() else KnowledgeGraph()
+                merged = self._kg_builder.merge_graphs(existing, graph)
+                merged.save(self._graph_path)
+                graph = merged
+
+            if chunks and embeddings:
+                cross_links = self._find_cross_document_links(
+                    chunks, embeddings, document.source,
+                )
+
+        except Exception:
+            logger.warning(
+                "Knowledge engine step failed.",
+                extra={"source": document.source},
+                exc_info=True,
+            )
+
+        logger.info(
+            "Knowledge engine completed.",
+            extra={
+                "source": document.source,
+                "chunks_stored": chunks_stored,
+                "cross_links": cross_links,
+            },
+        )
+        return graph, chunks_stored, cross_links
+
+    def _find_cross_document_links(
+        self,
+        chunks: list,
+        precomputed_embeddings: list,
+        current_source: str,
+    ) -> int:
+        """Find similar existing chunks and return cross-document link count."""
+        from app.infrastructure.search import SemanticSearch
+
+        search = SemanticSearch(self._vector_store)
+        link_count = 0
+        seen_sources: set[str] = set()
+
+        for chunk, emb_result in zip(chunks[:3], precomputed_embeddings[:3], strict=False):
+            if not emb_result.embedding:
+                continue
+            hits = search.search(emb_result.embedding, top_k=3, min_score=0.7)
+            for hit in hits:
+                if hit.source != current_source and hit.source not in seen_sources:
+                    seen_sources.add(hit.source)
+                    link_count += 1
+
+        return link_count

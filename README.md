@@ -9,7 +9,7 @@
 ![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-v2.0.0-blue?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-250%20Passing-success?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-386%20Passing-success?style=for-the-badge)
 
 [Overview](#-overview) •
 [Features](#-features) •
@@ -50,20 +50,48 @@ Unlike traditional note-taking apps, AI Memory doesn't just store information �
 - Modular, swappable prompt system
 
 ### 📄 Document Ingestion
-Supports:
-- PDF documents
-- Markdown files
-- Plain text files
-- GitHub repository READMEs
-- YouTube transcripts
+Supports 100+ file types across 15 categories:
+- **Documents:** PDF, DOCX, ODT, RTF, EPUB, TeX
+- **Code:** Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP, Swift, Kotlin, and 20+ more
+- **Notebooks:** Jupyter (.ipynb)
+- **Spreadsheets:** CSV, TSV, XLS, XLSX, ODS
+- **Presentations:** PPTX, PPT, ODP
+- **Images:** PNG, JPG, GIF, WebP, BMP, TIFF, HEIC, SVG
+- **Diagrams:** DrawIO, Visio, Mermaid (.mmd)
+- **Audio:** MP3, WAV, M4A, FLAC, OGG, AAC
+- **Video:** MP4, MKV, MOV, AVI, WebM
+- **Archives:** ZIP, TAR, GZ, 7Z, RAR
+- **Emails:** EML
+- **Databases:** SQLite, DB
+- **Research:** BibTeX (.bib), RIS
+- **Web:** HTML, XML, JSON, RSS
+- **Config:** TOML, INI, CFG, YAML, ENV
+- **Text:** TXT, Markdown, Log files
+- **URLs:** GitHub READMEs, YouTube transcripts
 
 ### 🧠 Knowledge Extraction
-Automatically extracts:
-- Summaries
+Automatically extracts 21 fields:
+- Summaries (short + detailed)
 - Key concepts & definitions
 - Important entities
 - Related topics & references
-- Tags and suggested titles
+- Tags, categories, and suggested titles
+- Reading time & difficulty level
+- Q&A pairs, flashcards, and MCQs
+- Short answer and long answer questions
+- Revision notes
+- Metadata (word count, page count, language)
+- Suggested related notes & backlinks
+
+### 🔗 Knowledge Engine
+- **Semantic chunking** — splits by headings, paragraphs, then sentences
+- **Embedding generation** — Ollama `nomic-embed-text` for vector representations
+- **Vector store** — in-memory with JSON persistence for similarity search
+- **Knowledge graph** — builds entity/concept/definition/topic graphs with JSON persistence
+- **Cross-document linking** — finds related content via vector similarity
+- **Placeholder notes** — auto-creates stub notes for unresolved wiki-links
+- **Semantic search** — cosine similarity over embedded chunks
+- **Hybrid search** — combines 70% semantic + 30% keyword scoring
 
 ### 📚 Obsidian Integration
 - Markdown generation with YAML frontmatter
@@ -99,12 +127,13 @@ Automatically extracts:
 
 **Version:** `v2.0.0`  **Status:** 🟢 Stable · Actively Developed
 
-| Completed | In Progress |
+| Completed | Future |
 |---|---|
-| Local-first architecture | Local embeddings & vector search (v3) |
-| Ollama integration | Semantic + hybrid search (v3) |
-| PDF / Markdown / TXT ingestion | RAG-based context retrieval (v3) |
-| GitHub README ingestion | Knowledge graph (v4) |
+| Local-first architecture | RAG-based context retrieval |
+| Ollama integration | External vector DB (Chroma/Qdrant) |
+| PDF / Markdown / TXT ingestion | REST API for search |
+| 100+ file type support | Web UI |
+| GitHub README ingestion | Multi-user support |
 | YouTube transcript ingestion | |
 | Markdown generation & vault management | |
 | CLI interface, logging, config management | |
@@ -115,7 +144,14 @@ Automatically extracts:
 | Automatic processed / failed folders | |
 | Graceful shutdown & queue persistence | |
 | Rich CLI progress reporting | |
-| Comprehensive testing | |
+| 21-field document intelligence | |
+| Semantic chunking & embeddings | |
+| Vector store with similarity search | |
+| Knowledge graph with persistence | |
+| Cross-document linking | |
+| Placeholder note creation | |
+| Semantic & hybrid search | |
+| Comprehensive testing (386 tests) | |
 
 ---
 
@@ -125,13 +161,16 @@ Automatically extracts:
 |---|---|
 | Programming Language | Python 3.11+ |
 | Local LLM | Ollama |
-| Default Model | Qwen3:8B |
+| Default Model | qwen3:8b / llama3.1:8b |
+| Embeddings | nomic-embed-text (Ollama) |
 | CLI | Typer |
 | Terminal UI | Rich |
 | Configuration | YAML |
 | Validation | Pydantic |
 | Folder Watching | Watchdog |
 | Duplicate Detection | SHA-256 Hashing |
+| Vector Store | In-memory + JSON persistence |
+| Knowledge Graph | Custom (JSON persistence) |
 | Progress Reporting | Rich Progress |
 | Testing | Pytest |
 | Linting | Ruff |
@@ -211,9 +250,11 @@ Expected output:
 ## 🤖 Ollama Setup
 
 1. Install Ollama from [ollama.com](https://ollama.com)
-2. Pull the default model:
+2. Pull the required models:
    ```bash
    ollama pull qwen3:8b
+   ollama pull llama3.1:8b
+   ollama pull nomic-embed-text
    ```
 3. Verify installation:
    ```bash
@@ -222,6 +263,8 @@ Expected output:
    Expected:
    ```text
    qwen3:8b
+   llama3.1:8b
+   nomic-embed-text
    ```
 4. Start Ollama (if not already running):
    ```bash
@@ -233,7 +276,8 @@ Expected output:
 | Setting | Value |
 |---|---|
 | Endpoint | `http://localhost:11434` |
-| Model | `qwen3:8b` |
+| LLM Model | `qwen3:8b` or `llama3.1:8b` |
+| Embedding Model | `nomic-embed-text` |
 
 Override with environment variables:
 ```bash
@@ -496,22 +540,26 @@ Source Document
 Duplicate Detection
       │
       ▼
-Text Preprocessing
+  Classifier (18 kinds)
       │
       ▼
- Prompt Builder
+  Router (20 processors)
       │
       ▼
- Ollama (Qwen3)
+  Routed Processor (OCR/Vision/Audio/...)
       │
       ▼
-JSON Validation
+  AI Analysis (21 fields)
+      │
+      ├─→ Semantic Chunking → Embeddings → Vector Store
+      ├─→ Knowledge Graph Builder → Graph Persistence
+      ├─→ Cross-Document Linking (similarity search)
       │
       ▼
-Markdown Generator
+Markdown Generation
       │
       ▼
- Wiki Manager
+ Wiki Manager + Placeholder Notes
       │
       ▼
  Obsidian Vault
@@ -694,8 +742,14 @@ python -m pip install -e ".[dev]"
 # Run the full test suite
 python -m pytest
 
+# Run unit tests only
+python -m pytest tests/unit/
+
 # Run a specific test file
-python -m pytest tests/integration/test_complete_workflow.py
+python -m pytest tests/unit/test_knowledge_engine.py
+
+# Run tests with coverage
+python -m pytest --cov=app --cov-report=term-missing
 
 # Lint
 ruff check .
@@ -703,6 +757,13 @@ ruff check .
 # Type check
 mypy app
 ```
+
+### Test Suite
+
+- **386 unit tests** across 28 test files
+- Tests cover: ingestion, classification, routing, processing, AI analysis, markdown generation, knowledge engine, vector store, knowledge graph, embeddings, search, watcher, queue, CLI, and more
+- External model behavior is mocked for deterministic tests
+- Run `python -m pytest` to execute the full suite
 
 ### Development Principles
 - Keep the project runnable after every change

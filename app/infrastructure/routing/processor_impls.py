@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from app.core.logging import get_logger
 from app.domain.documents import SourceDocument
 from app.domain.processed_document import ProcessedDocument
@@ -51,12 +49,36 @@ def _passthrough(
 def _ocr_extract(vision_client: object, document: SourceDocument, *, prompt: str) -> str:
     """Extract text from a document image via the vision client."""
     if not hasattr(vision_client, "describe_image"):
+        logger.warning(
+            "No vision client available for image processing. "
+            "Install qwen2.5vl:7b with: ollama pull qwen2.5vl:7b",
+        )
         return document.text
 
     source_path = document.source_path
     if source_path and source_path.exists():
         return vision_client.describe_image(source_path, prompt=prompt)
     return document.text
+
+
+def _looks_handwritten(text: str) -> bool:
+    """Heuristic: detect if extracted text looks like handwriting."""
+    if not text or len(text.strip()) < 10:
+        return False
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    if not lines:
+        return False
+    # Handwriting tends to have shorter, inconsistent lines
+    avg_len = sum(len(l) for l in lines) / len(lines)
+    if avg_len > 80:
+        return False
+    # Check for mixed case words (handwriting often has irregular capitalization)
+    words = text.split()
+    if len(words) < 5:
+        return False
+    mixed = sum(1 for w in words if w and w[0].isupper() and not w.isupper() and len(w) > 2)
+    ratio = mixed / len(words)
+    return 0.1 < ratio < 0.6
 
 
 def _audio_extract(transcriber: object, document: SourceDocument) -> str:
@@ -70,13 +92,17 @@ def _audio_extract(transcriber: object, document: SourceDocument) -> str:
     return document.text
 
 
+# ── Text & Markup ────────────────────────────────────────────────────────────
+
+
 class TextProcessor:
-    """Process plain text files."""
+    """Process plain text and generic unknown files."""
 
     name = "TextProcessor"
-    supported_kinds = {"text", "html", "json", "xml", "unknown"}
+    supported_kinds = {"text", "unknown", "tex", "epub"}
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing text file: %s", document.filename)
         return _passthrough(document, source_type=document.source_type, confidence=0.95)
 
 
@@ -87,7 +113,22 @@ class MarkdownProcessor:
     supported_kinds = {"markdown"}
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing markdown file: %s", document.filename)
         return _passthrough(document, source_type="markdown", confidence=0.95)
+
+
+class WebProcessor:
+    """Process web content files (HTML, XML, JSON, RSS)."""
+
+    name = "WebProcessor"
+    supported_kinds = {"web", "html", "json", "xml"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing web file: %s", document.filename)
+        return _passthrough(document, source_type="web", confidence=0.90)
+
+
+# ── Code & Config ────────────────────────────────────────────────────────────
 
 
 class CodeProcessor:
@@ -97,7 +138,22 @@ class CodeProcessor:
     supported_kinds = {"code"}
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing code file: %s", document.filename)
         return _passthrough(document, source_type="code", confidence=0.92)
+
+
+class ConfigProcessor:
+    """Process configuration files (.env, .toml, .ini, .cfg, .conf)."""
+
+    name = "ConfigProcessor"
+    supported_kinds = {"config"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing config file: %s", document.filename)
+        return _passthrough(document, source_type="config", confidence=0.93)
+
+
+# ── Documents ────────────────────────────────────────────────────────────────
 
 
 class PDFProcessor:
@@ -107,7 +163,80 @@ class PDFProcessor:
     supported_kinds = {"pdf"}
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing PDF file: %s", document.filename)
         return _passthrough(document, source_type="pdf", confidence=0.90)
+
+
+class DocxProcessor:
+    """Process DOCX/ODT/RTF document files."""
+
+    name = "DocxProcessor"
+    supported_kinds = {"docx"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing document file: %s", document.filename)
+        return _passthrough(document, source_type="docx", confidence=0.90)
+
+
+class PptxProcessor:
+    """Process PPTX/PPT/ODP presentation files."""
+
+    name = "PptxProcessor"
+    supported_kinds = {"pptx"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing presentation file: %s", document.filename)
+        return _passthrough(document, source_type="pptx", confidence=0.88)
+
+
+class ResearchProcessor:
+    """Process research citation files (.bib, .ris)."""
+
+    name = "ResearchProcessor"
+    supported_kinds = {"research"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing research file: %s", document.filename)
+        return _passthrough(document, source_type="research", confidence=0.88)
+
+
+# ── Data ─────────────────────────────────────────────────────────────────────
+
+
+class TableProcessor:
+    """Process CSV/TSV and spreadsheet files."""
+
+    name = "TableProcessor"
+    supported_kinds = {"csv", "spreadsheet"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing table file: %s", document.filename)
+        return _passthrough(document, source_type=document.source_type, confidence=0.88)
+
+
+class DatabaseProcessor:
+    """Process database files (.sqlite, .db)."""
+
+    name = "DatabaseProcessor"
+    supported_kinds = {"database"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing database file: %s", document.filename)
+        return _passthrough(document, source_type="database", confidence=0.85)
+
+
+class NotebookProcessor:
+    """Process Jupyter notebook files."""
+
+    name = "NotebookProcessor"
+    supported_kinds = {"notebook"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing notebook file: %s", document.filename)
+        return _passthrough(document, source_type="notebook", confidence=0.90)
+
+
+# ── Media ────────────────────────────────────────────────────────────────────
 
 
 class VisionProcessor:
@@ -120,9 +249,23 @@ class VisionProcessor:
         self._vision_client = vision_client
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
-        extracted = _ocr_extract(self._vision_client, document, prompt="Extract all text from this image. Return only the extracted text, nothing else.")
+        logger.debug("Processing image file: %s", document.filename)
+        prompt = (
+            "Analyze this image. If it contains handwritten text, transcribe "
+            "all handwritten text accurately. If it contains printed text or "
+            "digital content, extract all visible text. Return only the "
+            "extracted text, nothing else."
+        )
+        extracted = _ocr_extract(
+            self._vision_client, document, prompt=prompt,
+        )
         t = _extract_title(document)
-        meta = {**_base_metadata(document), "model_used": bool(self._vision_client)}
+        is_handwritten = bool(self._vision_client) and _looks_handwritten(extracted)
+        meta = {
+            **_base_metadata(document),
+            "model_used": bool(self._vision_client),
+            "handwriting_detected": is_handwritten,
+        }
         return ProcessedDocument(
             title=t,
             content=extracted,
@@ -130,22 +273,12 @@ class VisionProcessor:
             metadata=meta,
             extracted_text=extracted,
             confidence=0.85 if self._vision_client else 0.70,
-            source_type="image",
+            source_type="handwritten" if is_handwritten else "image",
         )
 
 
-class TableProcessor:
-    """Process CSV and spreadsheet files."""
-
-    name = "TableProcessor"
-    supported_kinds = {"csv", "spreadsheet"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        return _passthrough(document, source_type=document.source_type, confidence=0.88)
-
-
 class AudioProcessor:
-    """Process audio files."""
+    """Process audio files via whisper transcriber."""
 
     name = "AudioProcessor"
     supported_kinds = {"audio"}
@@ -154,6 +287,7 @@ class AudioProcessor:
         self._transcriber = transcriber
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing audio file: %s", document.filename)
         extracted = _audio_extract(self._transcriber, document)
         t = _extract_title(document)
         meta = {**_base_metadata(document), "model_used": bool(self._transcriber)}
@@ -175,27 +309,11 @@ class VideoProcessor:
     supported_kinds = {"video"}
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing video file: %s", document.filename)
         return _passthrough(document, source_type="video", confidence=0.70)
 
 
-class DocxProcessor:
-    """Process DOCX files."""
-
-    name = "DocxProcessor"
-    supported_kinds = {"docx"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        return _passthrough(document, source_type="docx", confidence=0.90)
-
-
-class PptxProcessor:
-    """Process PPTX files."""
-
-    name = "PptxProcessor"
-    supported_kinds = {"pptx"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        return _passthrough(document, source_type="pptx", confidence=0.88)
+# ── Specialized ──────────────────────────────────────────────────────────────
 
 
 class OCRProcessor:
@@ -208,13 +326,18 @@ class OCRProcessor:
         self._vision_client = vision_client
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing scanned PDF: %s", document.filename)
         prompt = (
             "This is a scanned PDF page. Extract all visible text accurately. "
             "Return only the extracted text, nothing else."
         )
         extracted = _ocr_extract(self._vision_client, document, prompt=prompt)
         t = _extract_title(document)
-        meta = {**_base_metadata(document), "ocr": True, "model_used": bool(self._vision_client)}
+        meta = {
+            **_base_metadata(document),
+            "ocr": True,
+            "model_used": bool(self._vision_client),
+        }
         return ProcessedDocument(
             title=t,
             content=extracted,
@@ -236,13 +359,19 @@ class HandwritingProcessor:
         self._vision_client = vision_client
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing handwritten document: %s", document.filename)
         prompt = (
-            "This is a handwritten document. Transcribe all handwritten text as accurately "
-            "as possible. Return only the transcribed text, nothing else."
+            "This is a handwritten document. Transcribe all handwritten text "
+            "as accurately as possible. Return only the transcribed text, "
+            "nothing else."
         )
         extracted = _ocr_extract(self._vision_client, document, prompt=prompt)
         t = _extract_title(document)
-        meta = {**_base_metadata(document), "handwriting": True, "model_used": bool(self._vision_client)}
+        meta = {
+            **_base_metadata(document),
+            "handwriting": True,
+            "model_used": bool(self._vision_client),
+        }
         return ProcessedDocument(
             title=t,
             content=extracted,
@@ -254,24 +383,67 @@ class HandwritingProcessor:
         )
 
 
+class ArchiveProcessor:
+    """Process archive files (.zip, .tar, .gz, .7z, .rar)."""
+
+    name = "ArchiveProcessor"
+    supported_kinds = {"archive"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing archive file: %s", document.filename)
+        return _passthrough(document, source_type="archive", confidence=0.80)
+
+
+class EmailProcessor:
+    """Process email files (.eml, .msg)."""
+
+    name = "EmailProcessor"
+    supported_kinds = {"email"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing email file: %s", document.filename)
+        return _passthrough(document, source_type="email", confidence=0.88)
+
+
+class DiagramProcessor:
+    """Process diagram files (.drawio, .vsdx)."""
+
+    name = "DiagramProcessor"
+    supported_kinds = {"diagram"}
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        logger.debug("Processing diagram file: %s", document.filename)
+        return _passthrough(document, source_type="diagram", confidence=0.85)
+
+
+# ── Registry ─────────────────────────────────────────────────────────────────
+
+_ALL_PROCESSORS: list[type] = [
+    TextProcessor,
+    MarkdownProcessor,
+    WebProcessor,
+    CodeProcessor,
+    ConfigProcessor,
+    PDFProcessor,
+    DocxProcessor,
+    PptxProcessor,
+    ResearchProcessor,
+    TableProcessor,
+    DatabaseProcessor,
+    NotebookProcessor,
+    VisionProcessor,
+    AudioProcessor,
+    VideoProcessor,
+    OCRProcessor,
+    HandwritingProcessor,
+    ArchiveProcessor,
+    EmailProcessor,
+    DiagramProcessor,
+]
+
+
 def get_processor_by_name(name: str) -> object | None:
     """Return the processor instance for a given name, or None."""
-    _registry: dict[str, type] = {
-        cls.__name__: cls
-        for cls in [
-            TextProcessor,
-            MarkdownProcessor,
-            CodeProcessor,
-            PDFProcessor,
-            VisionProcessor,
-            TableProcessor,
-            AudioProcessor,
-            VideoProcessor,
-            DocxProcessor,
-            PptxProcessor,
-            OCRProcessor,
-            HandwritingProcessor,
-        ]
-    }
+    _registry = {cls.__name__: cls for cls in _ALL_PROCESSORS}
     cls = _registry.get(name)
     return cls() if cls is not None else None

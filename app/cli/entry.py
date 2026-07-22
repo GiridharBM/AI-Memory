@@ -336,9 +336,19 @@ def _run_ingest(source: str | Path, *, expected_source_type: str) -> None:
 
     try:
         ollama_client = OllamaClient(settings.ollama)
+        vision_client = None
+        try:
+            from app.infrastructure.llm.vision_client import OllamaVisionClient
+            vision_client = OllamaVisionClient(
+                settings.ollama, vision_model=settings.models.vision,
+            )
+        except Exception:
+            logger.debug("Vision client unavailable.")
         workflow = IngestionWorkflow.from_runtime(
             ollama_client=ollama_client,
             writer=VaultWriter.from_settings(settings),
+            routing=settings.models,
+            vision_client=vision_client,
         )
         result = workflow.run(source, expected_source_type=expected_source_type)
     except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError) as exc:

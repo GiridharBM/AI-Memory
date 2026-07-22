@@ -18,7 +18,7 @@ class DocxIngestor(BaseIngestor):
     """Read DOCX files into normalized source documents."""
 
     source_type = "docx"
-    supported_suffixes = (".docx",)
+    supported_suffixes = (".docx", ".odt", ".rtf")
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="DOCX ingestor")

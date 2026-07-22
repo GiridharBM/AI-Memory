@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import json
-import math
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -26,11 +23,10 @@ from app.domain.semantic_chunking import DocumentChunk
 from app.domain.vector_store import SearchResult, VectorEntry
 from app.infrastructure.embeddings import EmbeddingResult
 from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
-from app.infrastructure.search import HybridSearch, SearchHit, SemanticSearch
+from app.infrastructure.search import HybridSearch, SemanticSearch
 from app.infrastructure.semantic_chunking import SemanticChunker
-from app.infrastructure.versioning import VersionManager
 from app.infrastructure.vector_store import VectorStore, _cosine_similarity
-
+from app.infrastructure.versioning import VersionManager
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -304,29 +300,30 @@ class TestEmbeddings:
 
 class TestEmbeddingService:
     def test_embed_empty_text_raises(self) -> None:
-        from app.infrastructure.embeddings import EmbeddingService
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         with pytest.raises(ValueError, match="empty"):
             svc.embed("")
 
     def test_embed_whitespace_only_raises(self) -> None:
-        from app.infrastructure.embeddings import EmbeddingService
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         with pytest.raises(ValueError, match="empty"):
             svc.embed("   ")
 
     def test_embed_batch_empty_returns_empty(self) -> None:
-        from app.infrastructure.embeddings import EmbeddingService
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         assert svc.embed_batch([]) == []
 
     def test_embed_success(self) -> None:
         from unittest.mock import MagicMock, patch
-        from app.infrastructure.embeddings import EmbeddingService
+
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         mock_response = MagicMock()
         mock_response.model_dump.return_value = {
@@ -342,8 +339,9 @@ class TestEmbeddingService:
 
     def test_embed_no_model_dump(self) -> None:
         from unittest.mock import patch
-        from app.infrastructure.embeddings import EmbeddingService
+
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         raw_dict = {"embeddings": [[0.5, 0.6]], "prompt_eval_count": None}
         with patch.object(svc._client, "embed", return_value=raw_dict) as m:
@@ -352,8 +350,9 @@ class TestEmbeddingService:
 
     def test_embed_empty_embeddings_list(self) -> None:
         from unittest.mock import MagicMock, patch
-        from app.infrastructure.embeddings import EmbeddingService
+
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         mock_response = MagicMock()
         mock_response.model_dump.return_value = {"embeddings": []}
@@ -363,8 +362,9 @@ class TestEmbeddingService:
 
     def test_embed_client_error_propagates(self) -> None:
         from unittest.mock import patch
-        from app.infrastructure.embeddings import EmbeddingService
+
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         with patch.object(svc._client, "embed", side_effect=RuntimeError("connection")):
             with pytest.raises(RuntimeError, match="connection"):
@@ -372,8 +372,9 @@ class TestEmbeddingService:
 
     def test_embed_batch_success(self) -> None:
         from unittest.mock import MagicMock, patch
-        from app.infrastructure.embeddings import EmbeddingService
+
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         mock_response = MagicMock()
         mock_response.model_dump.return_value = {
@@ -388,8 +389,9 @@ class TestEmbeddingService:
 
     def test_embed_batch_client_error_propagates(self) -> None:
         from unittest.mock import patch
-        from app.infrastructure.embeddings import EmbeddingService
+
         from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         with patch.object(svc._client, "embed", side_effect=RuntimeError("fail")):
             with pytest.raises(RuntimeError, match="fail"):
@@ -553,3 +555,225 @@ class TestDomainIntegration:
         e = VectorEntry(id="e1", text="hello", embedding=[0.1])
         r = SearchResult(entry=e, score=0.95)
         assert r.score == 0.95
+
+
+# ---------------------------------------------------------------------------
+# Knowledge Graph Persistence
+# ---------------------------------------------------------------------------
+
+class TestKnowledgeGraphPersistence:
+    def test_save_and_load(self, tmp_path: Path) -> None:
+        path = tmp_path / "graph.json"
+        g = KnowledgeGraph()
+        g.add_node(KnowledgeNode(id="n1", label="A", node_type="concept", source="t.md"))
+        g.add_node(KnowledgeNode(id="n2", label="B", node_type="entity", source="t.md"))
+        g.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type="related_to", weight=0.8))
+        g.save(path)
+
+        loaded = KnowledgeGraph.load(path)
+        assert len(loaded.nodes) == 2
+        assert "n1" in loaded.nodes
+        assert "n2" in loaded.nodes
+        assert len(loaded.edges) == 1
+        assert loaded.edges[0].weight == 0.8
+
+    def test_save_creates_parent_dirs(self, tmp_path: Path) -> None:
+        path = tmp_path / "sub" / "dir" / "graph.json"
+        g = KnowledgeGraph()
+        g.add_node(KnowledgeNode(id="n1", label="X", node_type="note"))
+        g.save(path)
+        assert path.exists()
+
+    def test_load_empty_graph(self, tmp_path: Path) -> None:
+        path = tmp_path / "empty.json"
+        path.write_text('{"nodes": [], "edges": []}', encoding="utf-8")
+        g = KnowledgeGraph.load(path)
+        assert len(g.nodes) == 0
+        assert len(g.edges) == 0
+
+    def test_merge_and_persist(self, tmp_path: Path) -> None:
+        path = tmp_path / "graph.json"
+        g1 = KnowledgeGraph()
+        g1.add_node(KnowledgeNode(id="a", label="A", node_type="concept"))
+        g1.save(path)
+
+        g2 = KnowledgeGraph()
+        g2.add_node(KnowledgeNode(id="b", label="B", node_type="entity"))
+
+        builder = KnowledgeGraphBuilder()
+        existing = KnowledgeGraph.load(path)
+        merged = builder.merge_graphs(existing, g2)
+        merged.save(path)
+
+        final = KnowledgeGraph.load(path)
+        assert "a" in final.nodes
+        assert "b" in final.nodes
+
+
+# ---------------------------------------------------------------------------
+# Placeholder Notes
+# ---------------------------------------------------------------------------
+
+class TestPlaceholderNotes:
+    def test_create_placeholder(self, tmp_path: Path) -> None:
+        from app.infrastructure.vault.wiki_manager import WikiManager
+        notes_dir = tmp_path / "Notes"
+        notes_dir.mkdir()
+        manager = WikiManager(tmp_path)
+        path = manager.create_placeholder("Quantum Computing", "Physics Note")
+        assert path is not None
+        assert path.exists()
+        text = path.read_text(encoding="utf-8")
+        assert "Quantum Computing" in text
+        assert "Physics Note" in text
+        assert "## Backlinks" in text
+
+    def test_create_placeholder_no_duplicate(self, tmp_path: Path) -> None:
+        from app.infrastructure.vault.wiki_manager import WikiManager
+        notes_dir = tmp_path / "Notes"
+        notes_dir.mkdir()
+        manager = WikiManager(tmp_path)
+        path1 = manager.create_placeholder("Test", "Source")
+        path2 = manager.create_placeholder("Test", "Source")
+        assert path1 is not None
+        assert path2 is None
+
+    def test_placeholder_has_stub_tag(self, tmp_path: Path) -> None:
+        from app.infrastructure.vault.wiki_manager import WikiManager
+        notes_dir = tmp_path / "Notes"
+        notes_dir.mkdir()
+        manager = WikiManager(tmp_path)
+        path = manager.create_placeholder("My Topic", "Parent")
+        text = path.read_text(encoding="utf-8")
+        assert "stub" in text
+        assert "auto-generated" in text
+
+    def test_vault_writer_create_placeholder(self, tmp_path: Path) -> None:
+        from app.infrastructure.vault.writer import VaultWriter
+        writer = VaultWriter(tmp_path)
+        writer.create_placeholder("Test Note", "Source Note")
+        note_path = tmp_path / "Notes" / "Test Note.md"
+        assert note_path.exists()
+
+
+# ---------------------------------------------------------------------------
+# Pipeline Integration (mocked)
+# ---------------------------------------------------------------------------
+
+class TestPipelineKnowledgeEngine:
+    def test_workflow_result_has_kg_fields(self) -> None:
+        from app.pipelines.ingest_workflow import IngestionWorkflowResult
+        from app.domain.documents import SourceDocument, DocumentMetadata
+        from app.domain.notes import ObsidianNote
+        from app.infrastructure.vault.wiki_manager import WikiUpdateResult
+
+        doc = SourceDocument(
+            source="t.md", filename="t.md", source_type="text", text="x",
+            metadata=DocumentMetadata(),
+        )
+        from unittest.mock import MagicMock
+        ai = MagicMock()
+        ai.analysis = _analysis()
+        from datetime import UTC, datetime
+        note = ObsidianNote(
+            title="T", filename="t.md", source="t.md", markdown="# T",
+            generated_at=datetime.now(tz=UTC), source_type="text",
+        )
+        wr = WikiUpdateResult(note_path=Path("t.md"), created=True, updated=False,
+                              index_path=Path("i.md"), overview_path=Path("o.md"),
+                              log_path=Path("l.md"))
+
+        result = IngestionWorkflowResult(
+            document=doc, ai_result=ai, note=note, write_result=wr,
+        )
+        assert result.knowledge_graph is None
+        assert result.chunks_stored == 0
+        assert result.cross_links_added == 0
+
+    def test_workflow_accepts_kg_params(self) -> None:
+        from app.pipelines.ingest_workflow import IngestionWorkflow
+        from unittest.mock import MagicMock
+
+        writer = MagicMock()
+        writer.save.return_value = MagicMock(
+            note_path=Path("t.md"), created=True, updated=False,
+            index_path=Path("i.md"), overview_path=Path("o.md"),
+            log_path=Path("l.md"),
+        )
+        ollama = MagicMock()
+        wf = IngestionWorkflow(
+            ingestion_service=MagicMock(),
+            ollama_client=ollama,
+            note_generator=MagicMock(),
+            writer=writer,
+            chunker=MagicMock(),
+            embedding_service=MagicMock(),
+            vector_store=MagicMock(),
+            knowledge_graph_builder=MagicMock(),
+        )
+        assert wf._chunker is not None
+        assert wf._vector_store is not None
+
+    def test_knowledge_engine_skips_when_no_components(self) -> None:
+        from app.pipelines.ingest_workflow import IngestionWorkflow
+        from app.domain.documents import SourceDocument, DocumentMetadata
+        from unittest.mock import MagicMock
+
+        writer = MagicMock()
+        wf = IngestionWorkflow(
+            ingestion_service=MagicMock(),
+            ollama_client=MagicMock(),
+            note_generator=MagicMock(),
+            writer=writer,
+        )
+        doc = SourceDocument(
+            source="t.md", filename="t.md", source_type="text", text="hello",
+            metadata=DocumentMetadata(),
+        )
+        kg, stored, links = wf._run_knowledge_engine(doc, _analysis())
+        assert kg is None
+        assert stored == 0
+        assert links == 0
+
+
+# ---------------------------------------------------------------------------
+# Cross-Document Linking
+# ---------------------------------------------------------------------------
+
+class TestCrossDocumentLinking:
+    def test_find_similar_chunks(self) -> None:
+        store = VectorStore()
+        store.add(VectorEntry(
+            id="doc1::chunk_0", text="python is a programming language",
+            embedding=[0.9, 0.1, 0.0], source="doc1.py",
+        ))
+        store.add(VectorEntry(
+            id="doc2::chunk_0", text="python is widely used in data science",
+            embedding=[0.85, 0.15, 0.0], source="doc2.md",
+        ))
+
+        from app.infrastructure.search import SemanticSearch
+        search = SemanticSearch(store)
+        query_emb = [0.88, 0.12, 0.0]
+        hits = search.search(query_emb, top_k=3, min_score=0.7)
+        sources = {h.source for h in hits}
+        assert len(hits) >= 2
+        assert "doc1.py" in sources
+        assert "doc2.md" in sources
+
+    def test_no_cross_links_for_identical_source(self) -> None:
+        store = VectorStore()
+        store.add(VectorEntry(
+            id="doc1::chunk_0", text="hello world",
+            embedding=[1.0, 0.0], source="doc1.md",
+        ))
+        store.add(VectorEntry(
+            id="doc1::chunk_1", text="hello world again",
+            embedding=[0.95, 0.05], source="doc1.md",
+        ))
+
+        from app.infrastructure.search import SemanticSearch
+        search = SemanticSearch(store)
+        hits = search.search([1.0, 0.0], top_k=5, min_score=0.7)
+        different_source = [h for h in hits if h.source != "doc1.md"]
+        assert len(different_source) == 0

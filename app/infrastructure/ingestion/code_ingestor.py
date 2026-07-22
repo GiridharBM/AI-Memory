@@ -19,9 +19,24 @@ class CodeIngestor(BaseIngestor):
 
     source_type = "code"
     supported_suffixes = (
-        ".py", ".js", ".ts", ".java", ".c", ".cpp", ".cs",
+        # Mainstream
+        ".py", ".js", ".ts", ".jsx", ".tsx", ".java", ".c", ".cpp", ".cs",
         ".go", ".rb", ".rs", ".php", ".sh", ".bash",
+        # Mobile / systems
+        ".kt", ".swift", ".dart", ".scala",
+        # Data / scripting
+        ".r", ".m", ".ps1", ".sql",
+        # Web styles
+        ".css", ".scss", ".less", ".vue", ".svelte",
+        # Markup treated as code
+        ".mmd",
     )
+    _DOTFILE_NAMES: frozenset[str] = frozenset({".gitignore", ".dockerignore"})
+
+    def can_ingest(self, source: SourceReference) -> bool:
+        if isinstance(source, Path) and source.name in self._DOTFILE_NAMES:
+            return True
+        return super().can_ingest(source)
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="Code ingestor")

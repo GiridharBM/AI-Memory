@@ -7,7 +7,6 @@ from pathlib import Path
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.infrastructure.ingestion.base import (
     BaseIngestor,
-    IngestionError,
     SourceReference,
     require_path_source,
 )
@@ -18,7 +17,9 @@ class ImageIngestor(BaseIngestor):
     """Read image files into normalized source documents (metadata only)."""
 
     source_type = "image"
-    supported_suffixes = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff")
+    supported_suffixes = (
+        ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".heic", ".svg",
+    )
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="Image ingestor")
@@ -47,5 +48,7 @@ class ImageIngestor(BaseIngestor):
             ".webp": "image/webp",
             ".bmp": "image/bmp",
             ".tiff": "image/tiff",
+            ".heic": "image/heic",
+            ".svg": "image/svg+xml",
         }
         return mime_map.get(ext, "image/*")

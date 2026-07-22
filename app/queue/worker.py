@@ -22,7 +22,12 @@ from rich.progress import (
 
 from app.application import AIProcessingError
 from app.core.config import Settings
-from app.core.extensions import AUDIO_EXTENSIONS, CODE_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
+from app.core.extensions import (
+    AUDIO_EXTENSIONS,
+    CODE_EXTENSIONS,
+    IMAGE_EXTENSIONS,
+    VIDEO_EXTENSIONS,
+)
 from app.core.logging import get_logger
 from app.infrastructure.llm import OllamaClient, OllamaClientError
 from app.infrastructure.state.manifest import ManifestManager
@@ -94,7 +99,6 @@ class QueueWorker:
         self._thread = Thread(target=self.run_forever, name="queue-worker", daemon=True)
         self._thread.start()
         logger.info("Worker started")
-        print("Worker started", flush=True)
 
     def stop(self, *, drain: bool = False) -> None:
         """Stop the background worker."""
@@ -148,10 +152,7 @@ class QueueWorker:
         source_type = self._source_type_for_extension(item.extension)
         if source_type is None:
             logger.warning("Unsupported file type queued.", extra={"path": str(item.path)})
-            print("Unsupported file type", flush=True)
             self._fail_item(item)
-            print("Done.", flush=True)
-            print("Continue watching.", flush=True)
             return True
 
         with self._progress(item.path.name) as progress:
@@ -160,41 +161,26 @@ class QueueWorker:
             digest = self.manifest_manager.hash_for_path(item.path)
             logger.info("SHA256 calculated.", extra={"path": str(item.path), "sha256": digest})
 
-            print("Duplicate check...", flush=True)
-            print("Hash:", flush=True)
-            print(digest, flush=True)
             if self.manifest_manager.contains_hash(digest):
-                logger.info("Duplicate detected.", extra={"path": str(item.path), "sha256": digest})
-                print("Duplicate?", flush=True)
-                print("YES", flush=True)
-                print("Skipping", flush=True)
-                print(item.path.name, flush=True)
+                logger.info("Duplicate detected, skipping.", extra={"path": str(item.path), "sha256": digest})
                 item.status = QueueStatus.DONE
                 self.stats.record_duplicate()
                 return True
 
-            print("Duplicate?", flush=True)
-            print("No", flush=True)
             self._advance(progress, task, "Cleaning text...")
             logger.info(
                 "Processing %s ingestion.",
                 source_type.capitalize(),
                 extra={"path": str(item.path)},
             )
-            print(f"Processing {source_type.capitalize()}...", flush=True)
-            print("Calling Ollama...", flush=True)
             self._advance(progress, task, "Sending to Ollama...")
-            print("Generating note...", flush=True)
             self._advance(progress, task, "Generating knowledge...")
-            print("Updating vault...", flush=True)
 
             try:
                 result = self._workflow.run(item.path, expected_source_type=source_type)
             except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError):
                 logger.exception("File processing failed.", extra={"path": str(item.path)})
-                print("Failed.", flush=True)
                 self._fail_item(item)
-                print("Continue watching.", flush=True)
                 return True
 
             self._advance(progress, task, "Writing Markdown...")
@@ -206,7 +192,6 @@ class QueueWorker:
             )
             self.manifest_manager.save()
             logger.info("Manifest updated.", extra={"path": str(item.path), "sha256": digest})
-            print("Manifest updated", flush=True)
 
             self._move_to_processed(item.path)
             self._advance(progress, task, "Finished")
@@ -217,9 +202,7 @@ class QueueWorker:
             processing_seconds=elapsed,
             queue_latency_seconds=queue_latency,
         )
-        print(f"Completed in {elapsed:.1f} seconds.", flush=True)
-        print("Done.", flush=True)
-        print("Continue watching.", flush=True)
+        logger.info("Completed.", extra={"path": str(item.path), "elapsed": round(elapsed, 1)})
         return True
 
     def _build_workflow(self, settings: Settings) -> ProcessingWorkflow:
@@ -228,7 +211,9 @@ class QueueWorker:
         transcriber = None
         try:
             from app.infrastructure.llm.vision_client import OllamaVisionClient
-            vision_client = OllamaVisionClient(settings.ollama)
+            vision_client = OllamaVisionClient(
+                settings.ollama, vision_model=settings.models.vision,
+            )
         except Exception:
             logger.debug("Vision client unavailable.")
         try:
@@ -301,8 +286,6 @@ class QueueWorker:
             "File moved.",
             extra={"source": str(source_path), "destination": str(destination)},
         )
-        print("Moving file...", flush=True)
-        print(str(destination), flush=True)
         return destination
 
     def _save_queue_state(self) -> None:

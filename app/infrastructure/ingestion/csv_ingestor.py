@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.infrastructure.ingestion.base import (
     BaseIngestor,
@@ -18,7 +16,7 @@ class CSVIngestor(BaseIngestor):
     """Read CSV files into normalized source documents."""
 
     source_type = "csv"
-    supported_suffixes = (".csv",)
+    supported_suffixes = (".csv", ".tsv")
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="CSV ingestor")

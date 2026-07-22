@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 from unittest.mock import MagicMock, patch
@@ -22,8 +21,7 @@ from app.core.config import (
     Settings,
     WatcherSettings,
 )
-from app.queue import QueueItem, QueueManager
-from app.watcher.events import FileCreatedEvent
+from app.queue import QueueManager
 from app.watcher.service import WatchService, _InboxCreatedHandler
 
 
@@ -63,7 +61,7 @@ class FakeWorker:
 
 def test_watcher_stop_drains_saves_flushes_and_reports_clean_shutdown(
     tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     service = WatchService(_settings(tmp_path))
     observer = FakeObserver()
@@ -72,17 +70,15 @@ def test_watcher_stop_drains_saves_flushes_and_reports_clean_shutdown(
     service.queue_worker = cast(Any, worker)
     service._started = True
 
-    service.stop(drain=True)
+    with caplog.at_level("INFO"):
+        service.stop(drain=True)
 
-    output = capsys.readouterr().out
     assert observer.stopped
     assert observer.joined
     assert worker.drain is True
-    assert "Waiting for current task..." in output
-    assert "Queue empty." in output
-    assert "Logs flushed." in output
-    assert "Watcher stopped." in output
-    assert "Goodbye." in output
+    assert "Waiting for current task..." in caplog.text
+    assert "Queue empty." in caplog.text
+    assert "Watcher stopped" in caplog.text
     assert (tmp_path / "manifests" / "queue_state.json").exists()
 
 

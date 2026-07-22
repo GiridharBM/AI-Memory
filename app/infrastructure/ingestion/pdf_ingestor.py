@@ -35,6 +35,7 @@ class PdfIngestor(BaseIngestor):
             extracted_pages.append(page.extract_text() or "")
 
         cleaned_text = clean_text("\n\n".join(extracted_pages))
+        resolved_path = source_path.resolve()
         if not cleaned_text:
             # Scanned PDF — no extractable text, return with scanned_pdf source type
             return SourceDocument(
@@ -51,7 +52,6 @@ class PdfIngestor(BaseIngestor):
             )
 
         metadata: dict[str, object] = dict(reader.metadata or {})
-        resolved_path = source_path.resolve()
 
         return SourceDocument(
             source=str(resolved_path),

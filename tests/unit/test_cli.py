@@ -84,7 +84,7 @@ def test_cli_ingest_markdown_uses_workflow(
 
     class FakeWorkflow:
         @classmethod
-        def from_runtime(cls, *, ollama_client: object, writer: object) -> FakeWorkflow:
+        def from_runtime(cls, *, ollama_client: object, writer: object, **kwargs: object) -> FakeWorkflow:
             return cls()
 
         def run(self, source_arg: str | Path, *, expected_source_type: str) -> SimpleNamespace:

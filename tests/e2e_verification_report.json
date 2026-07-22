@@ -1,0 +1,2399 @@
+{
+  "phase1": [
+    {
+      "category": "text",
+      "filename": "quantum_computing_intro.txt",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.05,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=text"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=711"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2822"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=1"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=6,edges=7"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=1"
+        }
+      ]
+    },
+    {
+      "category": "markdown",
+      "filename": "kubernetes_guide.md",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=markdown"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=580"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2814"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=4"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=4"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=5"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=7,edges=14"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=5"
+        }
+      ]
+    },
+    {
+      "category": "code (python)",
+      "filename": "binary_search.py",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=code"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=557"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2800"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=6"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=8,edges=21"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=6"
+        }
+      ]
+    },
+    {
+      "category": "csv",
+      "filename": "sales_data.csv",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=csv"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=159"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2751"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=7"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=9,edges=28"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=7"
+        }
+      ]
+    },
+    {
+      "category": "config (toml)",
+      "filename": "pyproject.toml",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=config"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=199"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2792"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=8"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=10,edges=35"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=8"
+        }
+      ]
+    },
+    {
+      "category": "json",
+      "filename": "config.json",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=web"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=175"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2739"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=9"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=11,edges=42"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=9"
+        }
+      ]
+    },
+    {
+      "category": "html",
+      "filename": "article.html",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=web"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=506"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2744"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=10"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=12,edges=49"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=10"
+        }
+      ]
+    },
+    {
+      "category": "xml",
+      "filename": "data.xml",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=web"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=231"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2721"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=11"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=13,edges=56"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=11"
+        }
+      ]
+    },
+    {
+      "category": "database (sqlite)",
+      "filename": "users.db",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.02,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=database"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=208"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2784"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=12"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=14,edges=63"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=12"
+        }
+      ]
+    },
+    {
+      "category": "archive (zip)",
+      "filename": "project_files.zip",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=archive"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=136"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2810"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=13"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=15,edges=70"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=13"
+        }
+      ]
+    },
+    {
+      "category": "diagram (drawio)",
+      "filename": "architecture.drawio",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=diagram"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=45"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2829"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=14"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=16,edges=77"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=14"
+        }
+      ]
+    },
+    {
+      "category": "research (bib)",
+      "filename": "references.bib",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=research"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=211"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2801"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=15"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=17,edges=84"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=15"
+        }
+      ]
+    },
+    {
+      "category": "research (ris)",
+      "filename": "citations.ris",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=research"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=184"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2796"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=16"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=18,edges=91"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=16"
+        }
+      ]
+    },
+    {
+      "category": "notebook (ipynb)",
+      "filename": "analysis.ipynb",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=notebook"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=108"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2807"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=17"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=19,edges=98"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=17"
+        }
+      ]
+    },
+    {
+      "category": "email (eml)",
+      "filename": "meeting.eml",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=email"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=310"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2780"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=18"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=20,edges=105"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=18"
+        }
+      ]
+    },
+    {
+      "category": "config (env)",
+      "filename": ".env",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=config"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=108"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2743"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=19"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=21,edges=112"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=19"
+        }
+      ]
+    },
+    {
+      "category": "tex",
+      "filename": "paper.tex",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=text"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=559"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2728"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=20"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=22,edges=119"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=20"
+        }
+      ]
+    },
+    {
+      "category": "css",
+      "filename": "styles.css",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=code"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=336"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2733"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=21"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=23,edges=126"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=21"
+        }
+      ]
+    },
+    {
+      "category": "pdf",
+      "filename": "sample.pdf",
+      "status": "PASS",
+      "features_passed": 23,
+      "features_total": 23,
+      "elapsed_s": 0.01,
+      "error": null,
+      "features": [
+        {
+          "name": "File Detection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Content Classification",
+          "passed": true,
+          "detail": "source_type=pdf"
+        },
+        {
+          "name": "Intelligent Routing",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Model Selection",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "Processing",
+          "passed": true,
+          "detail": "text_len=9"
+        },
+        {
+          "name": "Metadata Extraction",
+          "passed": true,
+          "detail": "author=Test Author"
+        },
+        {
+          "name": "Markdown Generation",
+          "passed": true,
+          "detail": "note_size=2731"
+        },
+        {
+          "name": "Executive Summary",
+          "passed": true,
+          "detail": "len=32"
+        },
+        {
+          "name": "Detailed Summary",
+          "passed": true,
+          "detail": "len=129"
+        },
+        {
+          "name": "Keywords",
+          "passed": true,
+          "detail": "count=3"
+        },
+        {
+          "name": "Definitions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "FAQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Flashcards",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "MCQs",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Short Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Long Answer Questions",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Revision Notes",
+          "passed": true,
+          "detail": "count=1"
+        },
+        {
+          "name": "Semantic Chunking",
+          "passed": true,
+          "detail": "chunks_stored=1"
+        },
+        {
+          "name": "Embedding Generation",
+          "passed": true,
+          "detail": "embeddings_generated=1"
+        },
+        {
+          "name": "Vector DB Storage",
+          "passed": true,
+          "detail": "entries=22"
+        },
+        {
+          "name": "Knowledge Graph",
+          "passed": true,
+          "detail": "nodes=24,edges=133"
+        },
+        {
+          "name": "Wiki Links",
+          "passed": true,
+          "detail": "present=True"
+        },
+        {
+          "name": "Semantic Search",
+          "passed": true,
+          "detail": "store_entries=22"
+        }
+      ]
+    }
+  ],
+  "phase2": []
+}

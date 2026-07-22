@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import json
-import logging
 import os
 from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
 
+from app.core.logging import get_logger
 from app.infrastructure.state.hashing import compute_file_hash
 from app.infrastructure.state.models import ManifestEntry, ManifestState
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ManifestManager:

@@ -18,7 +18,11 @@ class TextIngestor(BaseIngestor):
     """Read TXT files into normalized source documents."""
 
     source_type = "text"
-    supported_suffixes = (".txt",)
+    supported_suffixes = (
+        ".txt", ".log", ".tex", ".rtf",
+        ".json", ".xml", ".html", ".htm", ".rss",
+        ".gitignore", ".dockerignore", ".editorconfig",
+    )
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="Text ingestor")

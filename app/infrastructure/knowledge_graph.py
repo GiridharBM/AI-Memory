@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+from app.core.logging import get_logger
 from app.domain.analysis import DocumentAnalysis
 from app.domain.knowledge_graph import (
-    EdgeType,
     GraphBuildResult,
     KnowledgeEdge,
     KnowledgeGraph,
     KnowledgeNode,
-    NodeType,
 )
+
+logger = get_logger(__name__)
 
 
 def _make_id(label: str, node_type: str) -> str:
@@ -117,11 +118,16 @@ class KnowledgeGraphBuilder:
                     ))
                     edges_added += 1
 
-        return GraphBuildResult(
+        result = GraphBuildResult(
             graph=graph,
             nodes_added=nodes_added,
             edges_added=edges_added,
         )
+        logger.info(
+            "Knowledge graph built.",
+            extra={"source": source, "nodes": nodes_added, "edges": edges_added},
+        )
+        return result
 
     def merge_graphs(self, *graphs: KnowledgeGraph) -> KnowledgeGraph:
         merged = KnowledgeGraph()
@@ -130,4 +136,8 @@ class KnowledgeGraphBuilder:
                 merged.add_node(node)
             for edge in graph.edges:
                 merged.add_edge(edge)
+        logger.debug(
+            "Graphs merged.",
+            extra={"total_nodes": len(merged.nodes), "total_edges": len(merged.edges)},
+        )
         return merged

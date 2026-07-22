@@ -7,7 +7,6 @@ from pathlib import Path
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.infrastructure.ingestion.base import (
     BaseIngestor,
-    IngestionError,
     SourceReference,
     require_path_source,
 )
@@ -18,7 +17,7 @@ class AudioIngestor(BaseIngestor):
     """Read audio files into normalized source documents (metadata only)."""
 
     source_type = "audio"
-    supported_suffixes = (".mp3", ".wav", ".m4a", ".flac", ".ogg")
+    supported_suffixes = (".mp3", ".wav", ".m4a", ".flac", ".ogg", ".aac")
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         source_path = require_path_source(source, ingestor_name="Audio ingestor")
@@ -45,5 +44,6 @@ class AudioIngestor(BaseIngestor):
             ".m4a": "audio/mp4",
             ".flac": "audio/flac",
             ".ogg": "audio/ogg",
+            ".aac": "audio/aac",
         }
         return mime_map.get(ext, "audio/*")
