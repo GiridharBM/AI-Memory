@@ -87,8 +87,9 @@ class IngestionWorkflow:
         self._writer = writer
         self._vision_client = vision_client
         self._transcriber = transcriber
+        self._routing = routing or ModelRoutingSettings()
         self._classifier = DocumentClassifier()
-        self._router = ProcessorRouter(routing or ModelRoutingSettings())
+        self._router = ProcessorRouter(self._routing)
         for proc in default_processors():
             self._router.register(proc)
 
@@ -184,9 +185,13 @@ class IngestionWorkflow:
         if self._processor is not None:
             ai_result = self._processor.process(document)
         else:
+            # Use general_text model for AI analysis regardless of which
+            # processor extracted the text (vision/audio processors use
+            # specialized models for extraction, not analysis).
+            analysis_model = self._routing.model_for("general_text")
             processor = DocumentAIProcessor(
                 self._ollama_client,
-                model=selection.model_name,
+                model=analysis_model,
             )
             ai_result = processor.process(document)
 

@@ -139,7 +139,7 @@ def test_worker_processes_pdf_updates_vault_manifest_and_moves_file(
 
 
 def test_worker_moves_invalid_file_to_failed(tmp_path: Path) -> None:
-    source = tmp_path / "inbox" / "data.csv"
+    source = tmp_path / "inbox" / "data.xyz"
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text("a,b", encoding="utf-8")
 
@@ -150,7 +150,7 @@ def test_worker_moves_invalid_file_to_failed(tmp_path: Path) -> None:
     assert item.status == QueueStatus.FAILED
     assert queue.is_empty()
     assert not source.exists()
-    assert (settings.processing.failed_path / "data.csv").exists()
+    assert (settings.processing.failed_path / "data.xyz").exists()
     assert not (settings.paths.vault_root / "Notes").exists()
     assert ManifestManager(settings.manifest.path, project_root=tmp_path).count() == 0
 

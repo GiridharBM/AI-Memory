@@ -57,6 +57,21 @@ def _assert_processed(doc: ProcessedDocument, *, expected_source_type: str) -> N
     assert doc.markdown.startswith("# Test Title")
     assert doc.extracted_text
     assert 0 <= doc.confidence <= 1.0
+
+
+def _tmp_pdf() -> Path:
+    """Create a minimal valid one-page PDF for testing."""
+    try:
+        import fitz
+        pdf_path = Path(tempfile.mktemp(suffix=".pdf"))
+        doc = fitz.open()
+        page = doc.new_page()
+        page.insert_text((72, 72), "Test content")
+        doc.save(str(pdf_path))
+        doc.close()
+        return pdf_path
+    except Exception:
+        return Path(tempfile.mktemp(suffix=".pdf"))
     assert doc.source_type == expected_source_type
     assert isinstance(doc.metadata, dict)
     assert doc.metadata["source"]
@@ -294,9 +309,7 @@ class TestOCRProcessor:
         mock_client = MagicMock()
         mock_client.describe_image.return_value = "OCR extracted text"
 
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
-            f.write(b"fake pdf bytes")
-            pdf_path = Path(f.name)
+        pdf_path = _tmp_pdf()
 
         try:
             doc = _make_document(text="", source_type="scanned_pdf", source_path=pdf_path)

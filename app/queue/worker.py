@@ -177,7 +177,10 @@ class QueueWorker:
             self._advance(progress, task, "Generating knowledge...")
 
             try:
-                result = self._workflow.run(item.path, expected_source_type=source_type)
+                result = self._workflow.run(
+                    item.path,
+                    expected_source_type=source_type if source_type != "pdf" else None,
+                )
             except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError):
                 logger.exception("File processing failed.", extra={"path": str(item.path)})
                 self._fail_item(item)

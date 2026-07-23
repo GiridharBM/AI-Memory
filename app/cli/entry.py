@@ -84,7 +84,7 @@ ConfigJsonOption = Annotated[
 def ingest_pdf(path: PdfPathArgument) -> None:
     """Ingest a PDF file."""
 
-    _run_ingest(path, expected_source_type="pdf")
+    _run_ingest(path, expected_source_type=None)
 
 
 @ingest_cli.command("markdown")

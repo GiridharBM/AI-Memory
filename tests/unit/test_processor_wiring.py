@@ -41,6 +41,21 @@ def _tmp_file(suffix: str, content: bytes = b"fake") -> Path:
     return Path(f.name)
 
 
+def _tmp_pdf() -> Path:
+    """Create a minimal valid one-page PDF for testing."""
+    try:
+        import fitz
+        pdf_path = Path(tempfile.mktemp(suffix=".pdf"))
+        doc = fitz.open()
+        page = doc.new_page()
+        page.insert_text((72, 72), "Test content")
+        doc.save(str(pdf_path))
+        doc.close()
+        return pdf_path
+    except Exception:
+        return _tmp_file(".pdf", b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF")
+
+
 class TestVisionProcessorWiring:
     def test_vision_client_is_used_when_provided(self) -> None:
         mock_client = MagicMock()
@@ -73,7 +88,7 @@ class TestOCRProcessorWiring:
     def test_ocr_uses_vision_client(self) -> None:
         mock_client = MagicMock()
         mock_client.describe_image.return_value = "Scanned text extracted"
-        pdf = _tmp_file(".pdf")
+        pdf = _tmp_pdf()
 
         try:
             proc = OCRProcessor(vision_client=mock_client)

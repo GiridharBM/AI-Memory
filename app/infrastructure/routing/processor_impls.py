@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from app.core.logging import get_logger
 from app.domain.documents import SourceDocument
 from app.domain.processed_document import ProcessedDocument
@@ -51,14 +53,56 @@ def _ocr_extract(vision_client: object, document: SourceDocument, *, prompt: str
     if not hasattr(vision_client, "describe_image"):
         logger.warning(
             "No vision client available for image processing. "
-            "Install qwen2.5vl:7b with: ollama pull qwen2.5vl:7b",
+            "Pull a vision model with: ollama pull qwen2.5vl:latest",
         )
         return document.text
 
     source_path = document.source_path
-    if source_path and source_path.exists():
-        return vision_client.describe_image(source_path, prompt=prompt)
-    return document.text
+    if not source_path or not source_path.exists():
+        return document.text
+
+    # For PDFs, convert each page to an image first
+    if source_path.suffix.lower() == ".pdf":
+        return _ocr_extract_from_pdf(vision_client, source_path, prompt=prompt)
+
+    return vision_client.describe_image(source_path, prompt=prompt)
+
+
+def _ocr_extract_from_pdf(vision_client: object, pdf_path: Path, *, prompt: str) -> str:
+    """Convert PDF pages to images and extract text via vision model."""
+    try:
+        import fitz  # PyMuPDF
+    except ImportError:
+        logger.warning(
+            "PyMuPDF not installed. Cannot OCR scanned PDFs. "
+            "Install with: pip install PyMuPDF",
+        )
+        return ""
+
+    try:
+        doc = fitz.open(str(pdf_path))
+    except Exception:
+        logger.warning("Failed to open PDF for OCR: %s", pdf_path)
+        return ""
+    all_text = []
+    for page_num in range(min(len(doc), 5)):  # limit to first 5 pages
+        page = doc[page_num]
+        # Render page to image (PNG)
+        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # 2x zoom for better quality
+        img_bytes = pix.tobytes("png")
+        # Save to temp file and send to vision model
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp.write(img_bytes)
+            tmp_path = Path(tmp.name)
+        try:
+            text = vision_client.describe_image(tmp_path, prompt=prompt)
+            if text.strip():
+                all_text.append(text.strip())
+        finally:
+            tmp_path.unlink(missing_ok=True)
+    doc.close()
+    return "\n\n".join(all_text)
 
 
 def _looks_handwritten(text: str) -> bool:

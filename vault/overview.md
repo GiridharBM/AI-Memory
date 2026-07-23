@@ -1,15 +1,15 @@
 # Overview
 
 <!-- PAM:BEGIN MANAGED -->
-- Total generated notes: 78
-- Indexed sources: 20
+- Total generated notes: 118
+- Indexed sources: 23
 - Core pages: [[index]], [[overview]], [[log]]
 
 ## Recent Notes
 
-- [[Sustainability|Sustainability]]
 - [[Sustainability in Engineering|Sustainability in Engineering]]
 - [[Turnkey Solutions|Turnkey Solutions]]
+- [[U.S. AI Regulation and Policy|U.S. AI Regulation and Policy]]
 - [[Utthunga|Utthunga]]
 - [[Web Development|Web Development]]
 - [[Web_Module_5_Pure_React|Web_Module_5_Pure_React]]

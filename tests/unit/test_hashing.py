@@ -35,7 +35,7 @@ def test_compute_file_hash_for_pdf(tmp_path: Path) -> None:
 
 
 def test_compute_file_hash_rejects_unsupported_extension(tmp_path: Path) -> None:
-    path = tmp_path / "data.csv"
+    path = tmp_path / "data.xyz"
     path.write_text("a,b", encoding="utf-8")
 
     with pytest.raises(ValueError):

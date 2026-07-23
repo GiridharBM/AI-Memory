@@ -72,6 +72,51 @@
       "extension": ".md",
       "status": "processed",
       "generated_note": "Chinese Open-Weight Models and U.S. Policy Uncertainty.md"
+    },
+    {
+      "sha256": "e9ff1351a9b6e59a1cfd43ee0e0b3ef0c946257ad3f3da88a816e58b81ce617c",
+      "original_filename": "20_AI_Concepts_Explained_in_40_Minutes.md",
+      "original_path": "data\\inbox\\20_AI_Concepts_Explained_in_40_Minutes.md",
+      "processed_at": "2026-07-23T17:08:53Z",
+      "extension": ".md",
+      "status": "processed",
+      "generated_note": "20_AI_Concepts_Explained_in_40_Minutes.md"
+    },
+    {
+      "sha256": "fd50949e22e6f8bbdf8fd9c41800fbbf71fb7cdc00221ac8e9d9c622f432505c",
+      "original_filename": "AI_Concepts.md",
+      "original_path": "data\\inbox\\AI_Concepts.md",
+      "processed_at": "2026-07-23T17:16:25Z",
+      "extension": ".md",
+      "status": "processed",
+      "generated_note": "Artificial Intelligence Concepts.md"
+    },
+    {
+      "sha256": "77145f0545c3376e94fd5be42367d49b0f13eac82fa167e548005e75318ee60b",
+      "original_filename": "buildfastwithai.txt",
+      "original_path": "data\\inbox\\buildfastwithai.txt",
+      "processed_at": "2026-07-23T17:37:27Z",
+      "extension": ".txt",
+      "status": "processed",
+      "generated_note": "Gemini_3_6_Flash_Review_Benchmarks_Price_API_2026.md"
+    },
+    {
+      "sha256": "d8e9a44ea42e1a566cff3a36d9274b361d4d819157fd5c9019d9ba738f793b13",
+      "original_filename": "image.png",
+      "original_path": "data\\inbox\\image.png",
+      "processed_at": "2026-07-23T17:53:07Z",
+      "extension": ".png",
+      "status": "processed",
+      "generated_note": "Introduction to Machine Learning.md"
+    },
+    {
+      "sha256": "659b699ad6fc55ff4376532d5aae69e9ae3dc33ea8bb67bcddc18fe2af741a11",
+      "original_filename": "images (1).jpg",
+      "original_path": "data\\inbox\\images (1).jpg",
+      "processed_at": "2026-07-23T18:20:49Z",
+      "extension": ".jpg",
+      "status": "processed",
+      "generated_note": "How-Artificial-Intelligence-Works.md"
     }
   ]
 }

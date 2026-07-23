@@ -5,7 +5,17 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-SUPPORTED_HASH_EXTENSIONS = {".md", ".pdf", ".txt"}
+from app.core.extensions import (
+    AUDIO_EXTENSIONS,
+    CODE_EXTENSIONS,
+    IMAGE_EXTENSIONS,
+    VIDEO_EXTENSIONS,
+)
+
+SUPPORTED_HASH_EXTENSIONS = (
+    {".md", ".pdf", ".txt", ".csv", ".xlsx"}
+    | CODE_EXTENSIONS | IMAGE_EXTENSIONS | AUDIO_EXTENSIONS | VIDEO_EXTENSIONS
+)
 CHUNK_SIZE = 8192
 
 
