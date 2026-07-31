@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import math
+import os
+from contextlib import suppress
 from pathlib import Path
 
 from app.core.logging import get_logger
@@ -85,9 +87,15 @@ class VectorStore:
                 for e in self._entries.values()
             ]
         }
-        self._persistence_path.write_text(
-            json.dumps(data, indent=2), encoding="utf-8",
+        temporary_path = self._persistence_path.with_suffix(
+            f"{self._persistence_path.suffix}.tmp",
         )
+        try:
+            temporary_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            os.replace(temporary_path, self._persistence_path)
+        finally:
+            with suppress(FileNotFoundError):
+                temporary_path.unlink()
         logger.info("Vector store saved.", extra={"count": len(self._entries)})
 
     def _load(self) -> None:

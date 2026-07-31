@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -107,7 +109,13 @@ class KnowledgeGraph:
                 for e in self.edges
             ],
         }
-        path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        temporary_path = path.with_suffix(f"{path.suffix}.tmp")
+        try:
+            temporary_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            os.replace(temporary_path, path)
+        finally:
+            with suppress(FileNotFoundError):
+                temporary_path.unlink()
 
     @classmethod
     def load(cls, path: Path) -> KnowledgeGraph:

@@ -407,7 +407,11 @@ class IngestionWorkflow:
             graph = result.graph
 
             if self._graph_path:
-                existing = KnowledgeGraph.load(self._graph_path) if self._graph_path.exists() else KnowledgeGraph()
+                existing = (
+                    KnowledgeGraph.load(self._graph_path)
+                    if self._graph_path.exists()
+                    else KnowledgeGraph()
+                )
                 merged = self._kg_builder.merge_graphs(existing, graph)
                 merged.save(self._graph_path)
                 graph = merged

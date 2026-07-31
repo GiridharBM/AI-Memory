@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from app.infrastructure.state.manifest import ManifestManager
 
 
@@ -53,3 +55,27 @@ def test_manifest_corrupted_recovery(tmp_path: Path) -> None:
     assert corrupted_path.exists()
     assert json.loads(manifest_path.read_text(encoding="utf-8")) == {"version": 1, "files": []}
     assert manager.count() == 0
+
+
+def test_loaded_flag_set_on_save_success(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "data" / "manifests" / "processed_files.json"
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+
+    assert manager._loaded is True
+
+
+def test_loaded_flag_not_set_on_save_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest_path = tmp_path / "data" / "manifests" / "processed_files.json"
+    seen: dict[str, bool] = {}
+
+    def _failing_save(self: ManifestManager) -> None:
+        seen["loaded"] = self._loaded
+        raise OSError("disk full")
+
+    monkeypatch.setattr(ManifestManager, "save", _failing_save)
+    with pytest.raises(OSError):
+        ManifestManager(manifest_path, project_root=tmp_path)
+
+    assert seen["loaded"] is False

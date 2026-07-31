@@ -26,7 +26,6 @@ from app.core.extensions import (
     AUDIO_EXTENSIONS,
     CODE_EXTENSIONS,
     IMAGE_EXTENSIONS,
-    PROCESSABLE_EXTENSIONS,
     VIDEO_EXTENSIONS,
 )
 from app.core.logging import get_logger
@@ -39,8 +38,6 @@ from app.queue.state import QueueStateStore
 from app.queue.stats import RuntimeStats
 
 logger = get_logger(__name__)
-
-SUPPORTED_PROCESSING_EXTENSIONS = PROCESSABLE_EXTENSIONS
 
 
 class ProcessingWorkflow(Protocol):
@@ -178,7 +175,13 @@ class QueueWorker:
                     item.path,
                     expected_source_type=source_type if source_type != "pdf" else None,
                 )
-            except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError, ValueError):
+            except (
+                IngestionWorkflowError,
+                AIProcessingError,
+                OllamaClientError,
+                OSError,
+                ValueError,
+            ):
                 logger.exception("File processing failed.", extra={"path": str(item.path)})
                 self._fail_item(item)
                 return True

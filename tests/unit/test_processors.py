@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
+
+import pytest
 
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.domain.processed_document import ProcessedDocument
@@ -29,6 +32,7 @@ from app.infrastructure.routing.processor_impls import (
     VideoProcessor,
     VisionProcessor,
     WebProcessor,
+    _ocr_extract_from_pdf,
     get_processor_by_name,
 )
 
@@ -72,9 +76,6 @@ def _tmp_pdf() -> Path:
         return pdf_path
     except Exception:
         return Path(tempfile.mktemp(suffix=".pdf"))
-    assert doc.source_type == expected_source_type
-    assert isinstance(doc.metadata, dict)
-    assert doc.metadata["source"]
 
 
 # ── TextProcessor ──────────────────────────────────────────────────────
@@ -330,6 +331,12 @@ class TestOCRProcessor:
         doc = _make_document(text="existing text", source_type="scanned_pdf")
         result = proc.process(doc)
         assert result.extracted_text == "existing text"
+
+    def test_scanned_pdf_requires_pymupdf(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setitem(sys.modules, "fitz", None)
+
+        with pytest.raises(ImportError, match="PyMuPDF"):
+            _ocr_extract_from_pdf(MagicMock(), Path("scan.pdf"), prompt="x")
 
 
 # ── HandwritingProcessor ───────────────────────────────────────────────

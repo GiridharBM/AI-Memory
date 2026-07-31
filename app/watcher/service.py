@@ -12,6 +12,7 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from app.core.config import Settings
+from app.core.extensions import PROCESSABLE_EXTENSIONS
 from app.core.logging import get_logger
 from app.queue import QueueItem, QueueManager, QueueStateStore, QueueWorker, RuntimeStats
 from app.watcher.scanner import should_watch_file
@@ -62,7 +63,7 @@ class WatchService:
             logger.info("Recovered %d pending files.", recovered)
 
         handler = _InboxCreatedHandler(
-            supported_extensions=set(self.settings.watcher.supported_extensions),
+            supported_extensions=self._supported_extensions(),
             queue_manager=self.queue_manager,
             queue_state_store=self.queue_state_store,
             stats=self.stats,
@@ -122,8 +123,11 @@ class WatchService:
         except (ValueError, OSError):
             return str(path)
 
+    def _supported_extensions(self) -> set[str]:
+        return set(PROCESSABLE_EXTENSIONS) | set(self.settings.watcher.supported_extensions)
+
     def _scan_inbox(self) -> None:
-        supported_extensions = set(self.settings.watcher.supported_extensions)
+        supported_extensions = self._supported_extensions()
         paths = (
             self.inbox_root.rglob("*")
             if self.settings.watcher.recursive

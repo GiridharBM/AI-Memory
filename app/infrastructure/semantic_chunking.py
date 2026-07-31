@@ -78,7 +78,7 @@ class SemanticChunker:
         for index, chunk in enumerate(chunks):
             text = chunk.text
             if index > 0:
-                text = overlapped[index - 1].text[-self.overlap_chars:] + text
+                text = chunks[index - 1].text[-self.overlap_chars:] + text
             overlapped.append(DocumentChunk(
                 chunk_id=chunk.chunk_id,
                 text=text,

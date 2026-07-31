@@ -335,6 +335,15 @@ def test_inbox_scan_skips_directories(tmp_path: Path) -> None:
     assert service.queue_manager.size() == 0
 
 
+def test_supported_extensions_always_include_canonical_set(tmp_path: Path) -> None:
+    from app.core.extensions import PROCESSABLE_EXTENSIONS
+
+    settings = _settings(tmp_path)
+    service = WatchService(settings)
+    assert PROCESSABLE_EXTENSIONS <= service._supported_extensions()
+    assert service._supported_extensions() >= set(settings.watcher.supported_extensions)
+
+
 def test_inbox_scan_does_not_double_enqueue_restored_files(tmp_path: Path) -> None:
     settings = _settings(tmp_path)
     settings.watcher.inbox_path.mkdir(parents=True, exist_ok=True)

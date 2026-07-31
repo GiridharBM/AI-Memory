@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import logging
+
+import pytest
+
 from app.core.config import ModelRoutingSettings
 
 
@@ -29,6 +33,16 @@ class TestModelRoutingSettings:
     def test_model_for_unknown_falls_back(self) -> None:
         settings = ModelRoutingSettings()
         assert settings.model_for("nonexistent_key") == "qwen3:8b"
+
+    def test_model_for_unknown_logs_warning(self, caplog: pytest.LogCaptureFixture) -> None:
+        settings = ModelRoutingSettings()
+        with caplog.at_level(logging.WARNING):
+            assert settings.model_for("nonexistent_key") == "qwen3:8b"
+        assert any(
+            record.levelno == logging.WARNING
+            and "Unknown routing key 'nonexistent_key'" in record.getMessage()
+            for record in caplog.records
+        )
 
     def test_custom_models(self) -> None:
         settings = ModelRoutingSettings(

@@ -57,7 +57,7 @@ Phase 2 may proceed after the recommended quality-gate work in Section 7 is revi
   missing, and logs a warning naming the dropped edge.
 - New unit tests in `tests/unit/test_knowledge_engine.py`: valid endpoints → True; missing source/target/both → False.
 
-## 2. Files Modified (Phase 1 work — all UNCOMMITTED)
+## 2. Files Modified (Phase 1 work — committed as `3378d87`, 4 commits ahead of `origin/main`)
 
 - `app/cli/entry.py`
 - `app/core/config.py`
@@ -92,14 +92,14 @@ Phase 2 may proceed after the recommended quality-gate work in Section 7 is revi
 - `tests/unit/test_watcher_filters.py`
 - `tests/unit/test_watcher_service.py`
 
-Plus untracked: `docs/` (all reports + implementation spec + changelog).
+Plus `docs/` (all reports + implementation spec + changelog), committed with the Phase 1 work.
 
 ## 3. Test Summary
 
 | Suite | Result |
 |-------|--------|
-| Unit (`tests/unit`) | 407 passed |
-| Integration (`tests/integration`) | 14 passed |
+| Unit (`tests/unit`) | 411 passed |
+| Integration (`tests/integration`) | 10 passed |
 | Full regression (`tests`) | **421 passed, 0 failed** |
 | Live-service tests | 0 (all mocked; `integration` marker registered, default runs skip it) |
 
@@ -115,11 +115,12 @@ Test count grew from 411 → 421 with the new P1-03/04/05 tests.
 
 ## 5. Known Issues
 
-1. **Lint (ruff check): 77 errors repo-wide** — pre-existing debt, not introduced by Phase 1.
-   Breakdown: 35× E501, 9× F401, 6× I001, 7× F541, 5× F821, 4× E702, 3× B904, 3× F841, 2× E741,
-   2× B007, 1× UP035.
+1. **Lint (ruff check): 73 errors repo-wide after remediation** — 77 at phase end: 73 pre-existing debt
+   (not introduced by Phase 1) + 4 introduced by the phase (fixed during review remediation).
+   Breakdown (remaining): 33× E501, 9× F401, 6× I001, 7× F541, 5× F821, 4× E702, 3× B904, 3× F841, 2× E741,
+   1× B007 (of the original 2), 0× UP035.
    - Concentrated in `tests/integration/test_e2e_complete.py` (29), `tests/intelligence_test.py` (11),
-     `tests/unit/test_knowledge_engine.py` (4). App code ~15, mostly E501.
+     `tests/unit/test_knowledge_engine.py` (2 of the original 4). App code ~11, mostly E501.
    - F821 items are lazy annotations in test files (tests pass); `expected_source_type` at
      `tests/unit/test_processors.py:75` is unreachable dead code.
 2. **Formatting (ruff format --check): 48 files would be reformatted**, 65 already formatted.
@@ -129,7 +130,7 @@ Test count grew from 411 → 421 with the new P1-03/04/05 tests.
    - `numpy` `.pyi` incompatible with Python 3.14 (`Type statement is only supported in Python 3.12`),
      which aborts the whole run
    - The changed files introduce no new mypy findings beyond these environment blockers.
-4. **All Phase 1 work is uncommitted.** `git log` shows only 3 commits; 33 modified/new files + docs untracked.
+4. **All Phase 1 work is committed** (`3378d87`, 49 files, +8644/−468), 4 commits ahead of `origin/main`.
 5. `tests/intelligence_test.py` is a legacy standalone script (not collected by pytest, no `test_` functions).
 
 ## 6. Risks
@@ -141,25 +142,24 @@ Test count grew from 411 → 421 with the new P1-03/04/05 tests.
 - **Medium — first run cost.** The first ingestion per fresh `manifest_root` builds the vector store + KG
   from scratch. No migration needed (files are new).
 - **Medium — no SCM safety net.** Entire Phase 1 delta uncommitted; a failed disk/lockup loses the work.
-- **Low — CI cannot be enabled.** Tests are hermetic and green, but the lint/format/mypy gates are not clean.
+- **Low — CI cannot be enabled.** Tests are hermetic and green, but the remaining lint/format/mypy gates are not clean.
 - **Low — latency metric changed.** `average_queue_latency_seconds` now excludes skipped/failed items;
   any dashboards based on the old (deflated) value should be re-baselined.
 
 ## 7. Recommendations Before Starting Phase 2
 
-1. **Commit the Phase 1 work** (code + tests + docs) — this is the top blocker; the entire milestone is
-   uncommitted.
-2. Verify `nomic-embed-text` is available in the local Ollama; run one real `pam ingest` end-to-end and
+1. **Verify `nomic-embed-text` is available** in the local Ollama; run one real `pam ingest` end-to-end and
    confirm `vector_store.json` + `knowledge_graph.json` appear under the manifest root.
-3. **Decide on quality gates:** either fix the 77 lint errors / 48 formatting diffs, or tune
+2. **Decide on quality gates:** either fix the 73 remaining lint errors / 48 formatting diffs, or tune
    `pyproject.toml` (e.g., exclude legacy test scripts) so gates pass before enabling CI.
-4. **Make mypy runnable:** install `types-PyYAML`; add config for optional-dependency imports
+3. **Make mypy runnable:** install `types-PyYAML`; add config for optional-dependency imports
    (`ignore_missing_imports` / per-module overrides for `docx`, `pptx`, `faster_whisper`, `fitz`); verify a
    Python 3.14-compatible `numpy`/mypy pairing.
-5. Delete or migrate `tests/intelligence_test.py` (legacy script, 11 lint findings, no pytest value).
-6. Keep coverage ≥ 80% (currently 86.07%); re-check at the end of Phase 2.
+4. Delete or migrate `tests/intelligence_test.py` (legacy script, 11 lint findings, no pytest value).
+5. Keep coverage ≥ 80% (currently 86.07%); re-check at the end of Phase 2.
 
 ## 8. Verdict
 
 Phase 1 is **complete**: all 21 tasks implemented, 421/421 tests pass, coverage 86.07%, no regressions.
-Proceed to Phase 2 after committing and reviewing Section 7.
+Proceed to Phase 2 after the review remediation is signed off (see `ENGINEERING_REVIEW_PHASE_1.md` and
+`PHASE_1_REMEDIATION_REPORT.md`).

@@ -72,12 +72,11 @@ def _ocr_extract_from_pdf(vision_client: object, pdf_path: Path, *, prompt: str)
     """Convert PDF pages to images and extract text via vision model."""
     try:
         import fitz  # PyMuPDF
-    except ImportError:
-        logger.warning(
-            "PyMuPDF not installed. Cannot OCR scanned PDFs. "
+    except ImportError as exc:
+        raise ImportError(
+            "PyMuPDF is required for scanned PDF OCR. "
             "Install with: pip install PyMuPDF",
-        )
-        return ""
+        ) from exc
 
     try:
         doc = fitz.open(str(pdf_path))

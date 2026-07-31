@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from app.core.extensions import PROCESSABLE_EXTENSIONS
 from app.domain.documents import DocumentMetadata, SourceDocument
-from app.infrastructure.routing.classifier import DocumentClassifier
+from app.infrastructure.routing.classifier import (
+    EXTENSION_KIND_MAP,
+    DocumentClassifier,
+)
 
 
 def _doc(filename: str, source_type: str, text: str = "") -> SourceDocument:
@@ -26,6 +30,15 @@ class TestClassifierFileTypes:
     def test_markdown_detection(self) -> None:
         kind = self.classifier._detect_kind(".md", "markdown")
         assert kind == "markdown"
+
+    def test_every_mapped_extension_classifies_to_its_kind(self) -> None:
+        for ext, kind in EXTENSION_KIND_MAP.items():
+            detected = self.classifier._detect_kind(ext, "")
+            assert detected == kind, f"{ext} -> {detected}, expected {kind}"
+
+    def test_all_processable_extensions_are_mapped(self) -> None:
+        unmapped = PROCESSABLE_EXTENSIONS - set(EXTENSION_KIND_MAP)
+        assert unmapped == set()
 
     def test_markdown_variant_detection(self) -> None:
         kind = self.classifier._detect_kind(".markdown", "markdown")

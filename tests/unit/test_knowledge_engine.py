@@ -126,6 +126,15 @@ class TestSemanticChunking:
         assert len(chunks) == 1
         assert chunks[0].text == "Short text."
 
+    def test_chunk_overlap_uses_original_predecessor(self) -> None:
+        chunker = SemanticChunker(max_chunk_chars=5, overlap_chars=8)
+        text = "AAAA. BBBB. CCCC. DDDD."
+        chunks = chunker.chunk(text, "test.md", "markdown")
+        assert len(chunks) == 4
+        assert chunks[1].text == "AAAA.BBBB."
+        assert chunks[2].text == "BBBB.CCCC."
+        assert chunks[3].text == "CCCC.DDDD."
+
     def test_chunk_overlap_offsets_preserved(self) -> None:
         text = ". ".join(f"Sentence {i}" for i in range(30))
         plain = SemanticChunker(max_chunk_chars=50, overlap_chars=0)
@@ -574,6 +583,25 @@ class TestVectorStore:
         assert len(store2) == 1
         assert store2.get("e1").text == "hello"
 
+    def test_save_is_atomic(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        path = tmp_path / "vectors.json"
+        store = VectorStore(persistence_path=path)
+        store.add(VectorEntry(id="e1", text="hello", embedding=[1.0, 0.5]))
+        store.save()
+        assert path.exists()
+        assert not path.with_suffix(".json.tmp").exists()
+
+        original = path.read_bytes()
+
+        def _boom(*args: object, **kwargs: object) -> object:
+            raise RuntimeError("serialization failed")
+
+        monkeypatch.setattr("json.dumps", _boom)
+        with pytest.raises(RuntimeError):
+            store.save()
+        assert path.read_bytes() == original
+        assert not path.with_suffix(".json.tmp").exists()
+
 
 class TestCosineSimilarity:
     def test_identical_vectors(self) -> None:
@@ -721,6 +749,25 @@ class TestKnowledgeGraphPersistence:
         g = KnowledgeGraph.load(path)
         assert len(g.nodes) == 0
         assert len(g.edges) == 0
+
+    def test_save_is_atomic(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        path = tmp_path / "graph.json"
+        g = KnowledgeGraph()
+        g.add_node(KnowledgeNode(id="n1", label="A", node_type="concept"))
+        g.save(path)
+        assert path.exists()
+        assert not path.with_suffix(".json.tmp").exists()
+
+        original = path.read_bytes()
+
+        def _boom(*args: object, **kwargs: object) -> object:
+            raise RuntimeError("serialization failed")
+
+        monkeypatch.setattr("json.dumps", _boom)
+        with pytest.raises(RuntimeError):
+            g.save(path)
+        assert path.read_bytes() == original
+        assert not path.with_suffix(".json.tmp").exists()
 
     def test_merge_and_persist(self, tmp_path: Path) -> None:
         path = tmp_path / "graph.json"

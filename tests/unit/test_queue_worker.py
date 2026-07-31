@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 
+from app.core.config import Settings
 from app.pipelines import IngestionWorkflowResult
 from app.queue import QueueItem, QueueManager, QueueStatus, QueueWorker
 
@@ -54,6 +55,23 @@ def test_worker_handles_missing_source_without_crashing(tmp_settings: Settings, 
     assert item.status == QueueStatus.FAILED
     assert queue.is_empty()
     assert not queue.is_queued(source)
+
+
+def test_worker_rejects_unsupported_extension(tmp_settings: Settings, tmp_path: Path) -> None:
+    queue = QueueManager()
+    source = tmp_path / "inbox" / "data.xyz"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("unexpected", encoding="utf-8")
+    item = QueueItem(path=source, extension=".xyz", created_at=datetime.now(UTC))
+    queue.enqueue(item)
+
+    worker = QueueWorker(queue, tmp_settings, workflow=EmptyWorkflow())
+
+    assert worker.process_next()
+    assert item.status == QueueStatus.FAILED
+    assert not source.exists()
+    assert (tmp_path / "failed" / "data.xyz").exists()
+    assert queue.is_empty()
 
 
 # _settings removed: tests use shared tmp_settings fixture from conftest.py

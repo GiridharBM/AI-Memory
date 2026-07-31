@@ -6,8 +6,6 @@ from pathlib import Path
 
 from app.core.extensions import PROCESSABLE_EXTENSIONS
 
-SUPPORTED_EXTENSIONS = PROCESSABLE_EXTENSIONS
-
 
 def is_supported_file(
     path: str | Path,
@@ -16,7 +14,7 @@ def is_supported_file(
     """Return true when a path points to a supported Markdown file."""
 
     candidate = Path(path)
-    extensions = supported_extensions or SUPPORTED_EXTENSIONS
+    extensions = supported_extensions or PROCESSABLE_EXTENSIONS
     return candidate.is_file() and candidate.suffix.lower() in extensions
 
 

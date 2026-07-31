@@ -329,13 +329,17 @@ def _merge_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, An
     return merged
 
 
-def _resolve_relative_paths(config: dict[str, Any], keys: set[str], project_root: Path) -> dict[str, Any]:
+def _resolve_relative_paths(
+    config: dict[str, Any], keys: set[str], project_root: Path,
+) -> dict[str, Any]:
     resolved = dict(config)
     for key in keys:
         if key not in resolved:
             continue
         candidate = Path(resolved[key])
-        resolved[key] = candidate if candidate.is_absolute() else (project_root / candidate).resolve()
+        resolved[key] = (
+            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
+        )
     return resolved
 
 
