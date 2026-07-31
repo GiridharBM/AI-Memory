@@ -46,7 +46,7 @@ include = ["app*"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-addopts = "-ra --tb=short"
+addopts = "-ra --tb=short -m 'not integration'"
 
 [tool.coverage.run]
 source = ["app"]

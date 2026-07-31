@@ -38,13 +38,9 @@ watcher:
     # Documents
     - .txt
     - .md
-    - .markdown
-    - .rtf
-    - .docx
-    - .odt
     - .pdf
-    - .tex
-    - .epub
+    - .csv
+    - .xlsx
     # Programming
     - .py
     - .js
@@ -74,23 +70,6 @@ watcher:
     - .less
     - .vue
     - .svelte
-    - .toml
-    - .ini
-    - .cfg
-    - .conf
-    - .env
-    # Notebooks
-    - .ipynb
-    # Spreadsheets
-    - .csv
-    - .tsv
-    - .xls
-    - .xlsx
-    - .ods
-    # Presentations
-    - .pptx
-    - .ppt
-    - .odp
     # Images
     - .png
     - .jpg
@@ -101,45 +80,19 @@ watcher:
     - .tiff
     - .heic
     - .svg
-    # Diagrams
-    - .drawio
-    - .mmd
     # Audio
     - .mp3
     - .wav
     - .m4a
-    - .aac
-    - .ogg
     - .flac
+    - .ogg
+    - .aac
     # Video
     - .mp4
     - .mkv
     - .mov
     - .avi
     - .webm
-    # Archives
-    - .zip
-    - .tar
-    - .gz
-    - .7z
-    - .rar
-    # Email
-    - .eml
-    # Databases
-    - .sqlite
-    - .db
-    # Research
-    - .bib
-    - .ris
-    # Config
-    - .yaml
-    - .yml
-    # Web
-    - .html
-    - .htm
-    - .xml
-    - .json
-    - .rss
 
 queue:
   enabled: true

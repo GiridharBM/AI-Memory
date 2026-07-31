@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from app.queue import QueueItem, QueueManager, QueueStatus
 
 
@@ -82,6 +84,24 @@ def test_empty_queue() -> None:
     assert manager.is_empty()
     assert manager.peek() is None
     assert manager.dequeue() is None
+
+
+def test_queue_path_resolve_failure_falls_back_to_absolute(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manager = QueueManager()
+    path = tmp_path / "notes.md"
+
+    def _raise(*args: object, **kwargs: object) -> Path:
+        raise OSError("removed drive")
+
+    monkeypatch.setattr(Path, "resolve", _raise)
+    item = _item(path)
+
+    assert manager.enqueue(item)
+    assert manager.is_queued(path)
+    assert not manager.enqueue(_item(path))
 
 
 def _item(path: Path) -> QueueItem:

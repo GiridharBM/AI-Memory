@@ -60,3 +60,9 @@ RESEARCH_EXTENSIONS: frozenset[str] = frozenset({".bib", ".ris"})
 
 # ── Web ──────────────────────────────────────────────────────────────────────
 WEB_EXTENSIONS: frozenset[str] = frozenset({".html", ".htm", ".xml", ".json", ".rss"})
+
+# ── Processable (ingestor + processor available) ─────────────────────────────
+PROCESSABLE_EXTENSIONS: frozenset[str] = frozenset(
+    {".md", ".txt", ".pdf", ".csv", ".xlsx"}
+    | CODE_EXTENSIONS | IMAGE_EXTENSIONS | AUDIO_EXTENSIONS | VIDEO_EXTENSIONS
+)

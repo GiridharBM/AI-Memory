@@ -29,6 +29,14 @@ from app.domain.analysis import (
 from app.domain.documents import DocumentMetadata, SourceDocument
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    """Register markers used across the test suite."""
+    config.addinivalue_line(
+        "markers",
+        "integration: tests that hit live external services (skipped by default)",
+    )
+
+
 @pytest.fixture()
 def tmp_settings(tmp_path: Path) -> Settings:
     """Create a minimal Settings object using a temporary directory."""

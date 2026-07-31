@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,8 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, ValidationError, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_logger = logging.getLogger(__name__)
 
 CONFIG_ENV_VAR = "PAM_ENVIRONMENT"
 CONFIG_ENV_PREFIX = "PAM_"
@@ -198,6 +201,8 @@ class ModelRoutingSettings(BaseModel):
 
     def model_for(self, key: str) -> str:
         """Return the model name for a routing key, falling back to general_text."""
+        if not hasattr(self, key):
+            _logger.warning("Unknown routing key '%s', falling back to general_text.", key)
         return getattr(self, key, self.general_text)
 
 
@@ -246,22 +251,39 @@ def load_settings(
 
     config_data.setdefault("paths", {})
     config_data["paths"]["project_root"] = project_root
-    config_data["paths"] = _resolve_paths(config_data["paths"], project_root)
+    config_data["paths"] = _resolve_relative_paths(
+        config_data["paths"],
+        {"vault_root", "inbox_root", "staging_root", "manifest_root", "cache_root", "log_root"},
+        project_root,
+    )
 
     config_data.setdefault("watcher", {})
-    config_data["watcher"] = _resolve_watcher_paths(config_data["watcher"], project_root)
+    config_data["watcher"] = _resolve_relative_paths(
+        config_data["watcher"],
+        {"inbox_path", "processed_path", "failed_path"},
+        project_root,
+    )
 
     config_data.setdefault("processing", {})
-    config_data["processing"] = _resolve_processing_paths(
+    config_data["processing"] = _resolve_relative_paths(
         config_data["processing"],
+        {"processed_path", "failed_path"},
         project_root,
     )
 
     config_data.setdefault("queue", {})
-    config_data["queue"] = _resolve_queue_paths(config_data["queue"], project_root)
+    config_data["queue"] = _resolve_relative_paths(
+        config_data["queue"],
+        {"state_path"},
+        project_root,
+    )
 
     config_data.setdefault("manifest", {})
-    config_data["manifest"] = _resolve_manifest_paths(config_data["manifest"], project_root)
+    config_data["manifest"] = _resolve_relative_paths(
+        config_data["manifest"],
+        {"path"},
+        project_root,
+    )
 
     config_data.setdefault("models", {})
 
@@ -307,68 +329,14 @@ def _merge_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, An
     return merged
 
 
-def _resolve_paths(path_config: dict[str, Any], project_root: Path) -> dict[str, Path]:
-    resolved_paths: dict[str, Path] = {}
-    for key, value in path_config.items():
-        if key == "project_root":
-            resolved_paths[key] = project_root
+def _resolve_relative_paths(config: dict[str, Any], keys: set[str], project_root: Path) -> dict[str, Any]:
+    resolved = dict(config)
+    for key in keys:
+        if key not in resolved:
             continue
-        candidate = Path(value)
-        resolved_paths[key] = (
-            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
-        )
-    return resolved_paths
-
-
-def _resolve_watcher_paths(watcher_config: dict[str, Any], project_root: Path) -> dict[str, Any]:
-    resolved_config = dict(watcher_config)
-    for key in ("inbox_path", "processed_path", "failed_path"):
-        if key not in resolved_config:
-            continue
-        candidate = Path(resolved_config[key])
-        resolved_config[key] = (
-            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
-        )
-    return resolved_config
-
-
-def _resolve_processing_paths(
-    processing_config: dict[str, Any],
-    project_root: Path,
-) -> dict[str, Any]:
-    resolved_config = dict(processing_config)
-    for key in ("processed_path", "failed_path"):
-        if key not in resolved_config:
-            continue
-
-        candidate = Path(resolved_config[key])
-        resolved_config[key] = (
-            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
-        )
-    return resolved_config
-
-
-def _resolve_queue_paths(queue_config: dict[str, Any], project_root: Path) -> dict[str, Any]:
-    resolved_config = dict(queue_config)
-    if "state_path" in resolved_config:
-        candidate = Path(resolved_config["state_path"])
-        resolved_config["state_path"] = (
-            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
-        )
-    return resolved_config
-
-
-def _resolve_manifest_paths(
-    manifest_config: dict[str, Any],
-    project_root: Path,
-) -> dict[str, Any]:
-    resolved_config = dict(manifest_config)
-    if "path" in resolved_config:
-        candidate = Path(resolved_config["path"])
-        resolved_config["path"] = (
-            candidate if candidate.is_absolute() else (project_root / candidate).resolve()
-        )
-    return resolved_config
+        candidate = Path(resolved[key])
+        resolved[key] = candidate if candidate.is_absolute() else (project_root / candidate).resolve()
+    return resolved
 
 
 def _apply_environment_overrides(config_data: dict[str, Any]) -> dict[str, Any]:

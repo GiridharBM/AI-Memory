@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 from unittest.mock import MagicMock, patch
@@ -21,7 +22,7 @@ from app.core.config import (
     Settings,
     WatcherSettings,
 )
-from app.queue import QueueManager
+from app.queue import QueueItem, QueueManager
 from app.watcher.service import WatchService, _InboxCreatedHandler
 
 
@@ -176,6 +177,23 @@ def test_watcher_display_path_absolute(tmp_path: Path) -> None:
     assert "file.md" in result
 
 
+def test_display_path_outside_project_root(tmp_path: Path) -> None:
+    service = WatchService(_settings(tmp_path))
+    outside = tmp_path.parent / "outside" / "note.md"
+    assert service._display_path(outside) == str(outside)
+
+
+def test_display_path_cross_drive_no_crash(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    service = WatchService(_settings(tmp_path))
+    path = tmp_path / "inbox" / "note.md"
+
+    def _raise(*args: object, **kwargs: object) -> Path:
+        raise OSError("cross-drive path")
+
+    monkeypatch.setattr(Path, "relative_to", _raise)
+    assert service._display_path(path) == str(path)
+
+
 def test_watcher_stop_flushes_handlers(tmp_path: Path) -> None:
     service = WatchService(_settings(tmp_path))
     observer = FakeObserver()
@@ -267,6 +285,69 @@ def test_handler_rejects_duplicate_enqueue(tmp_path: Path) -> None:
     handler.on_created(event)
     handler.on_created(event)
     assert qm.size() == 1
+
+
+def test_start_scans_inbox_enqueues_existing_files(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    settings.watcher.inbox_path.mkdir(parents=True, exist_ok=True)
+    (settings.watcher.inbox_path / "note.md").write_text("# Note", encoding="utf-8")
+    nested = settings.watcher.inbox_path / "sub"
+    nested.mkdir(parents=True)
+    (nested / "other.md").write_text("# Other", encoding="utf-8")
+    service = WatchService(settings)
+    service.queue_worker = cast(Any, FakeWorker())
+    with patch("app.watcher.service.Observer", return_value=FakeObserver()):
+        service.start()
+    assert service.queue_manager.size() == 2
+
+
+def test_inbox_scan_skips_hidden_files(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    settings.watcher.inbox_path.mkdir(parents=True, exist_ok=True)
+    (settings.watcher.inbox_path / ".hidden.md").write_text("hidden", encoding="utf-8")
+    (settings.watcher.inbox_path / "note.md").write_text("# Note", encoding="utf-8")
+    service = WatchService(settings)
+    service.queue_worker = cast(Any, FakeWorker())
+    with patch("app.watcher.service.Observer", return_value=FakeObserver()):
+        service.start()
+    assert service.queue_manager.size() == 1
+
+
+def test_inbox_scan_skips_unsupported_extensions(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    settings.watcher.inbox_path.mkdir(parents=True, exist_ok=True)
+    (settings.watcher.inbox_path / "data.xyz").write_text("x", encoding="utf-8")
+    (settings.watcher.inbox_path / "note.md").write_text("# Note", encoding="utf-8")
+    service = WatchService(settings)
+    service.queue_worker = cast(Any, FakeWorker())
+    with patch("app.watcher.service.Observer", return_value=FakeObserver()):
+        service.start()
+    assert service.queue_manager.size() == 1
+
+
+def test_inbox_scan_skips_directories(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    (settings.watcher.inbox_path / "notes").mkdir(parents=True)
+    service = WatchService(settings)
+    service.queue_worker = cast(Any, FakeWorker())
+    with patch("app.watcher.service.Observer", return_value=FakeObserver()):
+        service.start()
+    assert service.queue_manager.size() == 0
+
+
+def test_inbox_scan_does_not_double_enqueue_restored_files(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    settings.watcher.inbox_path.mkdir(parents=True, exist_ok=True)
+    md_file = settings.watcher.inbox_path / "note.md"
+    md_file.write_text("# Note", encoding="utf-8")
+    service = WatchService(settings)
+    service.queue_manager.enqueue(
+        QueueItem(path=md_file, extension=".md", created_at=datetime.now(UTC))
+    )
+    service.queue_worker = cast(Any, FakeWorker())
+    with patch("app.watcher.service.Observer", return_value=FakeObserver()):
+        service.start()
+    assert service.queue_manager.size() == 1
 
 
 def test_watcher_run_calls_start_and_stop(tmp_path: Path) -> None:

@@ -38,7 +38,6 @@ class RuntimeStats:
 
     @property
     def average_queue_latency_seconds(self) -> float:
-        completed = self.processed + self.skipped_duplicates + self.failed
-        if completed == 0:
+        if self.processed == 0:
             return 0.0
-        return self.total_queue_latency_seconds / completed
+        return self.total_queue_latency_seconds / self.processed

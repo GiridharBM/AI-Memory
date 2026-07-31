@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
@@ -58,6 +59,7 @@ class VersionManager:
             version=version_num,
             timestamp=datetime.now(tz=UTC).isoformat(),
             filename=version_filename,
+            sha256=hashlib.sha256(content.encode("utf-8")).hexdigest(),
             source=source,
         )
         history.versions.append(entry)

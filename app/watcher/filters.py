@@ -4,21 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from app.core.extensions import (
-    AUDIO_EXTENSIONS,
-    CODE_EXTENSIONS,
-    DOCX_EXTENSIONS,
-    IMAGE_EXTENSIONS,
-    PPTX_EXTENSIONS,
-    SPREADSHEET_EXTENSIONS,
-    VIDEO_EXTENSIONS,
-)
+from app.core.extensions import PROCESSABLE_EXTENSIONS
 
-SUPPORTED_EXTENSIONS = (
-    {".md", ".txt", ".pdf", ".csv", ".xlsx"}
-    | CODE_EXTENSIONS | IMAGE_EXTENSIONS | AUDIO_EXTENSIONS | VIDEO_EXTENSIONS
-    | DOCX_EXTENSIONS | PPTX_EXTENSIONS | SPREADSHEET_EXTENSIONS
-)
+SUPPORTED_EXTENSIONS = PROCESSABLE_EXTENSIONS
 
 
 def is_supported_file(

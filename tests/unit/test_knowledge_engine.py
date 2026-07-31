@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -110,6 +111,40 @@ class TestSemanticChunking:
         text = ". ".join(f"Sentence {i}" for i in range(30))
         chunks = chunker.chunk(text, "test.md", "markdown")
         assert len(chunks) > 1
+
+    def test_chunk_overlap_produces_shared_text(self) -> None:
+        chunker = SemanticChunker(max_chunk_chars=300, overlap_chars=200)
+        text = ". ".join(f"Sentence {i}" for i in range(50))
+        chunks = chunker.chunk(text, "test.md", "markdown")
+        assert len(chunks) >= 2
+        for previous, current in zip(chunks, chunks[1:], strict=False):
+            assert previous.text[-200:] == current.text[:200]
+
+    def test_chunk_overlap_single_chunk(self) -> None:
+        chunker = SemanticChunker(max_chunk_chars=2000, overlap_chars=200)
+        chunks = chunker.chunk("Short text.", "test.md", "markdown")
+        assert len(chunks) == 1
+        assert chunks[0].text == "Short text."
+
+    def test_chunk_overlap_offsets_preserved(self) -> None:
+        text = ". ".join(f"Sentence {i}" for i in range(30))
+        plain = SemanticChunker(max_chunk_chars=50, overlap_chars=0)
+        overlapped = SemanticChunker(max_chunk_chars=50, overlap_chars=10)
+        plain_chunks = plain.chunk(text, "test.md", "markdown")
+        overlap_chunks = overlapped.chunk(text, "test.md", "markdown")
+        assert len(plain_chunks) > 1
+        assert [(c.start_char, c.end_char) for c in plain_chunks] == [
+            (c.start_char, c.end_char) for c in overlap_chunks
+        ]
+        assert overlap_chunks[0].text == plain_chunks[0].text
+
+    def test_chunk_overlap_zero(self) -> None:
+        chunker = SemanticChunker(max_chunk_chars=50, overlap_chars=0)
+        text = ". ".join(f"Sentence {i}" for i in range(30))
+        chunks = chunker.chunk(text, "test.md", "markdown")
+        assert len(chunks) > 1
+        for previous, current in zip(chunks, chunks[1:], strict=False):
+            assert not current.text.startswith(previous.text[-1:])
 
 
 # ---------------------------------------------------------------------------
@@ -239,6 +274,34 @@ class TestKnowledgeGraph:
         g.add_edge(KnowledgeEdge(source_id="missing", target_id="also_missing", edge_type="related_to"))
         assert len(g.edges) == 0
 
+    def test_add_edge_valid_endpoints_returns_true(self) -> None:
+        g = KnowledgeGraph()
+        g.add_node(KnowledgeNode(id="n1", label="A", node_type="concept"))
+        g.add_node(KnowledgeNode(id="n2", label="B", node_type="concept"))
+        added = g.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type="related_to"))
+        assert added is True
+        assert len(g.edges) == 1
+
+    def test_add_edge_missing_source_returns_false(self) -> None:
+        g = KnowledgeGraph()
+        g.add_node(KnowledgeNode(id="n2", label="B", node_type="concept"))
+        added = g.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type="related_to"))
+        assert added is False
+        assert len(g.edges) == 0
+
+    def test_add_edge_missing_target_returns_false(self) -> None:
+        g = KnowledgeGraph()
+        g.add_node(KnowledgeNode(id="n1", label="A", node_type="concept"))
+        added = g.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type="related_to"))
+        assert added is False
+        assert len(g.edges) == 0
+
+    def test_add_edge_both_missing_returns_false(self) -> None:
+        g = KnowledgeGraph()
+        added = g.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type="related_to"))
+        assert added is False
+        assert len(g.edges) == 0
+
     def test_neighbors(self) -> None:
         g = KnowledgeGraph()
         g.add_node(KnowledgeNode(id="a", label="A", node_type="concept"))
@@ -366,9 +429,68 @@ class TestEmbeddingService:
         from app.core.config import OllamaSettings
         from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
-        with patch.object(svc._client, "embed", side_effect=RuntimeError("connection")):
+        with patch.object(svc._client, "embed", side_effect=RuntimeError("connection")), \
+             patch("app.infrastructure.embeddings.time.sleep"):
             with pytest.raises(RuntimeError, match="connection"):
                 svc.embed("test")
+
+    def test_embed_retry_on_transient_failure(self) -> None:
+        from unittest.mock import MagicMock, patch
+
+        from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
+        svc = EmbeddingService(OllamaSettings())
+        mock_response = MagicMock()
+        mock_response.model_dump.return_value = {"embeddings": [[0.1, 0.2]]}
+        calls = {"count": 0}
+
+        def flaky(*args: object, **kwargs: object) -> MagicMock:
+            calls["count"] += 1
+            if calls["count"] < 3:
+                raise RuntimeError("transient")
+            return mock_response
+
+        with patch.object(svc._client, "embed", side_effect=flaky) as m, \
+             patch("app.infrastructure.embeddings.time.sleep") as sleep:
+            result = svc.embed("hello")
+        assert m.call_count == 3
+        assert sleep.call_args_list[0].args[0] == 1.0
+        assert sleep.call_args_list[1].args[0] == 2.0
+        assert result.embedding == [0.1, 0.2]
+
+    def test_embed_retry_exhausted(self) -> None:
+        from unittest.mock import patch
+
+        from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
+        svc = EmbeddingService(OllamaSettings())
+        with patch.object(svc._client, "embed", side_effect=RuntimeError("fail")) as m, \
+             patch("app.infrastructure.embeddings.time.sleep"):
+            with pytest.raises(RuntimeError, match="fail"):
+                svc.embed("test")
+        assert m.call_count == 3
+
+    def test_embed_batch_retry_on_transient_failure(self) -> None:
+        from unittest.mock import MagicMock, patch
+
+        from app.core.config import OllamaSettings
+        from app.infrastructure.embeddings import EmbeddingService
+        svc = EmbeddingService(OllamaSettings())
+        mock_response = MagicMock()
+        mock_response.model_dump.return_value = {"embeddings": [[0.1, 0.2]]}
+        calls = {"count": 0}
+
+        def flaky(*args: object, **kwargs: object) -> MagicMock:
+            calls["count"] += 1
+            if calls["count"] < 3:
+                raise RuntimeError("transient")
+            return mock_response
+
+        with patch.object(svc._client, "embed", side_effect=flaky) as m, \
+             patch("app.infrastructure.embeddings.time.sleep"):
+            results = svc.embed_batch(["a"])
+        assert m.call_count == 3
+        assert results[0].embedding == [0.1, 0.2]
 
     def test_embed_batch_success(self) -> None:
         from unittest.mock import MagicMock, patch
@@ -393,7 +515,8 @@ class TestEmbeddingService:
         from app.core.config import OllamaSettings
         from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
-        with patch.object(svc._client, "embed", side_effect=RuntimeError("fail")):
+        with patch.object(svc._client, "embed", side_effect=RuntimeError("fail")), \
+             patch("app.infrastructure.embeddings.time.sleep"):
             with pytest.raises(RuntimeError, match="fail"):
                 svc.embed_batch(["a"])
 
@@ -508,6 +631,14 @@ class TestVersionHistory:
         entry = vm.record_version("Note.md", "# Content v1", source="test.md")
         assert entry.version == 1
         assert vm.has_versions("Note.md") is True
+
+    def test_record_version_populates_sha256(self, tmp_path: Path) -> None:
+        vm = VersionManager(tmp_path)
+
+        content = "# Content v1"
+        entry = vm.record_version("Note.md", content)
+        assert entry.sha256 == hashlib.sha256(content.encode("utf-8")).hexdigest()
+        assert vm.get_versions("Note.md")[0].sha256 == entry.sha256
 
     def test_multiple_versions(self, tmp_path: Path) -> None:
         vm = VersionManager(tmp_path)
@@ -662,10 +793,10 @@ class TestPlaceholderNotes:
 
 class TestPipelineKnowledgeEngine:
     def test_workflow_result_has_kg_fields(self) -> None:
-        from app.pipelines.ingest_workflow import IngestionWorkflowResult
-        from app.domain.documents import SourceDocument, DocumentMetadata
+        from app.domain.documents import DocumentMetadata, SourceDocument
         from app.domain.notes import ObsidianNote
         from app.infrastructure.vault.wiki_manager import WikiUpdateResult
+        from app.pipelines.ingest_workflow import IngestionWorkflowResult
 
         doc = SourceDocument(
             source="t.md", filename="t.md", source_type="text", text="x",
@@ -691,8 +822,9 @@ class TestPipelineKnowledgeEngine:
         assert result.cross_links_added == 0
 
     def test_workflow_accepts_kg_params(self) -> None:
-        from app.pipelines.ingest_workflow import IngestionWorkflow
         from unittest.mock import MagicMock
+
+        from app.pipelines.ingest_workflow import IngestionWorkflow
 
         writer = MagicMock()
         writer.save.return_value = MagicMock(
@@ -715,9 +847,10 @@ class TestPipelineKnowledgeEngine:
         assert wf._vector_store is not None
 
     def test_knowledge_engine_skips_when_no_components(self) -> None:
-        from app.pipelines.ingest_workflow import IngestionWorkflow
-        from app.domain.documents import SourceDocument, DocumentMetadata
         from unittest.mock import MagicMock
+
+        from app.domain.documents import DocumentMetadata, SourceDocument
+        from app.pipelines.ingest_workflow import IngestionWorkflow
 
         writer = MagicMock()
         wf = IngestionWorkflow(

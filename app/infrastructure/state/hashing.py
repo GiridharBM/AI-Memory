@@ -22,12 +22,11 @@ CHUNK_SIZE = 8192
 def compute_file_hash(path: Path) -> str:
     """Compute a streaming SHA-256 hash for supported files."""
 
-    candidate = Path(path)
-    if candidate.suffix.lower() not in SUPPORTED_HASH_EXTENSIONS:
-        raise ValueError(f"Unsupported file type for hashing: {candidate.suffix}")
+    if path.suffix.lower() not in SUPPORTED_HASH_EXTENSIONS:
+        raise ValueError(f"Unsupported file type for hashing: {path.suffix}")
 
     digest = hashlib.sha256()
-    with candidate.open("rb") as handle:
+    with path.open("rb") as handle:
         while True:
             chunk = handle.read(CHUNK_SIZE)
             if not chunk:

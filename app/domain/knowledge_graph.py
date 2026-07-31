@@ -7,6 +7,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
+
 NodeType = Literal["entity", "concept", "topic", "note", "definition"]
 EdgeType = Literal["related_to", "defined_in", "mentioned_in", "part_of", "depends_on"]
 
@@ -43,9 +47,19 @@ class KnowledgeGraph:
     def add_node(self, node: KnowledgeNode) -> None:
         self.nodes[node.id] = node
 
-    def add_edge(self, edge: KnowledgeEdge) -> None:
+    def add_edge(self, edge: KnowledgeEdge) -> bool:
         if edge.source_id in self.nodes and edge.target_id in self.nodes:
             self.edges.append(edge)
+            return True
+        logger.warning(
+            "Dropping knowledge edge with missing endpoints.",
+            extra={
+                "source_id": edge.source_id,
+                "target_id": edge.target_id,
+                "edge_type": edge.edge_type,
+            },
+        )
+        return False
 
     def neighbors(self, node_id: str) -> list[tuple[KnowledgeNode, KnowledgeEdge]]:
         results: list[tuple[KnowledgeNode, KnowledgeEdge]] = []

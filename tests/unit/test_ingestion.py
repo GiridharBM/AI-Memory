@@ -105,7 +105,19 @@ def test_github_readme_ingestor_downloads_markdown(monkeypatch: pytest.MonkeyPat
 
 
 def test_youtube_ingestor_handles_missing_transcript() -> None:
-    result = DocumentIngestionService().ingest("https://www.youtube.com/watch?v=abc123")
+    class NoTranscriptFound(RuntimeError):
+        pass
+
+    class FakeClient:
+        def fetch(self, video_id: str, languages: list[str]) -> object:
+            raise NoTranscriptFound("missing")
+
+    ingestor = YouTubeTranscriptIngestor()
+    ingestor._client = cast(Any, FakeClient())
+
+    result = DocumentIngestionService(ingestors=[ingestor]).ingest(
+        "https://www.youtube.com/watch?v=abc123"
+    )
 
     assert not result.succeeded
     assert result.error is not None

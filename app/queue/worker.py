@@ -26,12 +26,12 @@ from app.core.extensions import (
     AUDIO_EXTENSIONS,
     CODE_EXTENSIONS,
     IMAGE_EXTENSIONS,
+    PROCESSABLE_EXTENSIONS,
     VIDEO_EXTENSIONS,
 )
 from app.core.logging import get_logger
-from app.infrastructure.llm import OllamaClient, OllamaClientError
+from app.infrastructure.llm import OllamaClientError
 from app.infrastructure.state.manifest import ManifestManager
-from app.infrastructure.vault import VaultWriter
 from app.pipelines import IngestionWorkflow, IngestionWorkflowError, IngestionWorkflowResult
 from app.queue.manager import QueueManager
 from app.queue.models import QueueItem, QueueStatus
@@ -40,10 +40,7 @@ from app.queue.stats import RuntimeStats
 
 logger = get_logger(__name__)
 
-SUPPORTED_PROCESSING_EXTENSIONS = (
-    {".md", ".txt", ".pdf", ".csv", ".xlsx"}
-    | CODE_EXTENSIONS | IMAGE_EXTENSIONS | AUDIO_EXTENSIONS | VIDEO_EXTENSIONS
-)
+SUPPORTED_PROCESSING_EXTENSIONS = PROCESSABLE_EXTENSIONS
 
 
 class ProcessingWorkflow(Protocol):
@@ -87,7 +84,7 @@ class QueueWorker:
         self._stop_event = Event()
         self._thread: Thread | None = None
         self._current_item_name: str | None = None
-        self._workflow = workflow or self._build_workflow(settings)
+        self._workflow = workflow or IngestionWorkflow.create_default(settings)
 
     def start(self) -> None:
         """Start one background worker."""
@@ -181,7 +178,7 @@ class QueueWorker:
                     item.path,
                     expected_source_type=source_type if source_type != "pdf" else None,
                 )
-            except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError):
+            except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError, ValueError):
                 logger.exception("File processing failed.", extra={"path": str(item.path)})
                 self._fail_item(item)
                 return True
@@ -207,30 +204,6 @@ class QueueWorker:
         )
         logger.info("Completed.", extra={"path": str(item.path), "elapsed": round(elapsed, 1)})
         return True
-
-    def _build_workflow(self, settings: Settings) -> ProcessingWorkflow:
-        ollama_client = OllamaClient(settings.ollama)
-        vision_client = None
-        transcriber = None
-        try:
-            from app.infrastructure.llm.vision_client import OllamaVisionClient
-            vision_client = OllamaVisionClient(
-                settings.ollama, vision_model=settings.models.vision,
-            )
-        except Exception:
-            logger.debug("Vision client unavailable.")
-        try:
-            from app.infrastructure.llm.whisper_transcriber import WhisperTranscriber
-            transcriber = WhisperTranscriber()
-        except Exception:
-            logger.debug("Whisper transcriber unavailable.")
-        return IngestionWorkflow.from_runtime(
-            ollama_client=ollama_client,
-            writer=VaultWriter.from_settings(settings),
-            routing=settings.models,
-            vision_client=vision_client,
-            transcriber=transcriber,
-        )
 
     def _source_type_for_extension(self, extension: str) -> str | None:
         normalized = extension.lower()

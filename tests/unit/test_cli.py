@@ -84,7 +84,13 @@ def test_cli_ingest_markdown_uses_workflow(
 
     class FakeWorkflow:
         @classmethod
-        def from_runtime(cls, *, ollama_client: object, writer: object, **kwargs: object) -> FakeWorkflow:
+        def create_default(
+            cls,
+            settings: object,
+            *,
+            vision_client: object | None = None,
+            transcriber: object | None = None,
+        ) -> FakeWorkflow:
             return cls()
 
         def run(self, source_arg: str | Path, *, expected_source_type: str) -> SimpleNamespace:
@@ -93,12 +99,6 @@ def test_cli_ingest_markdown_uses_workflow(
             return _workflow_result(tmp_path)
 
     monkeypatch.setattr(entry, "IngestionWorkflow", FakeWorkflow)
-    monkeypatch.setattr(entry, "OllamaClient", lambda settings: object())
-    monkeypatch.setattr(
-        entry.VaultWriter,
-        "from_settings",
-        classmethod(lambda cls, settings: object()),
-    )
 
     result = runner.invoke(entry.cli, ["ingest", "markdown", str(source)])
 

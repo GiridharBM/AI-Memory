@@ -110,4 +110,7 @@ class QueueManager:
             return queue_path in self._queued_paths or queue_path in self._processing_paths
 
     def _queue_path(self, path: Path) -> Path:
-        return path.resolve()
+        try:
+            return path.resolve()
+        except OSError:
+            return path.absolute()

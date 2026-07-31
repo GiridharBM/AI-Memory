@@ -54,6 +54,8 @@ class ManifestManager:
             self._quarantine_corrupted_manifest()
             self._state = ManifestState()
             self.save()
+            self._loaded = True
+            return self._state
 
         self._loaded = True
         return self._state

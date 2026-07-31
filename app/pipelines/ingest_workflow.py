@@ -2,23 +2,27 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
 from app.application import AIProcessingResult, DocumentAIProcessor
-from app.core.config import ModelRoutingSettings
+from app.core.config import ModelRoutingSettings, Settings
 from app.core.logging import get_logger
 from app.domain.analysis import DocumentAnalysis
 from app.domain.documents import SourceDocument
 from app.domain.knowledge_graph import KnowledgeGraph
 from app.domain.notes import ObsidianNote
+from app.infrastructure.embeddings import EmbeddingService
 from app.infrastructure.ingestion import DocumentIngestionService
+from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
 from app.infrastructure.llm import OllamaClient
 from app.infrastructure.routing.classifier import DocumentClassifier
 from app.infrastructure.routing.processors import default_processors
 from app.infrastructure.routing.router import ProcessorRouter
+from app.infrastructure.semantic_chunking import SemanticChunker
 from app.infrastructure.vault import VaultWriter, WikiUpdateResult
+from app.infrastructure.vector_store import VectorStore
 from app.templates import ObsidianMarkdownGenerator
 
 logger = get_logger(__name__)
@@ -138,6 +142,51 @@ class IngestionWorkflow:
             vector_store=vector_store,
             knowledge_graph_builder=knowledge_graph_builder,
             graph_persistence_path=graph_persistence_path,
+        )
+
+    @classmethod
+    def create_default(
+        cls,
+        settings: Settings,
+        *,
+        vision_client: object | None = None,
+        transcriber: object | None = None,
+    ) -> IngestionWorkflow:
+        """Create the production workflow from application settings."""
+
+        ollama_client = OllamaClient(settings.ollama)
+        if vision_client is None:
+            try:
+                from app.infrastructure.llm.vision_client import OllamaVisionClient
+
+                vision_client = OllamaVisionClient(
+                    settings.ollama, vision_model=settings.models.vision,
+                )
+            except Exception:
+                logger.debug("Vision client unavailable.")
+        if transcriber is None:
+            try:
+                from app.infrastructure.llm.whisper_transcriber import WhisperTranscriber
+
+                transcriber = WhisperTranscriber()
+            except Exception:
+                logger.debug("Whisper transcriber unavailable.")
+        manifest_root = settings.paths.manifest_root
+        return cls.from_runtime(
+            ollama_client=ollama_client,
+            writer=VaultWriter.from_settings(settings),
+            routing=settings.models,
+            vision_client=vision_client,
+            transcriber=transcriber,
+            chunker=SemanticChunker(),
+            embedding_service=EmbeddingService(
+                settings.ollama, model=settings.models.embeddings,
+            ),
+            vector_store=VectorStore(
+                persistence_path=manifest_root / "vector_store.json",
+            ),
+            knowledge_graph_builder=KnowledgeGraphBuilder(),
+            graph_persistence_path=manifest_root / "knowledge_graph.json",
         )
 
     def run(
@@ -291,7 +340,7 @@ class IngestionWorkflow:
                 },
             )
             return enriched, result.confidence
-        except Exception as e:
+        except Exception:
             # For vision-required types (image, scanned_pdf, handwritten), don't silently
             # fall back to original document (which has no text) - that sends images to
             # text-only model causing "this model does not support image input" errors.
@@ -319,7 +368,6 @@ class IngestionWorkflow:
         if self._chunker is None or self._embedding_service is None or self._vector_store is None:
             return None, 0, 0
 
-        from app.domain.semantic_chunking import DocumentChunk
         from app.domain.vector_store import VectorEntry
         from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
 

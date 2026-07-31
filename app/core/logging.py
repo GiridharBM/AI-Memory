@@ -1,4 +1,17 @@
-"""Reusable application logging configuration."""
+"""Reusable application logging configuration.
+
+Logging convention
+------------------
+- Application modules obtain their logger via ``get_logger(__name__)`` and assign
+  it as ``logger = get_logger(__name__)``.
+- ``get_logger`` returns a standard :class:`logging.Logger`, so modules that must
+  not import this package (e.g. ``app.core.config``) may use
+  ``logging.getLogger(__name__)`` directly; do not mix the two styles within one
+  module.
+- Use ``logger.exception()`` inside an ``except`` block where a traceback aids
+  diagnosis. Use ``logger.warning()`` (no traceback) for expected, recoverable
+  conditions.
+"""
 
 from __future__ import annotations
 

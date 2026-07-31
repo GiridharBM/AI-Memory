@@ -14,7 +14,6 @@ from watchdog.observers import Observer
 from app.core.config import Settings
 from app.core.logging import get_logger
 from app.queue import QueueItem, QueueManager, QueueStateStore, QueueWorker, RuntimeStats
-from app.watcher.events import FileCreatedEvent
 from app.watcher.scanner import should_watch_file
 
 logger = get_logger(__name__)
@@ -86,6 +85,8 @@ class WatchService:
         logger.info("Watcher started")
         logger.info("Watching %s", self._display_path(self.inbox_root))
 
+        self._scan_inbox()
+
     def stop(self, *, drain: bool = False) -> None:
         """Stop the watchdog observer."""
 
@@ -118,8 +119,29 @@ class WatchService:
     def _display_path(self, path: Path) -> str:
         try:
             return str(path.relative_to(self.settings.paths.project_root))
-        except ValueError:
+        except (ValueError, OSError):
             return str(path)
+
+    def _scan_inbox(self) -> None:
+        supported_extensions = set(self.settings.watcher.supported_extensions)
+        paths = (
+            self.inbox_root.rglob("*")
+            if self.settings.watcher.recursive
+            else self.inbox_root.iterdir()
+        )
+        for candidate in paths:
+            if not candidate.is_file():
+                continue
+            if not should_watch_file(candidate, supported_extensions):
+                continue
+            item = QueueItem(
+                path=candidate,
+                extension=candidate.suffix.lower(),
+                created_at=datetime.now(UTC),
+            )
+            if self.queue_manager.enqueue(item):
+                logger.info("Queued from inbox scan: %s", candidate.name)
+        self.queue_state_store.save(self.queue_manager)
 
     def _ensure_runtime_directories(self) -> None:
         for path in [
@@ -162,26 +184,21 @@ class _InboxCreatedHandler(FileSystemEventHandler):
 
         path = Path(event.src_path)
         if not should_watch_file(path, self.supported_extensions):
+            logger.info("Skipping unsupported file: %s", path.name)
             return
 
-        created_event = FileCreatedEvent(
-            path=path,
-            timestamp=datetime.now(UTC),
-            extension=path.suffix.lower(),
-        )
-        logger.info("Markdown detected: %s", created_event.path.name)
-        self.stats.record_detection()
-
         queue_item = QueueItem(
-            path=created_event.path,
-            extension=created_event.extension,
-            created_at=created_event.timestamp,
+            path=path,
+            extension=path.suffix.lower(),
+            created_at=datetime.now(UTC),
         )
+        logger.info("Markdown detected: %s", path.name)
+        self.stats.record_detection()
         if self.queue_manager.enqueue(queue_item):
             queue_size = self.queue_manager.size()
-            logger.info("Added to queue: %s", created_event.path.name)
+            logger.info("Added to queue: %s", path.name)
             logger.info("Queue size: %s", queue_size)
             self.queue_state_store.save(self.queue_manager)
             return
 
-        logger.info("Already queued: %s", created_event.path.name)
+        logger.info("Already queued: %s", path.name)

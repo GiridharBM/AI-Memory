@@ -61,11 +61,35 @@ class SemanticChunker:
                     ))
                     chunk_index += 1
 
+        chunks = self._apply_overlap(chunks)
+
         logger.debug(
             "Document chunked.",
             extra={"source": source, "chunks": len(chunks), "text_length": len(text)},
         )
         return chunks
+
+    def _apply_overlap(self, chunks: list[DocumentChunk]) -> list[DocumentChunk]:
+        """Prepend the previous chunk's tail to each chunk after the first."""
+        if self.overlap_chars <= 0 or len(chunks) < 2:
+            return chunks
+
+        overlapped: list[DocumentChunk] = []
+        for index, chunk in enumerate(chunks):
+            text = chunk.text
+            if index > 0:
+                text = overlapped[index - 1].text[-self.overlap_chars:] + text
+            overlapped.append(DocumentChunk(
+                chunk_id=chunk.chunk_id,
+                text=text,
+                source=chunk.source,
+                source_type=chunk.source_type,
+                chunk_index=chunk.chunk_index,
+                start_char=chunk.start_char,
+                end_char=chunk.end_char,
+                metadata=chunk.metadata,
+            ))
+        return overlapped
 
     def _split_by_headings(self, text: str) -> list[tuple[int, str]]:
         positions = [m.start() for m in _HEADING_PATTERN.finditer(text)]

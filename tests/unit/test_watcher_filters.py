@@ -4,7 +4,27 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from app.core.extensions import (
+    AUDIO_EXTENSIONS,
+    CODE_EXTENSIONS,
+    IMAGE_EXTENSIONS,
+    PROCESSABLE_EXTENSIONS,
+    VIDEO_EXTENSIONS,
+)
+from app.queue.worker import SUPPORTED_PROCESSING_EXTENSIONS
+from app.watcher.filters import SUPPORTED_EXTENSIONS
 from app.watcher.scanner import should_watch_file
+
+
+def test_shared_extension_consistency() -> None:
+    assert SUPPORTED_EXTENSIONS is PROCESSABLE_EXTENSIONS
+    assert SUPPORTED_PROCESSING_EXTENSIONS is PROCESSABLE_EXTENSIONS
+    assert {".md", ".txt", ".pdf", ".csv", ".xlsx"} <= PROCESSABLE_EXTENSIONS
+    assert CODE_EXTENSIONS <= PROCESSABLE_EXTENSIONS
+    assert IMAGE_EXTENSIONS <= PROCESSABLE_EXTENSIONS
+    assert AUDIO_EXTENSIONS <= PROCESSABLE_EXTENSIONS
+    assert VIDEO_EXTENSIONS <= PROCESSABLE_EXTENSIONS
+    assert ".docx" not in PROCESSABLE_EXTENSIONS
 
 
 def test_markdown_detected(tmp_path: Path) -> None:
