@@ -77,17 +77,17 @@
 2. **Tesseract binary absent** on this machine → OCR-scanned path not exercised locally; code path present and config-gated.
 3. **Dead harness**: `p6_101_verify.py` P3-101-style verify script still present but its target behavior changed; superseded by E2E scripts. Non-blocking.
 4. **Ruff 59 / mypy stub**: pre-existing, untouched lines. Non-blocking.
-5. **Stale historical docs** (`02_Current_Project_Status_Report.md`, `04_Evaluation_Benchmark_Report.md`): dated snapshots, intentionally not current claims (see sync report §3).
+5. **Stale historical docs** (`docs/archive/02_Current_Project_Status_Report.md`, `docs/archive/04_Evaluation_Benchmark_Report.md`): dated snapshots, intentionally not current claims (see `docs/archive/PHASE_6_DOCUMENTATION_SYNCHRONIZATION_REPORT.md` §3).
 
 ## 7. Final Changed-File Summary (this pass)
 
 | File | Change |
 |------|--------|
 | `docs/PHASE_6_FINAL_APPROVAL.md` | Created (this document) |
-| `docs/PHASE_6_DOCUMENTATION_SYNCHRONIZATION_REPORT.md` | Created |
-| `docs/PHASE_6_P6-101..105_ENGINEERING_REVIEW.md` | Created (per-task evidence) |
-| `docs/release_notes/v0.12.0-milestone-6.0.md` | Created |
-| `docs/changelog.md` | `[0.12.0]` entry added |
+| `docs/archive/PHASE_6_DOCUMENTATION_SYNCHRONIZATION_REPORT.md` | Created |
+| `docs/archive/PHASE_6_P6-101..105_ENGINEERING_REVIEW.md` | Created (per-task evidence; one file per task) |
+| `docs/archive/release_notes/v0.12.0-milestone-6.0.md` | Created |
+| `docs/archive/changelog.md` | `[0.12.0]` entry added |
 | `docs/MASTER_ENGINEERING_DESIGN_DOCUMENT.md` | Version 0.12.0; version history; test/coverage figures; §5 Phase 6 annotation |
 | `README.md` | Test badge, suite counts, hybrid-search description, classifier kinds, config sample, Vision/Roadmap |
 | `docs/01_Current_Implementation_Report.md` | Python version, matrix rows, graph persistence, structure narrative |

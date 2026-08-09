@@ -2960,7 +2960,7 @@ class ChunkingEvaluator:
 - [ ] **Live-service tests excluded from CI:** YouTube, Ollama tests marked `@pytest.mark.integration`
 - [ ] **Retrieval evaluation dataset committed:** 20+ labeled query-doc pairs
 - [ ] **LLM analysis evaluation dataset committed:** 10+ documents with known analysis values
-- [ ] **Performance benchmarks documented:** In `docs/04_Evaluation_Benchmark_Report.md`
+- [ ] **Performance benchmarks documented:** In `docs/archive/04_Evaluation_Benchmark_Report.md`
 - [ ] **E2E smoke test passes in CI:** FakeProcessor-based, no external dependencies
 - [ ] **All 20+ processors structurally validated:** Existing pattern maintained
 

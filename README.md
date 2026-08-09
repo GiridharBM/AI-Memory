@@ -8,7 +8,7 @@
 ![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge)
 ![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-v2.0.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-v0.12.0-blue?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/Tests-1398%20Passing-success?style=for-the-badge)
 
 [Overview](#-overview) •
@@ -41,6 +41,14 @@ Unlike traditional note-taking apps, AI Memory doesn't just store information �
 
 ---
 
+## 💡 The Problem
+
+Building a personal knowledge base by hand is slow and fragile. Notes end up scattered across files with no connections, no searchability, and no structure — so the effort spent capturing them rarely pays off later.
+
+**AI Memory fixes this by doing the capture and organization for you.** Drop a document, code file, audio recording, or image into the inbox and it is analyzed, summarized, linked to related content, and written into a connected Obsidian vault — automatically, on your own machine, with no cloud APIs.
+
+---
+
 ## ✨ Features
 
 ### 🤖 AI Powered
@@ -50,7 +58,7 @@ Unlike traditional note-taking apps, AI Memory doesn't just store information �
 - Modular, swappable prompt system
 
 ### 📄 Document Ingestion
-Supports 100+ file types across 15 categories:
+The classifier recognizes **90+ file extensions** across the kinds below:
 - **Documents:** PDF, DOCX, ODT, RTF, EPUB, TeX
 - **Code:** Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP, Swift, Kotlin, and 20+ more
 - **Notebooks:** Jupyter (.ipynb)
@@ -123,16 +131,16 @@ Automatically extracts 21 fields:
 
 ---
 
-## 🚀 Current Status
+## 🚀 Release Status
 
-**Version:** `v2.0.0`  **Status:** 🟢 Stable · Actively Developed
+**Version:** `v0.12.0`  **Status:** 🟢 Stable · Released · **PROJECT COMPLETE** (Phase 6 final approval)
 
-| Completed | Future |
+| Delivered | Future Vision |
 |---|---|
 | Local-first architecture | RAG-based context retrieval |
 | Ollama integration | External vector DB (Chroma/Qdrant) |
 | PDF / Markdown / TXT ingestion | REST API for search |
-| 100+ file type support | Web UI |
+| 90+ file extension support | Web UI |
 | GitHub README ingestion | Multi-user support |
 | YouTube transcript ingestion | |
 | Markdown generation & vault management | |
@@ -147,11 +155,53 @@ Automatically extracts 21 fields:
 | 21-field document intelligence | |
 | Semantic chunking & embeddings | |
 | Vector store with similarity search | |
+| Hybrid search (RRF) with metadata filters | |
 | Knowledge graph with persistence | |
 | Cross-document linking | |
 | Placeholder note creation | |
-| Semantic & hybrid search | |
 | Comprehensive testing (1398 tests) | |
+
+---
+
+## ✅ Project Phases
+
+Completed and independently approved across six phases:
+
+| Phase | Deliverables | Status |
+|-------|--------------|--------|
+| **1 — Core capture** | Vault, templated notes, Markdown/PDF/TXT ingest, wiki links, duplicate protection | ✅ |
+| **2 — Deep extraction** (M2.1–M2.6) | OCR, images, tables, audio, video, code/notebook structure, email attachments, metadata + language detection | ✅ |
+| **3 — Semantic memory** (M3.1, M3.2) | Embeddings, vector store, hierarchical chunking (heading-aware) | ✅ |
+| **4 — Knowledge graph** | Entity extraction, co-occurrence relationship detection, per-document graph with JSON persistence and a query layer | ✅ |
+| **5 — Hybrid retrieval** (P5-101..105) | Dense cosine + BM25 fused by RRF (k=60), `SearchService` facade, `pam search` with top-k/source-type/min-score/metadata filters | ✅ |
+| **6 — Hardening & final validation** (P6-101..106) | Performance benchmark, failure isolation, security/config audit, E2E validation, final approval | ✅ **APPROVED** |
+
+---
+
+## 🧪 Final Verification
+
+Measured against the live repository at release (see `docs/PHASE_6_FINAL_APPROVAL.md`):
+
+| Gate | Result |
+|------|--------|
+| Unit + regression suite | **1398 passed** / 59 deselected / 0 failed |
+| Code coverage | **90.04%** (floor 80) |
+| Integration suite | 85 passed / 1 skipped / 1 environmental (live-Ollama) |
+| End-to-end validation | **25/25 PASS** |
+| Ingest performance | 20,000 × 384-dim vectors in ~271 ms |
+| Search performance | ~190 ms per query |
+| Lint / type / deps | ruff 0 new findings · mypy clean (scoped) · `pip check` clean |
+| Secrets scan | Working tree and git history clean |
+
+---
+
+## ⚠️ Known Limitations
+
+- **In-memory vector store & graph** — persisted to JSON on disk, not an external database. Large-scale deployments are future vision (Chroma/FAISS/Qdrant, Neo4j).
+- **Live-Ollama smoke test** — `tests/integration/smoke_test.py` requires a running `llama3.1:8b` and asserts all 21 note sections while the template intentionally emits only populated sections. It is skipped by default and is an environmental, not a code, issue.
+- **Tesseract OCR fallback** — optional CPU-only path; scanned documents are OCR'd by the local vision model when it is absent.
+- **Ollama required** — all AI inference (analysis, embeddings, OCR) runs locally through Ollama; it must be installed and running.
+- **Backlogged engineering items** — MEDD evaluation tooling (retrieval/chunking quality metrics, hallucination detection) is documented but not built.
 
 ---
 
@@ -289,6 +339,18 @@ PAM_OLLAMA__HOST=http://localhost:11434
 PAM_OLLAMA__MODEL=qwen3:8b
 ```
 
+### Models used
+
+Model selection is per-task (`models:` block in `config/default.yaml`):
+
+| Role | Default model |
+|---|---|
+| General text analysis | `qwen3:8b` |
+| Programming / code structure | `qwen2.5-coder:7b` |
+| Vision / OCR / handwriting | `qwen2.5vl:latest` |
+| Audio transcription | `faster-whisper` |
+| Embeddings | `nomic-embed-text` |
+
 ---
 
 ## 📚 Obsidian Setup
@@ -336,6 +398,7 @@ pam status            # Configuration, vault, watcher, queue, and Ollama status
 pam doctor            # Full health check
 pam config             # View current configuration
 pam config --json     # View configuration as JSON
+pam search "query"    # Search the knowledge base (hybrid semantic + keyword)
 pam watch              # Start automatic folder watching and processing
 ```
 
@@ -361,6 +424,20 @@ pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID
 
 `pam status` shows watcher, queue, manifest, Ollama, and vault health. `pam config` prints the resolved watcher, queue, manifest, and processing settings.
 
+### 🔍 Search
+
+`pam search` runs **hybrid retrieval** — reciprocal rank fusion (RRF, k=60) of semantic (dense) and BM25 (keyword) scores over embedded chunks:
+
+```bash
+pam search "transformers attention"          # top 5 results
+pam search "transformer" --top-k 10          # more results
+pam search "python" --source-type code       # restrict to a source type
+pam search "memory" --min-score 0.5          # require a minimum score
+pam search "graph" --filter '{"language":"en"}'   # exact-match metadata filters
+```
+
+An empty query exits with a usage error.
+
 ---
 
 ## 🔍 Watching Mode
@@ -371,7 +448,7 @@ Version 2 introduces fully automatic processing. Run:
 pam watch
 ```
 
-This starts a background watcher that continuously monitors `data/inbox` for supported files (Markdown, TXT, and PDF). No manual `pam ingest` command is required — the watcher, queue, and pipeline handle everything.
+This starts a background watcher that continuously monitors `data/inbox` for files matching `watcher.supported_extensions` (Markdown, TXT, PDF, CSV, XLSX, code, images, audio, video). No manual `pam ingest` command is required — the watcher, queue, and pipeline handle everything.
 
 ```text
 data/inbox -> watcher -> queue -> duplicate check -> ingestion -> vault -> manifest
@@ -576,38 +653,36 @@ Markdown Generation
 ```text
 AI-Memory/
 ├── app/
-│   ├── application/
-│   ├── cli/
-│   ├── core/
-│   ├── domain/
-│   ├── infrastructure/
-│   │   ├── ingestion/
-│   │   ├── llm/
-│   │   ├── logging/
-│   │   ├── state/
-│   │   ├── watcher/
-│   │   ├── queue/
-│   │   └── vault/
-│   ├── pipelines/
-│   ├── prompts/
-│   └── templates/
+│   ├── application/       # Application services
+│   ├── cli/               # Typer CLI (pam)
+│   ├── core/              # Config, extensions, settings
+│   ├── domain/            # Domain models
+│   ├── infrastructure/    # Embeddings, search, BM25, vector store,
+│   │                      # knowledge graph, semantic chunking,
+│   │                      # routing (classifier + processors), ingestion
+│   ├── pipelines/         # Ingest workflow
+│   ├── prompts/           # Ollama prompt templates
+│   ├── queue/             # Processing queue + recovery
+│   ├── templates/         # Note templates
+│   └── watcher/           # Background folder watching
 ├── config/
 │   ├── default.yaml
 │   ├── development.yaml
 │   └── production.yaml
 ├── data/
-│   ├── inbox/
-│   ├── processed/
-│   ├── failed/
+│   ├── inbox/             # Input files awaiting processing
+│   ├── processed/         # Successfully processed files
+│   ├── failed/            # Failed files, for review
 │   ├── cache/
-│   ├── manifests/
+│   ├── manifests/         # processed_files.json, queue_state.json
 │   └── logs/
-├── docs/
+├── docs/                  # Engineering + release documentation
 ├── scripts/
 ├── tests/
-│   ├── integration/
-│   └── unit/
-├── vault/
+│   ├── integration/       # 18 integration test files
+│   └── unit/              # 56 unit test files
+├── vault/                 # Generated Obsidian vault
+├── LICENSE
 ├── README.md
 ├── requirements.txt
 └── pyproject.toml
@@ -616,8 +691,9 @@ AI-Memory/
 | Directory | Purpose |
 |---|---|
 | `app/` | Main application source code |
-| `app/infrastructure/watcher/` | Background folder watching service |
-| `app/infrastructure/queue/` | Processing queue implementation |
+| `app/watcher/` | Background folder watching service |
+| `app/queue/` | Processing queue implementation |
+| `app/infrastructure/` | Routing, ingestion, search, vector store, knowledge graph |
 | `config/` | YAML configuration files |
 | `data/inbox/` | Input files awaiting processing |
 | `data/processed/` | Files successfully processed and archived |
@@ -698,7 +774,7 @@ watcher:
     - .pdf
     - .csv
     - .xlsx
-    # ... code, image, audio, video extensions (100+ total)
+    # ... code, image, audio, video extensions (90+ total)
 
 queue:
   enabled: true
@@ -785,17 +861,18 @@ Before processing, every file is hashed with **SHA-256**. If the hash already ex
 # Install development dependencies
 python -m pip install -e ".[dev]"
 
-# Run the full test suite
+# Run the full unit + regression suite (default; 1398 tests)
 python -m pytest
 
-# Run unit tests only
-python -m pytest tests/unit/
+# Run integration tests (live Ollama required; environment-dependent tests may fail)
+python -m pytest tests/integration -m "integration or not integration"
 
 # Run a specific test file
 python -m pytest tests/unit/test_knowledge_engine.py
 
-# Run tests with coverage
-python -m pytest --cov=app --cov-report=term-missing
+# Coverage gate (fail_under = 80 in pyproject.toml)
+coverage run -m pytest
+coverage report
 
 # Lint
 ruff check .
@@ -816,7 +893,7 @@ mypy app
 - Prefer typed models for cross-module communication
 - Keep Ollama access behind `app.infrastructure.llm`
 - Keep vault writes behind `app.infrastructure.vault`
-- Keep watcher and queue logic behind `app.infrastructure.watcher` and `app.infrastructure.queue`
+- Keep watcher and queue logic behind `app.watcher` and `app.queue`
 - Do not overwrite user-written Obsidian content
 - Add tests when changing shared behavior
 
@@ -826,7 +903,7 @@ mypy app
 
 ### Watcher isn't detecting new files
 - Confirm `pam watch` is running and `watcher.enabled` is `true` in your config
-- Check that the file extension is supported (`.md`, `.txt`, `.pdf`)
+- Check that the file extension is listed in `watcher.supported_extensions` in `config/default.yaml`
 - Verify `inbox_path` points to the correct directory (`pam config` shows the resolved path)
 - Check `data/logs/watcher.log` for startup or permission errors
 
@@ -860,25 +937,15 @@ Version 3 and 4 foundations are already in place: **semantic memory** (local emb
 
 ## 🗺️ Roadmap
 
-### ✅ Completed (v1 – v3.2)
-Local-first architecture · Ollama integration · PDF / Markdown / TXT ingestion · GitHub README ingestion · YouTube transcript ingestion · Markdown generation & vault management · CLI, logging, and config management · Automatic folder watching (`pam watch`) · Background watcher service · Processing queue with recovery · SHA-256 duplicate detection · Automatic processed / failed folders · Graceful shutdown · Rich CLI progress · Runtime statistics · 21-field document intelligence · Semantic chunking & embeddings · Vector store with similarity search · Knowledge graph with persistence · Cross-document linking · Placeholder note creation · Semantic & hybrid search · Entity/relationship extraction
+### ✅ Delivered — project complete
+All six phases are complete and approved (`v0.1.0` → `v0.12.0`), including semantic memory, hybrid search, and the knowledge graph. See `docs/DEVELOPMENT_ROADMAP.md` for the phase-by-phase record and `docs/PHASE_6_FINAL_APPROVAL.md` for the final approval.
 
-### 🔜 v3 — Semantic Memory (partially shipped)
-- ✅ Local embeddings & vector store — in-memory with JSON persistence
-- ✅ Semantic search — cosine similarity over embedded chunks
-- ✅ Hybrid search — RRF (dense + BM25)
-- ✅ `pam search` CLI — query, top-k, metadata filters, min-score
-- 🔜 External vector DB — ChromaDB / FAISS / Qdrant
-- 🔜 RAG & context retrieval over retrieved chunks
-
-### 🔮 v4 — Knowledge Graph (partially shipped)
-- ✅ In-memory entity/relationship graph with JSON persistence and graph queries
-- 🔜 Neo4j / NetworkX for large-scale graph storage
-
-### 🚀 v5 — Autonomous AI Agent
-- Personal Tutor
-- Research Assistant
-- Daily Knowledge Summaries
+### 🔮 Future vision (not implemented)
+- External vector DB — ChromaDB / FAISS / Qdrant
+- RAG & context retrieval over retrieved chunks
+- Neo4j / NetworkX for large-scale graph storage
+- REST API, web UI, multi-user support
+- Autonomous AI agent (Personal Tutor, Research Assistant, Daily Knowledge Summaries)
 
 ---
 
