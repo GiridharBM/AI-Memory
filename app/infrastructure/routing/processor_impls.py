@@ -117,148 +117,89 @@ def _audio_extract(transcriber: object, document: SourceDocument) -> str:
     return document.text
 
 
-# ── Text & Markup ────────────────────────────────────────────────────────────
+# ── Passthrough processors (data-driven) ──────────────────────────────────
 
 
-class TextProcessor:
-    """Process plain text and generic unknown files."""
+class PassthroughProcessor:
+    """Stateless passthrough processor, parametrized by a spec row.
 
-    name = "TextProcessor"
-    supported_kinds = {"text", "unknown", "tex", "epub"}
+    The 15 text/code/data passthrough processors are behaviorally identical —
+    they differ only in ``name``, ``supported_kinds``, the ``source_type``
+    they stamp (fixed, or the document's own for Text/Table), and
+    ``confidence``. One implementation plus one spec table replaces 15 copies.
+    """
 
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing text file: %s", document.filename)
-        return _passthrough(document, source_type=document.source_type, confidence=0.95)
-
-
-class MarkdownProcessor:
-    """Process Markdown files."""
-
-    name = "MarkdownProcessor"
-    supported_kinds = {"markdown"}
+    name: str = "PassthroughProcessor"
+    supported_kinds: frozenset[str] = frozenset()
+    _source_type: str | None = None
+    _confidence: float = 0.90
 
     def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing markdown file: %s", document.filename)
-        return _passthrough(document, source_type="markdown", confidence=0.95)
+        logger.debug("Processing file: %s", document.filename)
+        return _passthrough(
+            document,
+            source_type=self._source_type or document.source_type,
+            confidence=self._confidence,
+        )
 
 
-class WebProcessor:
-    """Process web content files (HTML, XML, JSON, RSS)."""
-
-    name = "WebProcessor"
-    supported_kinds = {"web", "html", "json", "xml"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing web file: %s", document.filename)
-        return _passthrough(document, source_type="web", confidence=0.90)
-
-
-# ── Code & Config ────────────────────────────────────────────────────────────
-
-
-class CodeProcessor:
-    """Process source code files."""
-
-    name = "CodeProcessor"
-    supported_kinds = {"code"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing code file: %s", document.filename)
-        return _passthrough(document, source_type="code", confidence=0.92)
+def _passthrough_cls(
+    name: str,
+    supported_kinds: frozenset[str],
+    source_type: str | None,
+    confidence: float,
+) -> type[PassthroughProcessor]:
+    """Build a named passthrough class so historical names stay importable."""
+    return type(
+        name,
+        (PassthroughProcessor,),
+        {
+            "name": name,
+            "supported_kinds": supported_kinds,
+            "_source_type": source_type,
+            "_confidence": confidence,
+        },
+    )
 
 
-class ConfigProcessor:
-    """Process configuration files (.env, .toml, .ini, .cfg, .conf)."""
+_PASSTHROUGH_SPECS: tuple[tuple[str, frozenset[str], str | None, float], ...] = (
+    ("TextProcessor", frozenset({"text", "unknown", "tex", "epub"}), None, 0.95),
+    ("MarkdownProcessor", frozenset({"markdown"}), "markdown", 0.95),
+    ("WebProcessor", frozenset({"web", "html", "json", "xml"}), "web", 0.90),
+    ("CodeProcessor", frozenset({"code"}), "code", 0.92),
+    ("ConfigProcessor", frozenset({"config"}), "config", 0.93),
+    ("PDFProcessor", frozenset({"pdf"}), "pdf", 0.90),
+    ("DocxProcessor", frozenset({"docx"}), "docx", 0.90),
+    ("PptxProcessor", frozenset({"pptx"}), "pptx", 0.88),
+    ("ResearchProcessor", frozenset({"research"}), "research", 0.88),
+    ("TableProcessor", frozenset({"csv", "spreadsheet"}), None, 0.88),
+    ("DatabaseProcessor", frozenset({"database"}), "database", 0.85),
+    ("NotebookProcessor", frozenset({"notebook"}), "notebook", 0.90),
+    ("VideoProcessor", frozenset({"video"}), "video", 0.70),
+    ("ArchiveProcessor", frozenset({"archive"}), "archive", 0.80),
+    ("EmailProcessor", frozenset({"email"}), "email", 0.88),
+)
 
-    name = "ConfigProcessor"
-    supported_kinds = {"config"}
+_PASSTHROUGH_CLASSES: dict[str, type[PassthroughProcessor]] = {
+    name: _passthrough_cls(name, kinds, source_type, confidence)
+    for name, kinds, source_type, confidence in _PASSTHROUGH_SPECS
+}
 
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing config file: %s", document.filename)
-        return _passthrough(document, source_type="config", confidence=0.93)
-
-
-# ── Documents ────────────────────────────────────────────────────────────────
-
-
-class PDFProcessor:
-    """Process typed PDF files."""
-
-    name = "PDFProcessor"
-    supported_kinds = {"pdf"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing PDF file: %s", document.filename)
-        return _passthrough(document, source_type="pdf", confidence=0.90)
-
-
-class DocxProcessor:
-    """Process DOCX/ODT/RTF document files."""
-
-    name = "DocxProcessor"
-    supported_kinds = {"docx"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing document file: %s", document.filename)
-        return _passthrough(document, source_type="docx", confidence=0.90)
-
-
-class PptxProcessor:
-    """Process PPTX/PPT/ODP presentation files."""
-
-    name = "PptxProcessor"
-    supported_kinds = {"pptx"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing presentation file: %s", document.filename)
-        return _passthrough(document, source_type="pptx", confidence=0.88)
-
-
-class ResearchProcessor:
-    """Process research citation files (.bib, .ris)."""
-
-    name = "ResearchProcessor"
-    supported_kinds = {"research"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing research file: %s", document.filename)
-        return _passthrough(document, source_type="research", confidence=0.88)
-
-
-# ── Data ─────────────────────────────────────────────────────────────────────
-
-
-class TableProcessor:
-    """Process CSV/TSV and spreadsheet files."""
-
-    name = "TableProcessor"
-    supported_kinds = {"csv", "spreadsheet"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing table file: %s", document.filename)
-        return _passthrough(document, source_type=document.source_type, confidence=0.88)
-
-
-class DatabaseProcessor:
-    """Process database files (.sqlite, .db)."""
-
-    name = "DatabaseProcessor"
-    supported_kinds = {"database"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing database file: %s", document.filename)
-        return _passthrough(document, source_type="database", confidence=0.85)
-
-
-class NotebookProcessor:
-    """Process Jupyter notebook files."""
-
-    name = "NotebookProcessor"
-    supported_kinds = {"notebook"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing notebook file: %s", document.filename)
-        return _passthrough(document, source_type="notebook", confidence=0.90)
+TextProcessor = _PASSTHROUGH_CLASSES["TextProcessor"]
+MarkdownProcessor = _PASSTHROUGH_CLASSES["MarkdownProcessor"]
+WebProcessor = _PASSTHROUGH_CLASSES["WebProcessor"]
+CodeProcessor = _PASSTHROUGH_CLASSES["CodeProcessor"]
+ConfigProcessor = _PASSTHROUGH_CLASSES["ConfigProcessor"]
+PDFProcessor = _PASSTHROUGH_CLASSES["PDFProcessor"]
+DocxProcessor = _PASSTHROUGH_CLASSES["DocxProcessor"]
+PptxProcessor = _PASSTHROUGH_CLASSES["PptxProcessor"]
+ResearchProcessor = _PASSTHROUGH_CLASSES["ResearchProcessor"]
+TableProcessor = _PASSTHROUGH_CLASSES["TableProcessor"]
+DatabaseProcessor = _PASSTHROUGH_CLASSES["DatabaseProcessor"]
+NotebookProcessor = _PASSTHROUGH_CLASSES["NotebookProcessor"]
+VideoProcessor = _PASSTHROUGH_CLASSES["VideoProcessor"]
+ArchiveProcessor = _PASSTHROUGH_CLASSES["ArchiveProcessor"]
+EmailProcessor = _PASSTHROUGH_CLASSES["EmailProcessor"]
 
 
 # ── Media ────────────────────────────────────────────────────────────────────
@@ -338,17 +279,6 @@ class AudioProcessor:
             confidence=0.85 if self._transcriber else 0.60,
             source_type="audio",
         )
-
-
-class VideoProcessor:
-    """Process video files."""
-
-    name = "VideoProcessor"
-    supported_kinds = {"video"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing video file: %s", document.filename)
-        return _passthrough(document, source_type="video", confidence=0.70)
 
 
 # ── Specialized ──────────────────────────────────────────────────────────────
@@ -454,28 +384,6 @@ class HandwritingProcessor:
         )
 
 
-class ArchiveProcessor:
-    """Process archive files (.zip, .tar, .gz, .7z, .rar)."""
-
-    name = "ArchiveProcessor"
-    supported_kinds = {"archive"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing archive file: %s", document.filename)
-        return _passthrough(document, source_type="archive", confidence=0.80)
-
-
-class EmailProcessor:
-    """Process email files (.eml, .msg)."""
-
-    name = "EmailProcessor"
-    supported_kinds = {"email"}
-
-    def process(self, document: SourceDocument) -> ProcessedDocument:
-        logger.debug("Processing email file: %s", document.filename)
-        return _passthrough(document, source_type="email", confidence=0.88)
-
-
 def _diagram_enabled() -> bool:
     """Whether the drawio→Mermaid conversion is enabled (Milestone 2.5, R-4)."""
     from app.core.config import load_settings
@@ -567,9 +475,10 @@ _ALL_PROCESSORS: list[type] = [
     DiagramProcessor,
 ]
 
+_REGISTRY: dict[str, type] = {cls.__name__: cls for cls in _ALL_PROCESSORS}
+
 
 def get_processor_by_name(name: str) -> object | None:
     """Return the processor instance for a given name, or None."""
-    _registry = {cls.__name__: cls for cls in _ALL_PROCESSORS}
-    cls = _registry.get(name)
+    cls = _REGISTRY.get(name)
     return cls() if cls is not None else None

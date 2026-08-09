@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 
 import pytest
@@ -28,7 +27,6 @@ from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
 from app.infrastructure.search import HybridSearch, SearchService, SemanticSearch
 from app.infrastructure.semantic_chunking import ChunkingPolicy, SemanticChunker
 from app.infrastructure.vector_store import VectorStore, _cosine_similarity
-from app.infrastructure.versioning import VersionManager
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -1826,50 +1824,6 @@ class TestSearchService:
         svc = SearchService(store, embed=lambda q: [1.0, 0.0])
         assert svc.search("python", filter={"odd": "nope"}) == []
         assert [h.entry_id for h in svc.search("python", filter={"heading": "Intro"})] == ["e1"]
-
-
-# ---------------------------------------------------------------------------
-# Version History
-# ---------------------------------------------------------------------------
-
-class TestVersionHistory:
-    def test_record_version(self, tmp_path: Path) -> None:
-        vm = VersionManager(tmp_path)
-        entry = vm.record_version("Note.md", "# Content v1", source="test.md")
-        assert entry.version == 1
-        assert vm.has_versions("Note.md") is True
-
-    def test_record_version_populates_sha256(self, tmp_path: Path) -> None:
-        vm = VersionManager(tmp_path)
-
-        content = "# Content v1"
-        entry = vm.record_version("Note.md", content)
-        assert entry.sha256 == hashlib.sha256(content.encode("utf-8")).hexdigest()
-        assert vm.get_versions("Note.md")[0].sha256 == entry.sha256
-
-    def test_multiple_versions(self, tmp_path: Path) -> None:
-        vm = VersionManager(tmp_path)
-        vm.record_version("Note.md", "v1")
-        vm.record_version("Note.md", "v2")
-        vm.record_version("Note.md", "v3")
-        versions = vm.get_versions("Note.md")
-        assert len(versions) == 3
-        assert versions[2].version == 3
-
-    def test_get_version_content(self, tmp_path: Path) -> None:
-        vm = VersionManager(tmp_path)
-        vm.record_version("Note.md", "# Hello")
-        content = vm.get_version_content("Note.md", 1)
-        assert content == "# Hello"
-
-    def test_get_nonexistent_version(self, tmp_path: Path) -> None:
-        vm = VersionManager(tmp_path)
-        assert vm.get_version_content("Note.md", 99) is None
-
-    def test_no_versions(self, tmp_path: Path) -> None:
-        vm = VersionManager(tmp_path)
-        assert vm.has_versions("Unknown.md") is False
-        assert vm.get_versions("Unknown.md") == []
 
 
 # ---------------------------------------------------------------------------

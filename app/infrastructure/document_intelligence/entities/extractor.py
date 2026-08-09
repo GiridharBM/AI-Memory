@@ -207,13 +207,3 @@ class EntityExtractor:
 def get_default_entity_extractor() -> EntityExtractor:
     """Return an EntityExtractor (P4-102 composition root)."""
     return EntityExtractor()  # stateless; fresh instance is reentrant-safe (O-2)
-
-
-def analyze_document_entities(
-    text: str,
-    source: str,
-    source_type: str = "",
-    structure: DocumentStructure | None = None,
-) -> list[Entity]:
-    """Extract entities from source text (P4-102 public API)."""
-    return get_default_entity_extractor().extract(text, source, source_type, structure)

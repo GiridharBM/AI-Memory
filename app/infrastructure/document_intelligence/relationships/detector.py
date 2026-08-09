@@ -36,7 +36,6 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Sequence
 
-from app.domain.document_intelligence import DocumentStructure
 from app.domain.entity_relationship import Entity, Relationship, SourceReference
 
 _RELATIONSHIP_TYPE = "related_to"
@@ -97,20 +96,3 @@ class RelationshipDetector:
 def get_default_relationship_detector() -> RelationshipDetector:
     """Return a RelationshipDetector (P4-103 composition root)."""
     return RelationshipDetector()  # stateless; fresh instance is reentrant-safe
-
-
-def analyze_document_relationships(
-    text: str,
-    source: str,
-    source_type: str = "",
-    structure: DocumentStructure | None = None,
-) -> list[Relationship]:
-    """Extract entities from source text and detect relationships (P4-103 public API).
-
-    Composition root: runs the P4-102 entity extractor (flat or
-    structure-aware) and feeds the resulting entities into the detector.
-    """
-    from app.infrastructure.document_intelligence.entities import analyze_document_entities
-
-    entities = analyze_document_entities(text, source, source_type, structure)
-    return RelationshipDetector().detect(entities)

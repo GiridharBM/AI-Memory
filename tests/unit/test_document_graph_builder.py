@@ -12,8 +12,6 @@ from app.domain.entity_relationship import Entity, Relationship, SourceReference
 from app.domain.knowledge_graph import KnowledgeGraph
 from app.infrastructure.document_intelligence.graph import (
     DocumentGraphBuilder,
-    build_document_graph,
-    find_relationships,
     get_default_document_graph_builder,
     graph_to_dict,
 )
@@ -204,34 +202,6 @@ def test_same_input_identical_across_instances() -> None:
     assert first == second
 
 
-# ── 9. relationship lookup ─────────────────────────────────────────────────
-
-
-def test_find_relationships_filters() -> None:
-    a = _entity("organization::acme_corporation")
-    b = _entity("person::jane_smith")
-    c = _entity("technology::python_3.12")
-    graph = _build([a, b, c], [_relationship(a.id, b.id), _relationship(b.id, c.id)])
-
-    assert len(find_relationships(graph)) == 2
-    assert [e.target_id for e in find_relationships(graph, source_id=b.id)] == [c.id]
-    assert [e.source_id for e in find_relationships(graph, target_id=b.id)] == [a.id]
-    assert find_relationships(graph, source_id=a.id, target_id=b.id)[0].edge_type == "related_to"
-    assert find_relationships(graph, source_id=c.id, target_id=a.id) == []
-
-
-def test_find_relationships_edge_type_filter() -> None:
-    a = _entity("organization::acme_corporation")
-    b = _entity("person::jane_smith")
-    graph = _build(
-        [a, b],
-        [_relationship(a.id, b.id, "related_to"), _relationship(a.id, b.id, "depends_on")],
-    )
-    assert [e.edge_type for e in find_relationships(graph, edge_type="depends_on")] == [
-        "depends_on"
-    ]
-
-
 # ── 10. serialization round-trip ───────────────────────────────────────────
 
 
@@ -253,6 +223,6 @@ def test_graph_to_dict_round_trips_through_load(tmp_path) -> None:
 def test_module_helpers() -> None:
     assert isinstance(get_default_document_graph_builder(), DocumentGraphBuilder)
     a, b = _entity("organization::acme_corporation"), _entity("person::jane_smith")
-    graph = build_document_graph([a, b], [_relationship(a.id, b.id)], "a.md")
+    graph = DocumentGraphBuilder().build([a, b], [_relationship(a.id, b.id)], "a.md")
     assert len(graph.nodes) == 2
     assert len(graph.edges) == 1

@@ -320,8 +320,3 @@ class StructureAnalyzer:
 def get_default_structure_analyzer() -> StructureAnalyzer:
     """Return a StructureAnalyzer (frozen §4.3 composition root)."""
     return StructureAnalyzer()  # stateless; fresh instance is reentrant-safe (O-2)
-
-
-def analyze_document_structure(text: str, source: str) -> DocumentStructure:
-    """Analyze source text into a DocumentStructure (frozen §4.1 public API)."""
-    return get_default_structure_analyzer().analyze(text, source)

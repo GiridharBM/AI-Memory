@@ -18,7 +18,6 @@ from app.domain.document_intelligence import (
 from app.domain.entity_relationship import Entity
 from app.infrastructure.document_intelligence.entities import (
     EntityExtractor,
-    analyze_document_entities,
     get_default_entity_extractor,
 )
 
@@ -306,5 +305,5 @@ def test_structure_duplicate_mention_merges_sources() -> None:
 
 def test_module_helpers() -> None:
     assert isinstance(get_default_entity_extractor(), EntityExtractor)
-    entities = analyze_document_entities("Acme Corporation", "src.md", "text")
+    entities = EntityExtractor().extract("Acme Corporation", "src.md", "text")
     assert [e.id for e in entities] == ["organization::acme_corporation"]

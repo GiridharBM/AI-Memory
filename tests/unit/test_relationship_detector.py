@@ -9,9 +9,9 @@ surface.
 from __future__ import annotations
 
 from app.domain.entity_relationship import Entity, Relationship, SourceReference
+from app.infrastructure.document_intelligence.entities import EntityExtractor
 from app.infrastructure.document_intelligence.relationships import (
     RelationshipDetector,
-    analyze_document_relationships,
     get_default_relationship_detector,
 )
 
@@ -294,9 +294,10 @@ def test_deterministic_across_runs_and_instances() -> None:
 
 def test_module_helpers() -> None:
     assert isinstance(get_default_relationship_detector(), RelationshipDetector)
-    rels = analyze_document_relationships(
+    entities = EntityExtractor().extract(
         "Dr. Jane Smith at Acme Corporation.", "a.md", "markdown"
     )
+    rels = RelationshipDetector().detect(entities)
     assert [r.id for r in rels] == [
         "organization::acme_corporation::related_to::person::jane_smith"
     ]

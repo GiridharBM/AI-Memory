@@ -104,13 +104,7 @@ class IngestionWorkflow:
         ollama_client: OllamaClient | None = None,
         routing: ModelRoutingSettings | None = None,
         settings: Settings | None = None,
-        vision_client: object | None = None,
-        transcriber: object | None = None,
         ocr_service: DocumentOcrService | None = None,
-        structure_analyzer: object | None = None,
-        entity_extractor: object | None = None,
-        relationship_detector: object | None = None,
-        document_graph_builder: object | None = None,
         note_generator: NoteGenerator,
         writer: NoteWriter,
         chunker: object | None = None,
@@ -122,13 +116,13 @@ class IngestionWorkflow:
         self._ingestion_service = ingestion_service
         self._note_generator = note_generator
         self._writer = writer
-        self._vision_client = vision_client
-        self._transcriber = transcriber
+        self._vision_client: object | None = None
+        self._transcriber: object | None = None
         self._ocr_service = ocr_service
-        self._structure_analyzer = structure_analyzer
-        self._entity_extractor = entity_extractor
-        self._relationship_detector = relationship_detector
-        self._document_graph_builder = document_graph_builder
+        self._structure_analyzer: object | None = None
+        self._entity_extractor: object | None = None
+        self._relationship_detector: object | None = None
+        self._document_graph_builder: object | None = None
         self._routing = routing or ModelRoutingSettings()
         self._settings = settings
         self._classifier = DocumentClassifier(
@@ -195,50 +189,6 @@ class IngestionWorkflow:
         return self._settings.intelligence.code
 
     @classmethod
-    def from_runtime(
-        cls,
-        *,
-        ollama_client: OllamaClient,
-        writer: VaultWriter,
-        routing: ModelRoutingSettings | None = None,
-        settings: Settings | None = None,
-        vision_client: object | None = None,
-        transcriber: object | None = None,
-        ocr_service: DocumentOcrService | None = None,
-        structure_analyzer: object | None = None,
-        entity_extractor: object | None = None,
-        relationship_detector: object | None = None,
-        document_graph_builder: object | None = None,
-        chunker: object | None = None,
-        embedding_service: object | None = None,
-        vector_store: object | None = None,
-        knowledge_graph_builder: object | None = None,
-        graph_persistence_path: Path | None = None,
-    ) -> IngestionWorkflow:
-        """Create the production workflow from runtime integrations."""
-
-        return cls(
-            ingestion_service=DocumentIngestionService(settings=settings),
-            ollama_client=ollama_client,
-            routing=routing,
-            settings=settings,
-            vision_client=vision_client,
-            transcriber=transcriber,
-            ocr_service=ocr_service,
-            structure_analyzer=structure_analyzer,
-            entity_extractor=entity_extractor,
-            relationship_detector=relationship_detector,
-            document_graph_builder=document_graph_builder,
-            note_generator=ObsidianMarkdownGenerator(),
-            writer=writer,
-            chunker=chunker,
-            embedding_service=embedding_service,
-            vector_store=vector_store,
-            knowledge_graph_builder=knowledge_graph_builder,
-            graph_persistence_path=graph_persistence_path,
-        )
-
-    @classmethod
     def create_default(
         cls,
         settings: Settings,
@@ -272,18 +222,14 @@ class IngestionWorkflow:
         ocr_service = (
             None if not settings.intelligence.ocr.enabled else get_default_ocr_service(settings)
         )
-        return cls.from_runtime(
+        workflow = cls(
+            ingestion_service=DocumentIngestionService(settings=settings),
             ollama_client=ollama_client,
-            writer=VaultWriter.from_settings(settings),
             routing=settings.models,
             settings=settings,
-            vision_client=vision_client,
-            transcriber=transcriber,
             ocr_service=ocr_service,
-            structure_analyzer=get_default_structure_analyzer(),
-            entity_extractor=get_default_entity_extractor(),
-            relationship_detector=get_default_relationship_detector(),
-            document_graph_builder=get_default_document_graph_builder(),
+            note_generator=ObsidianMarkdownGenerator(),
+            writer=VaultWriter.from_settings(settings),
             chunker=SemanticChunker(
                 sentence_tokenizer=settings.chunking.sentence_tokenizer,
                 policy=ChunkingPolicy(
@@ -304,6 +250,13 @@ class IngestionWorkflow:
             knowledge_graph_builder=KnowledgeGraphBuilder(),
             graph_persistence_path=manifest_root / "knowledge_graph.json",
         )
+        workflow._vision_client = vision_client
+        workflow._transcriber = transcriber
+        workflow._structure_analyzer = get_default_structure_analyzer()
+        workflow._entity_extractor = get_default_entity_extractor()
+        workflow._relationship_detector = get_default_relationship_detector()
+        workflow._document_graph_builder = get_default_document_graph_builder()
+        return workflow
 
     def run(
         self,

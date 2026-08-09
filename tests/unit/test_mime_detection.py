@@ -224,14 +224,16 @@ class TestWorkflowMimeEnabledConfig:
         result = workflow._classifier.classify(_document_at(path))
         assert result.mime_type is None
 
-    def test_from_runtime_plumbs_settings(self, tmp_settings) -> None:
+    def test_settings_plumb_into_classifier(self, tmp_settings) -> None:
         from unittest.mock import MagicMock
 
         from app.pipelines.ingest_workflow import IngestionWorkflow
 
         tmp_settings.intelligence.metadata.mime_enabled = False
-        workflow = IngestionWorkflow.from_runtime(
+        workflow = IngestionWorkflow(
+            ingestion_service=MagicMock(),
             ollama_client=MagicMock(),
+            note_generator=MagicMock(),
             writer=MagicMock(),
             settings=tmp_settings,
         )

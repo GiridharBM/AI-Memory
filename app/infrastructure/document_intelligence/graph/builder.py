@@ -33,7 +33,6 @@ from collections.abc import Sequence
 from app.core.logging import get_logger
 from app.domain.entity_relationship import Entity, Relationship
 from app.domain.knowledge_graph import (
-    EdgeType,
     KnowledgeEdge,
     KnowledgeGraph,
     KnowledgeNode,
@@ -105,42 +104,9 @@ def _node_metadata(entity: Entity) -> dict[str, str]:
     return metadata
 
 
-def find_relationships(
-    graph: KnowledgeGraph,
-    *,
-    source_id: str | None = None,
-    target_id: str | None = None,
-    edge_type: EdgeType | None = None,
-) -> list[KnowledgeEdge]:
-    """Return edges matching the given filters, in deterministic order (P4-104).
-
-    Relationship lookup over the built graph. ``None`` filters are wildcards:
-    ``find_relationships(graph)`` returns every edge; ``source_id`` selects
-    edges leaving that node; ``target_id`` selects edges entering it; combined
-    filters are applied conjunctively.
-    """
-    matches = [
-        edge
-        for edge in graph.edges
-        if (source_id is None or edge.source_id == source_id)
-        and (target_id is None or edge.target_id == target_id)
-        and (edge_type is None or edge.edge_type == edge_type)
-    ]
-    return sorted(matches, key=lambda e: (e.source_id, e.target_id, e.edge_type))
-
-
 def get_default_document_graph_builder() -> DocumentGraphBuilder:
     """Return a DocumentGraphBuilder (P4-104 composition root)."""
     return DocumentGraphBuilder()  # stateless; fresh instance is reentrant-safe
-
-
-def build_document_graph(
-    entities: Sequence[Entity],
-    relationships: Sequence[Relationship],
-    source: str,
-) -> KnowledgeGraph:
-    """Build a document-level ``KnowledgeGraph`` (P4-104 public API)."""
-    return DocumentGraphBuilder().build(entities, relationships, source)
 
 
 def graph_to_dict(graph: KnowledgeGraph) -> dict[str, object]:

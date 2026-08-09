@@ -27,7 +27,6 @@ from app.infrastructure.document_intelligence.structure.detector import (
     _detect_blocks,
     _detect_headings,
     _normalize_heading_level,
-    analyze_document_structure,
     get_default_structure_analyzer,
     max_structure_text_bytes,
 )
@@ -698,7 +697,7 @@ class TestCleanTextBoundary:
 
 
 def _analyze(text: str) -> DocumentStructure:
-    return analyze_document_structure(text, "test-source")
+    return StructureAnalyzer().analyze(text, "test-source")
 
 
 class TestAnalyzerEntry:
@@ -707,12 +706,11 @@ class TestAnalyzerEntry:
         assert isinstance(tree, DocumentStructure)
         assert [s.id for s in tree.sections] == ["s-1"]
 
-    def test_function_delegates_to_factory(self) -> None:
-        tree = analyze_document_structure("# A\n", "src")
+    def test_default_factory_delegates_to_analyzer(self) -> None:
+        tree = get_default_structure_analyzer().analyze("# A\n", "src")
         assert [s.id for s in tree.sections] == ["s-1"]
 
     def test_composition_root_reexports(self) -> None:
-        assert document_intelligence_root.analyze_document_structure is analyze_document_structure
         assert (
             document_intelligence_root.get_default_structure_analyzer
             is get_default_structure_analyzer
@@ -723,8 +721,8 @@ class TestAnalyzerEntry:
 
     def test_source_accepted_unused(self) -> None:
         text = "# A\nbody\n"
-        assert analyze_document_structure(text, "a.pdf").model_dump() == (
-            analyze_document_structure(text, "b.docx").model_dump()
+        assert StructureAnalyzer().analyze(text, "a.pdf").model_dump() == (
+            StructureAnalyzer().analyze(text, "b.docx").model_dump()
         )
 
 
