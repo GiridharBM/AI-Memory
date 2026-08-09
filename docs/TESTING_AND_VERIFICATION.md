@@ -6,8 +6,9 @@ Verification evidence for LLM-Wiki / Personal AI Memory (PAM). The authoritative
 
 | Suite | Result |
 |-------|--------|
-| **Unit tests** | **1398 passed / 59 deselected / 0 failed** |
-| **Coverage** | **90.04%** (7269 statements, 724 missed) — floor is 80% |
+| **Unit tests** | **1359 passed / 57 deselected / 0 failed** |
+| **Test files** | 55 unit + 17 integration |
+| **Coverage** | 90.04% (7269 statements, 724 missed) — floor is 80% *(measured at the Phase 6 gate; not re-measured after cleanup commit `2433f70`)* |
 | **Integration tests** | **85 passed / 1 skipped / 1 env-fail** (the env-fail is the live-Ollama smoke test, which requires a running Ollama server) |
 | **End-to-end (E2E)** | **25 / 25 PASS** |
 | **Perf — ingest** | 20,000 tokens × 384 dims embed + store ≈ **271 ms** |
@@ -66,6 +67,8 @@ pip check
 | v0.9.0 | 1125 tests (coverage recorded in milestone notes) |
 | v0.10.0 | 1273 tests |
 | v0.11.0 | 1384 tests, 90.00% |
-| v0.12.0 | **1398 tests, 90.04% — final** |
+| v0.12.0 | **1398 tests, 90.04% — final (Phase 6 gate)** |
+
+The current suite after cleanup commit `2433f70` is **1359 passed / 57 deselected** (55 unit + 17 integration files); the Phase 6 gate figure above is the historical approval record.
 
 Per-milestone test/count changes are recorded in the original milestone reports (`docs/archive/`).

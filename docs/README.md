@@ -48,6 +48,6 @@ requirements.txt / pyproject.toml
 
 - **Version:** 0.12.0 (pre-1.0, maturity ≈ 80%)
 - **Runtime:** Python 3.11+ (tested on 3.14), Ollama, local-first
-- **Final suite:** 1398 tests passing, 90.04% coverage
+- **Final suite:** 1359 tests passing (coverage 90.04% was measured at the Phase 6 gate — not re-measured after cleanup)
 - **Search:** hybrid (dense cosine + BM25) fused with RRF (k=60), via `pam search`
 - **Completion evidence:** `PHASE_6_FINAL_APPROVAL.md`

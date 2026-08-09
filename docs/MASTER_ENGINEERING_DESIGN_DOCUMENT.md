@@ -88,7 +88,6 @@ Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian k
 │  9. KnowledgeGraphBuilder ─────→ entities, concepts, edges          │
 │ 10. ObsidianMarkdownGenerator ─→ full markdown note                 │
 │ 11. VaultWriter ───────────────→ write to vault/                    │
-│ 12. VersionManager ────────────→ versioned backup                   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -166,7 +165,7 @@ Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian k
 
 5. **Knowledge graph performance.** `KnowledgeGraph.neighbors()` is O(E) linear scan. `subgraph()` uses `list.pop(0)` (O(n) per pop). Neither scales beyond small graphs.
 
-6. **Duplicate processor/construction knowledge.** `IngestionWorkflow` → `_run_routed_processor()` recreates processors on every `run()` call. The CLI's `_run_ingest()` duplicates the same `from_runtime()` construction logic found in `QueueWorker._build_workflow()`.
+6. **Duplicate processor/construction knowledge.** `IngestionWorkflow` → `_run_routed_processor()` recreates processors on every `run()` call. The CLI's `_run_ingest()` duplicates the same `from_runtime()` construction logic found in `QueueWorker._build_workflow()`. *(Superseded by `2433f70` — construction consolidated onto `create_default()`.)*
 
 7. **Cross-document linking is hobbled.** `_find_cross_document_links` only inspects the first 3 chunks of any document — an arbitrary hardcoded limit that severely limits cross-document graph connectivity.
 
@@ -1082,7 +1081,9 @@ flowchart TB
 Maintain per-note version history by saving snapshots of note content at each write.
 
 ### Current Implementation
-`VersionManager` saves versioned copies of notes to subdirectories. Each version has a sequential number, timestamp, and content file. History tracked as JSON metadata.
+> **Superseded as of `2433f70 — refactor: remove verified over-engineering`.** The `VersionManager` subsystem was removed; no versioning is performed at write time.
+
+Historical implementation: `VersionManager` saved versioned copies of notes to subdirectories. Each version had a sequential number, timestamp, and content file. History was tracked as JSON metadata.
 
 ### Key Design Decisions
 - **Fix:** Populate the `sha256` field in `NoteVersion` (currently always empty string)
@@ -1104,7 +1105,7 @@ Typer-based CLI with subcommands. Rich formatting for tables, panels, and progre
 - **Add:** `pam search` command (see Search subsystem)
 - **Add:** `pam eval` command for running evaluations
 - **Fix:** `status` command shows real `RuntimeStats` (currently shows hardcoded zeros)
-- **Fix:** Eliminate duplicate `_build_workflow` / `from_runtime` construction logic
+- **Fix:** Eliminate duplicate `_build_workflow` / `from_runtime` construction logic *(resolved by `2433f70` — single `create_default()` path)*
 
 ---
 
@@ -1204,6 +1205,7 @@ pie title Gap Priority Distribution
 - **Difficulty:** Low (1-2 days)
 
 ### TD-03: NoteVersion.sha256 Never Populated
+> **Superseded by `2433f70` — `versioning.py` was removed**; the versioning subsystem no longer exists, making this debt moot.
 - **Problem:** `NoteVersion.sha256` field exists at `versioning.py:14` but `record_version()` at `versioning.py:51` never computes it
 - **Cause:** Feature partially implemented — field added but usage code was not completed
 - **Impact:** Version integrity cannot be verified. Cannot detect if archived version was tampered with
@@ -1266,6 +1268,7 @@ pie title Gap Priority Distribution
 - **Difficulty:** Low
 
 ### TD-11: CLI _run_ingest Duplicates Worker _build_workflow
+> **Superseded by `2433f70` — construction consolidated onto `create_default()`**; no `from_runtime` duplication remains.
 - **Files:** `cli/entry.py:331-357` and `queue/worker.py:211-233`
 - **Problem:** Same `IngestionWorkflow.from_runtime()` construction with same optional client setup duplicated
 - **Impact:** Adding a new optional dependency requires updating both locations
@@ -2061,7 +2064,7 @@ Pure-stdlib `StructureAnalyzer` in `app/infrastructure/document_intelligence/str
 - **`_build_tree(sections)` + `analyze(text, source)`** — sections contain their blocks; stable path-style section IDs (`s-1`, `s-1-1`, …) and block IDs (`b-<section_id>-<n>`); degenerate/empty input → empty structure, never raises; `MAX_SECTIONS = 10_000` (warn + truncate) and `max_structure_text_bytes = 5_000_000` (skip + single warning) caps.
 - **Enrichment (P2-305)** — `IngestionWorkflow._run_routed_processor` calls `_enrich_structure` after processor success; when `structure.enabled` is true and `source_type in TEXT_BEARING_KINDS` (`{"markdown", "text"}`), the serialized structure is stored as `enriched.metadata.extra["structure"] = structure.model_dump(mode="json")` (the same channel `parent_id` uses). A raised analyzer is logged and skipped — ingestion continues (L4).
 - **Domain models** — `DocumentStructure` / `DocumentSection` / `DocumentBlock` (+ `BlockType` literal) in `app/domain/document_intelligence.py`, with offset validators (`end_char >= start_char`; blocks require `len(text) == end_char - start_char`).
-- **Composition root** — `app/infrastructure/document_intelligence/__init__.py` exposes `analyze_document_structure` + `get_default_structure_analyzer`.
+- **Composition root** — `app/infrastructure/document_intelligence/__init__.py` exposes `get_default_document_graph_builder`, `get_default_entity_extractor`, `get_default_relationship_detector`, `get_default_structure_analyzer`, and `graph_to_dict`.
 
 ### Data Flow
 ```
@@ -2090,11 +2093,6 @@ class StructureAnalyzer:
 
 def get_default_structure_analyzer() -> StructureAnalyzer:
     """Return a StructureAnalyzer (stateless; reentrant-safe)."""
-    ...
-
-
-def analyze_document_structure(text: str, source: str) -> DocumentStructure:
-    """Analyze source text into a DocumentStructure (public API)."""
     ...
 ```
 
@@ -2547,8 +2545,8 @@ Phase 4 adds a deterministic, offline, **document-level** graph pipeline on top 
 - **Domain models** — `app/domain/entity_relationship.py` (P4-101): `Entity`, `Relationship`, `EntityMetadata`, `RelationshipMetadata`, `SourceReference`; validated Pydantic models reusing the `EntityType`/`ImportanceLevel`/`EdgeType` vocabulary and `DocumentChunk` provenance conventions; deterministic JSON (`to_dict`/`to_json`/`from_dict`/`from_json`), `extra="forbid"`, JSON-safe metadata, offset-pairing and self-loop rejection.
 - **Entity extraction** — `app/infrastructure/document_intelligence/entities/extractor.py` (P4-102): deterministic regex `EntityExtractor` (technology + person patterns), structure-block-aware with global offset stitching, code blocks excluded, "first rule wins" overlap resolution, `Entity.make_id` normalization.
 - **Relationship detection** — `app/infrastructure/document_intelligence/relationships/detector.py` (P4-103): deterministic `RelationshipDetector` emitting `related_to` from co-occurrence within a shared section/document; canonical lexicographic direction, evidence-merge dedup, deterministic ordering.
-- **Graph construction** — `app/infrastructure/document_intelligence/graph/builder.py` (P4-104): `DocumentGraphBuilder` maps entities/relationships onto the in-memory `KnowledgeGraph`; deterministic ordering, dedup, missing-endpoint edges skipped with a warning; `find_relationships` conjunctive filter; `graph_to_dict` mirrors `KnowledgeGraph.save`.
-- **Graph queries** — `app/infrastructure/document_intelligence/graph/query.py` (P4-105): `get_entity`, `related_entities` (undirected BFS, visited set, `max_depth`/`limit`), `nodes_by_source`, `query_graph` (roadmap §5.2 shape), `graph_from_dict` (loads the `metadata.extra["knowledge_graph"]` artifact without a disk round-trip). All queries deterministic, cycle-safe, `None`/`[]` on unknown ids and empty graphs.
+- **Graph construction** — `app/infrastructure/document_intelligence/graph/builder.py` (P4-104): `DocumentGraphBuilder` maps entities/relationships onto the in-memory `KnowledgeGraph`; deterministic ordering, dedup, missing-endpoint edges skipped with a warning; `graph_to_dict` mirrors `KnowledgeGraph.save`.
+- **Graph queries** — as of `2433f70 — refactor: remove verified over-engineering`, the query layer (`app/infrastructure/document_intelligence/graph/query.py`: `get_entity`, `related_entities`, `nodes_by_source`, `query_graph`, `graph_from_dict`) was removed. Traversal is via the domain methods `KnowledgeGraph.neighbors()` / `subgraph()`.
 - **Wiring** — `IngestionWorkflow` enrichment stages `_enrich_entities`/`_enrich_relationships`/`_enrich_graph` (`ingest_workflow.py:576-598`), each failure-contained (no key + ingestion continues) and gated by `intelligence.{entities,relationships,graph}.enabled` (R-4 rollback: disabled toggle → key absent → M2.2-identical documents).
 
 ## 7.8 LLM Module
@@ -2624,7 +2622,7 @@ VectorEntr(y)ies
 class IngestionWorkflow:
     def __init__(self, ..., 17 optional params)
     @classmethod
-    def from_runtime(cls, ollama_client, vault_writer, ...) -> IngestionWorkflow
+    def create_default(cls, settings, *, vision_client=None, transcriber=None) -> IngestionWorkflow
     def run(self, source: str | Path, *,
             expected_source_type: str | None = None) -> IngestionWorkflowResult
 
@@ -2653,7 +2651,6 @@ class IngestionWorkflowResult:
 10. Knowledge Graph save + cross-document linking
 11. ObsidianMarkdownGenerator.generate(document, analysis)
 12. VaultWriter.save(note)
-13. VersionManager.record_version(note)
 ```
 
 ## 7.11 Configuration Module
@@ -3082,7 +3079,6 @@ graph TB
         INFRA --> VSTORE[vector_store.py]
         INFRA --> KGBUILD[knowledge_graph.py]
         INFRA --> SCHUNK[semantic_chunking.py]
-        INFRA --> VER[versioning.py]
         INFRA --> INGEST[ingestion/]
         INFRA --> LLM[llm/]
         INFRA --> ROUTING[routing/]

@@ -75,7 +75,7 @@ User saves document
 ### Storage & search (P5)
 - **Vector store:** in-memory `dict[str, VectorEntry]` with JSON persistence, precomputed norms, O(n) cosine scan, deterministic `(-score, entry.id)` ordering, exact-match metadata filtering, mutation version counter.
 - **Search:** `SearchService` facade + `HybridSearch` — dense cosine + Okapi-BM25 (`k1=1.5`, `b=0.75`, pure stdlib) fused by reciprocal rank fusion (**RRF, k=60**). BM25 cache is version-keyed on the store; embedder/BM25 failures degrade gracefully. CLI: `pam search`.
-- **Knowledge graph:** in-memory adjacency list (`KnowledgeNode`/`KnowledgeEdge`) with JSON persistence wired through the pipeline; query layer (`get_entity`, `related_entities`, `nodes_by_source`, `query_graph`).
+- **Knowledge graph:** in-memory adjacency list (`KnowledgeNode`/`KnowledgeEdge`) with JSON persistence wired through the pipeline; traversal via `KnowledgeGraph.neighbors()` / `subgraph()`.
 
 ### Note generation & vault
 `ObsidianMarkdownGenerator` emits 21-field Obsidian notes with YAML frontmatter and `[[wiki links]]`. User content outside `<!-- PAM:BEGIN/END MANAGED -->` markers is preserved on regeneration. Vault writer + wiki manager maintain `index.md`, `overview.md`, `log.md`; duplicate-safe filenames; placeholder notes for unresolved links.

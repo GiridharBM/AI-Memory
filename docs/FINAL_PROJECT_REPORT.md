@@ -33,7 +33,7 @@ Layers: `CLI → Pipelines → Domain + Infrastructure` (domain is pure Pydantic
 - **Document intelligence** — 21 fields: summaries, key concepts, definitions, entities, related topics, tags, Q&A, flashcards, MCQs, short/long-answer questions, revision notes, metadata, suggested links.
 - **Deep extraction** — OCR (vision + optional Tesseract), metadata/MIME/language detection, heading structure, tables, images/EXIF/diagrams, code/notebook structure, email attachments.
 - **Semantic chunking** with heading hierarchy and parent/child seams.
-- **Knowledge graph** with entities/relationships and query layer.
+- **Knowledge graph** with entities/relationships and JSON persistence.
 - **Hybrid search** (`pam search`) with filters.
 - **Continuous mode** (`pam watch`) with queue recovery and dedup; Rich CLI progress.
 - **Rollback-by-flag** architecture — every `intelligence.*.enabled` toggle reproduces baseline-identical documents (no legacy branches).
@@ -48,7 +48,7 @@ Layers: `CLI → Pipelines → Domain + Infrastructure` (domain is pure Pydantic
 
 ## 6. Testing & verification (final, v0.12.0)
 
-- **1398 unit tests passing / 59 deselected / 0 failed**; coverage **90.04%** (floor 80).
+- **1359 unit tests passing / 57 deselected / 0 failed**; coverage **89.80%** (floor 80).
 - Integration **85 passed / 1 skipped / 1 env-fail** (live-Ollama smoke).
 - E2E **25/25 PASS**; perf: ingest 20k×384 ≈ 271 ms, search ≈ 190 ms.
 - Ruff 0 new, mypy in-scope clean, `pip check` clean.
@@ -60,7 +60,7 @@ Layers: `CLI → Pipelines → Domain + Infrastructure` (domain is pure Pydantic
 |--------|-------|
 | Version | v0.12.0 (maturity ≈ 80%) |
 | Phase count | 6 (10 milestones + phase work) |
-| Test suites | 56 unit + 18 integration files |
+| Test suites | 55 unit + 17 integration files |
 | Classifier kinds | 24 (90+ file extensions) |
 | Processors | 20 |
 | Intelligence fields | 21 |

@@ -9,7 +9,7 @@
 ![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-v0.12.0-blue?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-1398%20Passing-success?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-1359%20Passing-success?style=for-the-badge)
 
 [Overview](#-overview) •
 [Features](#-features) •
@@ -159,7 +159,7 @@ Automatically extracts 21 fields:
 | Knowledge graph with persistence | |
 | Cross-document linking | |
 | Placeholder note creation | |
-| Comprehensive testing (1398 tests) | |
+| Comprehensive testing (1359 tests) | |
 
 ---
 
@@ -172,7 +172,7 @@ Completed and independently approved across six phases:
 | **1 — Core capture** | Vault, templated notes, Markdown/PDF/TXT ingest, wiki links, duplicate protection | ✅ |
 | **2 — Deep extraction** (M2.1–M2.6) | OCR, images, tables, audio, video, code/notebook structure, email attachments, metadata + language detection | ✅ |
 | **3 — Semantic memory** (M3.1, M3.2) | Embeddings, vector store, hierarchical chunking (heading-aware) | ✅ |
-| **4 — Knowledge graph** | Entity extraction, co-occurrence relationship detection, per-document graph with JSON persistence and a query layer | ✅ |
+| **4 — Knowledge graph** | Entity extraction, co-occurrence relationship detection, per-document graph with JSON persistence | ✅ |
 | **5 — Hybrid retrieval** (P5-101..105) | Dense cosine + BM25 fused by RRF (k=60), `SearchService` facade, `pam search` with top-k/source-type/min-score/metadata filters | ✅ |
 | **6 — Hardening & final validation** (P6-101..106) | Performance benchmark, failure isolation, security/config audit, E2E validation, final approval | ✅ **APPROVED** |
 
@@ -184,8 +184,8 @@ Measured against the live repository at release (see `docs/PHASE_6_FINAL_APPROVA
 
 | Gate | Result |
 |------|--------|
-| Unit + regression suite | **1398 passed** / 59 deselected / 0 failed |
-| Code coverage | **90.04%** (floor 80) |
+| Unit + regression suite | **1359 passed** / 57 deselected / 0 failed |
+| Code coverage | **89.80%** (floor 80) |
 | Integration suite | 85 passed / 1 skipped / 1 environmental (live-Ollama) |
 | End-to-end validation | **25/25 PASS** |
 | Ingest performance | 20,000 × 384-dim vectors in ~271 ms |
@@ -291,7 +291,7 @@ pam doctor
 
 Expected output:
 ```text
-1398 passed
+1359 passed
 
 ✔ Configuration loaded
 ✔ Ollama available
@@ -679,8 +679,8 @@ AI-Memory/
 ├── docs/                  # Engineering + release documentation
 ├── scripts/
 ├── tests/
-│   ├── integration/       # 18 integration test files
-│   └── unit/              # 56 unit test files
+│   ├── integration/       # 17 integration test files
+│   └── unit/              # 55 unit test files
 ├── vault/                 # Generated Obsidian vault
 ├── LICENSE
 ├── README.md
@@ -861,7 +861,7 @@ Before processing, every file is hashed with **SHA-256**. If the hash already ex
 # Install development dependencies
 python -m pip install -e ".[dev]"
 
-# Run the full unit + regression suite (default; 1398 tests)
+# Run the full unit + regression suite (default; 1359 tests)
 python -m pytest
 
 # Run integration tests (live Ollama required; environment-dependent tests may fail)
@@ -883,7 +883,7 @@ mypy app
 
 ### Test Suite
 
-- **1398 passing tests** (59 deselected — integration/live tests requiring Ollama, Tesseract, or network)
+- **1359 passing tests** (57 deselected — integration/live tests requiring Ollama, Tesseract, or network)
 - Tests cover: ingestion, classification, routing, processing, AI analysis, markdown generation, knowledge engine, vector store, knowledge graph, semantic chunking, hybrid search, watcher, queue, CLI, configuration, security, and more
 - External model behavior is mocked for deterministic tests
 - Run `python -m pytest` to execute the full suite
@@ -931,7 +931,7 @@ mypy app
 
 AI Memory has evolved from a manual document processor into an automated, local-first AI Memory System — one where knowledge capture happens continuously in the background instead of through one-off commands.
 
-Version 3 and 4 foundations are already in place: **semantic memory** (local embeddings, semantic + hybrid search over the in-memory vector store), and a **knowledge graph** (entity/relationship extraction with JSON persistence and graph queries). Future versions build on this with external vector databases, **retrieval-augmented generation (RAG)**, and an agent layer — all while staying local-first and offline by design.
+Version 3 and 4 foundations are already in place: **semantic memory** (local embeddings, semantic + hybrid search over the in-memory vector store), and a **knowledge graph** (entity/relationship extraction with JSON persistence). Future versions build on this with external vector databases, **retrieval-augmented generation (RAG)**, and an agent layer — all while staying local-first and offline by design.
 
 ---
 

@@ -228,7 +228,7 @@ source → IngestService (size guard → pre-hooks → ingestor
 
 **How it works:** Maintains a list of 21 `BaseIngestor` instances plus a `DocumentMetadataService` seeded with `DEFAULT_EXTRACTORS`. On `ingest()`, normalizes the source (URL or Path) and dispatches to `_ingest_source()`, which runs, in order: the file-size guard (`_enforce_size_limit`), the pre-hook chain (`_run_pre_hooks`), ingestor selection (`_select_ingestor`), the ingestor itself, metadata enrichment (`_enrich_document`), and the post-hook chain (`_run_post_hooks`). Returns a `DocumentIngestionResult` with either a `SourceDocument` or a `DocumentIngestionError`.
 
-The service accepts `settings: Settings | None` at construction; when supplied, `intelligence.metadata.*` settings (`enabled`, `max_file_size_mb`, `email_attachments`, `max_attachments`, `hooks.pre`, `hooks.post`) are honored. Production wiring passes runtime settings through `IngestionWorkflow.from_runtime()`/`create_default()`.
+The service accepts `settings: Settings | None` at construction; when supplied, `intelligence.metadata.*` settings (`enabled`, `max_file_size_mb`, `email_attachments`, `max_attachments`, `hooks.pre`, `hooks.post`) are honored. Production wiring passes runtime settings through `IngestionWorkflow.create_default()`.
 
 ### Registered Ingestors
 
@@ -429,9 +429,9 @@ _enforce_size_limit (max_file_size_mb, reject before read)
 **Status:** Implemented (Milestone 2.3)
 
 **Files involved:**
-- `app/infrastructure/document_intelligence/structure/detector.py` — `StructureAnalyzer` (`analyze`), `_detect_headings`, `_detect_blocks`, `_build_tree`, `analyze_document_structure`, `get_default_structure_analyzer`
+- `app/infrastructure/document_intelligence/structure/detector.py` — `StructureAnalyzer` (`analyze`), `_detect_headings`, `_detect_blocks`, `_build_tree`, `get_default_structure_analyzer`
 - `app/domain/document_intelligence.py` — `DocumentStructure`, `DocumentSection`, `DocumentBlock`, `BlockType` (additive, alongside `MetadataExtraction`)
-- `app/infrastructure/document_intelligence/__init__.py` — composition root exposing `analyze_document_structure` + `get_default_structure_analyzer`
+- `app/infrastructure/document_intelligence/__init__.py` — composition root exposing `get_default_document_graph_builder`, `get_default_entity_extractor`, `get_default_relationship_detector`, `get_default_structure_analyzer`, and `graph_to_dict`
 - `app/pipelines/ingest_workflow.py` — enrichment call site (`_run_routed_processor` → `_enrich_structure`)
 - `app/core/config.py` + `config/default.yaml` — `StructureSettings` (`intelligence.structure.*`)
 
@@ -463,7 +463,7 @@ Blocks are emitted in document order and attributed to the section whose body ra
 
 `_run_routed_processor` (in `ingest_workflow.py`) calls `_enrich_structure(text, source, source_type)` after the routed processor succeeds and before chunking. The result is stored on the enriched `SourceDocument`: `enriched.metadata.extra["structure"] = structure.model_dump(mode="json")` — the same `metadata.extra` channel `parent_id` already rides on (`ProcessedDocument` is **not** modified; R-1 deviation). The key is written only when all of these hold:
 
-- `intelligence.structure.enabled: true` (plumbed through `Settings → from_runtime → _run_routed_processor`),
+- `intelligence.structure.enabled: true` (plumbed through `Settings → create_default → _run_routed_processor`),
 - `source_type in TEXT_BEARING_KINDS` (`{"markdown", "text"}`),
 - text ≤ 5 MB (oversize → logged skip),
 - the analyzer returns (a raised analyzer is logged and skipped — ingestion continues; L4).
@@ -1092,7 +1092,7 @@ Error handling exists at multiple levels but is not consistently applied:
 | Queue | Single worker only | No parallel processing |
 | Watcher | Polling at 1s interval | No real-time file detection |
 | Search | `SearchService` facade + `HybridSearch` (RRF dense+BM25) with `pam search` CLI (P5-104); reads persisted `manifest_root/vector_store.json` | No REST API binding |
-| Knowledge graph | In-memory `KnowledgeGraph` with JSON persistence wired into the pipeline (`graph_persistence_path` → `knowledge_graph.json`, P4-105); query layer (`query_graph`, `related_entities`, `nodes_by_source`) | No external graph DB (Neo4j/NetworkX) |
+| Knowledge graph | In-memory `KnowledgeGraph` with JSON persistence wired into the pipeline (`graph_persistence_path` → `knowledge_graph.json`, P4-105); traversal via domain methods `KnowledgeGraph.neighbors()` / `subgraph()` | No external graph DB (Neo4j/NetworkX) |
 | LLM provider | Ollama only | No cloud fallback |
 | No persistence | Vector store save() is called by pipeline but on every document | No incremental checkpointing |
 | Image preprocessing | Implemented (deskew/denoise/CLAHE) but disabled by default (`preprocess: false`) | Requires enabling in config; Pillow/numpy optional |

@@ -24,7 +24,7 @@ All extraction results ride `DocumentMetadata.extra` as flat JSON-serializable k
 
 ## 2. OCR contract (M2.1)
 
-- Protocol: `OcrEngine` (`app/infrastructure/document_intelligence/ocr/engine.py`) — implementers return `[OcrPageResult(text, confidence, page_number)]` via `process_document(document)`.
+- Protocol: `OcrEngine` (`app/infrastructure/document_intelligence/ocr/base.py`) — implementers return `[OcrPageResult(text, confidence, page_number)]` via `process_document(document)`.
 - `engine` config: `"vision"` (Ollama vision model, default), `"tesseract"`, `"auto"` (vision → Tesseract fallback).
 - PDF rendering honors `zoom`, `page_limit`; hard cap `max_pages=200`. Shared preprocessing (deskew → denoise → CLAHE) is opt-in per pipeline and **off by default**.
 - A no-OCR document falls back to original text; empty-OCR documents are routed by the classifier (e.g. `scanned_pdf`).
@@ -38,7 +38,7 @@ All extraction results ride `DocumentMetadata.extra` as flat JSON-serializable k
 - **Guarantees**: list items never split mid-item; fenced code blocks are atomic; tables/blockquotes/callouts are preserved byte-for-byte; heading content flows into the chunk text so flat stores still group correctly.
 - **Adaptive policy**: heading size step, min-chunk coalescing (too-small children merge into the parent when under `min_chunk_size`), snap overlap (`overlap_chars` snapped to nearest word boundary), heading hard boundaries.
 - **Sentence tokenization** (M3.1): `SentenceTokenizer` protocol, `auto` mode → NLTK `punkt_tab` if importable, else stdlib heuristic; resolved once per chunker instance.
-- **Embedding**: `OllamaEmbeddingClient` on nomic-embed-text; each chunk gets a `VectorEntry {id, document_id, content, embedding, metadata}`; vectors persisted as JSON (`data/vector_store.json`). Batched (default 16) with 1s delay; embed-failure = chunking skipped, chunker remains healthy.
+- **Embedding**: `OllamaEmbeddingClient` on nomic-embed-text; each chunk gets a `VectorEntry {id, document_id, content, embedding, metadata}`; vectors persisted as JSON (`data/manifests/vector_store.json`). Batched (default 16) with 1s delay; embed-failure = chunking skipped, chunker remains healthy.
 
 ## 4. Search contract (P5)
 
@@ -51,9 +51,9 @@ All extraction results ride `DocumentMetadata.extra` as flat JSON-serializable k
 
 ## 5. Knowledge graph contract (P4)
 
-- Persistence: in-memory adjacency list (`KnowledgeNode` / `KnowledgeEdge`) with JSON persistence (`data/knowledge_graph.json`).
+- Persistence: in-memory adjacency list (`KnowledgeNode` / `KnowledgeEdge`) with JSON persistence (`data/manifests/knowledge_graph.json`).
 - Built via `DocumentGraphBuilder` from entity + relationship extraction results.
-- Query layer: `get_entity`, `related_entities`, `nodes_by_source`, `query_graph`.
+- Traversal: `KnowledgeGraph.neighbors()` / `subgraph()` (domain methods).
 
 ## 6. Note generation & vault contract
 
