@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, ValidationError, field_validator
@@ -206,6 +206,243 @@ class ModelRoutingSettings(BaseModel):
         return getattr(self, key, self.general_text)
 
 
+class PromptSettings(BaseModel):
+    """Prompt templates for vision/OCR processors (R-6).
+
+    Defaults are byte-identical to the Phase-1 hardcoded prompts. Templates may
+    contain a ``{language}`` slot substituted by the processor's prompt
+    resolver; the shipped defaults carry no slot so the default prompt matches
+    Phase 1 exactly.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    ocr: str = (
+        "This is a scanned PDF page. Extract all visible text accurately. "
+        "Return only the extracted text, nothing else."
+    )
+    handwriting: str = (
+        "This is a handwritten document. Transcribe all handwritten text "
+        "as accurately as possible. Return only the transcribed text, "
+        "nothing else."
+    )
+    vision: str = (
+        "Analyze this image. If it contains handwritten text, transcribe "
+        "all handwritten text accurately. If it contains printed text or "
+        "digital content, extract all visible text. Return only the "
+        "extracted text, nothing else."
+    )
+
+
+class OcrSettings(BaseModel):
+    """Settings for the OCR engine subsystem (P2-108).
+
+    Defaults reproduce Phase 1: ``engine="auto"`` (vision primary, Tesseract
+    fallback), ``page_limit=5`` (hardcoded Phase-1 cap), ``zoom=2.0``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    engine: Literal["auto", "vision", "tesseract"] = "auto"
+    page_limit: int = Field(default=5, ge=0)  # 0 = all pages
+    zoom: float = Field(default=2.0, gt=0)
+    preprocess: bool = False
+    tesseract_cmd: str = ""  # empty => look up on PATH
+    tesseract_lang: str = "eng"
+    confidence_threshold: float = Field(default=0.0, ge=0.0)
+    max_pages: int = Field(default=200, ge=1)
+
+
+class HookChainSettings(BaseModel):
+    """Named plugin lists for the ingestion hook chain (P2-206)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    pre: list[str] = Field(default_factory=list)
+    post: list[str] = Field(default_factory=list)
+
+
+class MetadataSettings(BaseModel):
+    """Settings for the metadata extraction framework (Milestone 2.2).
+
+    ``enabled: false`` returns Phase-1-identical documents (rollback R-4).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    extractors: str = "default"
+    mime_enabled: bool = True
+    language_detection_enabled: bool = True
+    max_file_size_mb: int = Field(default=50, ge=1)
+    url_timeout_seconds: int = Field(default=30, ge=1)
+    email_attachments: bool = True
+    max_attachments: int = Field(default=20, ge=1)
+    hooks: HookChainSettings = Field(default_factory=HookChainSettings)
+
+
+class StructureSettings(BaseModel):
+    """Settings for document structure analysis (Milestone 2.3).
+
+    ``enabled: false`` returns M2.2-identical documents (rollback R-4).
+    ``enrich_analysis_input`` is a contract-only field (frozen §7 / C-5):
+    declared for the future structure-aware-prompting contract, not read by
+    any code this milestone.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    enrich_analysis_input: bool = False
+
+
+class EntitySettings(BaseModel):
+    """Settings for entity extraction (P4-102).
+
+    ``enabled: false`` returns M2.2-identical documents (no ``entities`` key;
+    rollback R-4). Extraction is deterministic and offline; no external service
+    is gated by this toggle, only the enrichment attachment point.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+
+
+class RelationshipSettings(BaseModel):
+    """Settings for relationship detection (P4-103).
+
+    ``enabled: false`` omits the ``relationships`` enrichment key (rollback
+    R-4). Detection consumes extracted entities (P4-102) and is deterministic
+    and offline; no external service is gated by this toggle, only the
+    enrichment attachment point.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+
+
+class GraphSettings(BaseModel):
+    """Settings for document-level knowledge graph construction (P4-104).
+
+    ``enabled: false`` omits the ``knowledge_graph`` enrichment key (rollback
+    R-4). Construction consumes the extracted entities (P4-102) and detected
+    relationships (P4-103) into an in-memory ``KnowledgeGraph``; it is
+    deterministic and offline, and no external service or persistent
+    graph-database infrastructure is gated by this toggle.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+
+
+class TableSettings(BaseModel):
+    """Settings for table intelligence (Milestone 2.4).
+
+    ``enabled: false`` restores Phase-1 note output exactly (rollback R-4);
+    ``max_rows``/``max_cols`` bound extraction (frozen §2.4). The frozen
+    §2.4 ``min_confidence`` key was removed — pdfplumber exposes no per-table
+    confidence to gate on (review R1, deviation recorded).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    pdf_engine: str = "pdfplumber"
+    max_rows: int = Field(default=200, ge=1)
+    max_cols: int = Field(default=30, ge=1)
+    header_sniffing: bool = True
+
+
+class ImageSettings(BaseModel):
+    """Settings for image intelligence (Milestone 2.5).
+
+    ``preprocess`` controls the shared preprocess module on the image-analysis
+    path (R-a); the OCR path keeps its own ``OcrSettings.preprocess`` toggle —
+    one shared ``imaging/preprocess.py`` implementation, two toggles.
+    ``exif_enabled`` / ``diagram_enabled`` gate the additive EXIF and drawio
+    features (R-4). ``max_dimensions``/``max_bytes`` bound preprocessing;
+    ``max_dimensions`` (scalar max edge or ``[width, height]``) supersedes the
+    historical ``MAX_EDGE = 8000`` constant (P2-503, frozen §4.5 ``[8192, 8192]``).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    preprocess: bool = False
+    exif_enabled: bool = True
+    diagram_enabled: bool = True
+    max_dimensions: int | tuple[int, int] = (8192, 8192)
+    max_bytes: int = Field(default=20 * 1024 * 1024, ge=1)
+
+
+class CodeSettings(BaseModel):
+    """Settings for code & notebook intelligence (Milestone 2.6).
+
+    ``enabled: false`` restores Phase-1 behavior exactly: code passthrough and
+    notebook flattening with no ``code_structure``/``notebook_structure`` keys
+    (rollback R-4). ``languages="default"`` selects the built-in
+    ``extensions.py`` suffix-to-language mapping; other values are not
+    supported in M2.6 (extensibility deferred). ``max_code_chars`` is a Python
+    ``str`` length — oversized sources are truncated at parse time with a
+    logged warning (frozen §4.6 performance). ``max_cell_outputs`` caps
+    notebook cell outputs during ``NotebookParser.parse()`` (entries beyond
+    the cap replaced with a ``[truncated]`` marker). ``include_docstrings``
+    is a contract-only field this milestone (C-5 precedent): declared for the
+    future structure-consuming phase, not read by any code.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    languages: Literal["default"] = "default"
+    max_cell_outputs: int = Field(default=10, ge=1)
+    max_code_chars: int = Field(default=100000, ge=1)
+    include_docstrings: bool = True
+
+
+class ChunkingSettings(BaseModel):
+    """Settings for the semantic chunker (P3-105, P3-205).
+
+    ``sentence_tokenizer`` selects the sentence engine: ``"auto"`` (default)
+    reproduces post-P3-104 behavior — NLTK ``punkt_tab`` when available,
+    stdlib heuristic fallback otherwise (D4/D8); ``"heuristic"`` forces the
+    deterministic stdlib engine; ``"nltk"`` forces the NLTK engine (failing
+    fast if its data is missing).
+
+    The policy fields are the adaptive chunking knobs (P3-205); their defaults
+    mirror :class:`ChunkingPolicy`, reproducing P3-204 output.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    sentence_tokenizer: Literal["auto", "nltk", "heuristic"] = "auto"
+    heading_size_step: int = Field(default=0, ge=0)
+    min_chunk_chars: int = Field(default=200, ge=1)
+    snap_overlap: bool = False
+    snap_max_back: int = Field(default=2000, ge=0)
+    heading_overlap_boundary: bool = False
+
+
+class IntelligenceSettings(BaseModel):
+    """Settings for the intelligence subsystem (OCR engine, prompt templates)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    ocr: OcrSettings = Field(default_factory=OcrSettings)
+    prompts: PromptSettings = Field(default_factory=PromptSettings)
+    metadata: MetadataSettings = Field(default_factory=MetadataSettings)
+    structure: StructureSettings = Field(default_factory=StructureSettings)
+    entities: EntitySettings = Field(default_factory=EntitySettings)
+    relationships: RelationshipSettings = Field(default_factory=RelationshipSettings)
+    graph: GraphSettings = Field(default_factory=GraphSettings)
+    tables: TableSettings = Field(default_factory=TableSettings)
+    images: ImageSettings = Field(default_factory=ImageSettings)
+    code: CodeSettings = Field(default_factory=CodeSettings)
+
+
 class Settings(BaseSettings):
     """Validated application settings with environment variable support."""
 
@@ -224,6 +461,8 @@ class Settings(BaseSettings):
     manifest: ManifestSettings = Field(default_factory=ManifestSettings)
     processing: ProcessingSettings = Field(default_factory=ProcessingSettings)
     models: ModelRoutingSettings = Field(default_factory=ModelRoutingSettings)
+    intelligence: IntelligenceSettings = Field(default_factory=IntelligenceSettings)
+    chunking: ChunkingSettings = Field(default_factory=ChunkingSettings)
 
 
 def load_settings(
@@ -330,7 +569,9 @@ def _merge_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, An
 
 
 def _resolve_relative_paths(
-    config: dict[str, Any], keys: set[str], project_root: Path,
+    config: dict[str, Any],
+    keys: set[str],
+    project_root: Path,
 ) -> dict[str, Any]:
     resolved = dict(config)
     for key in keys:

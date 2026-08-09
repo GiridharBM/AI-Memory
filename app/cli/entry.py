@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import shutil
 import sys
 from importlib.util import find_spec
 from pathlib import Path
@@ -17,6 +19,7 @@ from app.application import AIProcessingError
 from app.core.config import ConfigurationError, Settings, load_settings
 from app.core.logging import get_logger, setup_logging
 from app.infrastructure.llm import OllamaClient, OllamaClientError
+from app.infrastructure.search import SearchHit, SearchService
 from app.infrastructure.state.manifest import ManifestManager
 from app.pipelines import IngestionWorkflow, IngestionWorkflowError
 from app.queue import QueueStateStore
@@ -228,9 +231,11 @@ def doctor() -> None:
     pending_queue_items = len(QueueStateStore(settings.queue.state_path).load())
     checks.add_row("Queue status", "OK", f"{pending_queue_items} recoverable pending item(s)")
 
+    ollama_available = False
     try:
         ollama_client = OllamaClient(settings.ollama)
         if ollama_client.is_available():
+            ollama_available = True
             checks.add_row("Ollama", "OK", str(settings.ollama.host))
             if not hasattr(ollama_client, "model_exists"):
                 checks.add_row("Ollama model", "WARN", "Model check unavailable")
@@ -244,6 +249,38 @@ def doctor() -> None:
     except Exception as exc:
         checks.add_row("Ollama", "FAIL", str(exc))
         exit_code = 1
+
+    ocr_cfg = settings.intelligence.ocr
+    checks.add_row(
+        "OCR",
+        "Enabled" if ocr_cfg.enabled else "Disabled",
+        f"engine={ocr_cfg.engine}, page_limit={ocr_cfg.page_limit or 'all'}",
+    )
+    checks.add_row(
+        "Vision model",
+        "OK" if ollama_available else "WARN",
+        f"{settings.models.vision}" + ("" if ollama_available else " (Ollama unreachable)"),
+    )
+    tesseract_binary = (
+        ocr_cfg.tesseract_cmd
+        if ocr_cfg.tesseract_cmd and Path(ocr_cfg.tesseract_cmd).exists()
+        else (shutil.which("tesseract") or "")
+    )
+    checks.add_row(
+        "Tesseract binary",
+        "OK" if tesseract_binary else "WARN",
+        tesseract_binary or "not on PATH (set intelligence.ocr.tesseract_cmd)",
+    )
+    checks.add_row(
+        "pytesseract",
+        "OK" if find_spec("pytesseract") else "WARN",
+        "Installed" if find_spec("pytesseract") else "Not installed (pip install pytesseract)",
+    )
+    checks.add_row(
+        "Preprocessing (Pillow)",
+        "OK" if find_spec("PIL") else "WARN",
+        "Installed" if find_spec("PIL") else "Not installed",
+    )
 
     console.print(checks)
     raise typer.Exit(exit_code)
@@ -321,10 +358,106 @@ def watch() -> None:
     service.run()
 
 
+@cli.command("search")
+def search(
+    query: Annotated[str, typer.Argument(help="Search query text.")],
+    top_k: Annotated[
+        int,
+        typer.Option("--top-k", min=1, help="Number of results to return."),
+    ] = 5,
+    source_type: Annotated[
+        str | None,
+        typer.Option(
+            "--source-type",
+            help="Only show results of this source type (e.g. pdf, markdown).",
+        ),
+    ] = None,
+    min_score: Annotated[
+        float,
+        typer.Option("--min-score", help="Minimum retrieval score."),
+    ] = 0.0,
+    filter_json: Annotated[
+        str | None,
+        typer.Option("--filter", help="JSON object of exact-match metadata filters."),
+    ] = None,
+) -> None:
+    """Search the knowledge base and show ranked results."""
+
+    settings = _load_configured_settings()
+    setup_logging(settings)
+
+    query = query.strip()
+    if not query:
+        console.print(
+            Panel("Search query must not be empty.", title="Search", border_style="red"),
+        )
+        raise typer.Exit(1)
+
+    filters = _parse_search_filters(filter_json, source_type)
+    if filters is None:
+        raise typer.Exit(1)
+
+    try:
+        service = SearchService.create_default(settings)
+        hits = service.search(
+            query, top_k=top_k, filter=filters or None, min_score=min_score,
+        )
+    except Exception as exc:
+        logger.exception("Search failed.")
+        console.print(Panel(str(exc), title="Search failed", border_style="red"))
+        raise typer.Exit(1) from exc
+
+    _print_search_results(query, hits)
+
+
 def main() -> None:
     """Run the CLI application."""
 
     cli()
+
+
+def _parse_search_filters(
+    filter_json: str | None,
+    source_type: str | None,
+) -> dict[str, object] | None:
+    """Parse --filter JSON and merge --source-type; None signals a usage error."""
+    filters: dict[str, object] = {}
+    if filter_json:
+        try:
+            parsed = json.loads(filter_json)
+        except json.JSONDecodeError as exc:
+            console.print(
+                Panel(f"Invalid --filter JSON: {exc}", title="Search", border_style="red"),
+            )
+            return None
+        if not isinstance(parsed, dict):
+            console.print(
+                Panel("--filter must be a JSON object.", title="Search", border_style="red"),
+            )
+            return None
+        filters.update(parsed)
+    if source_type:
+        filters["source_type"] = source_type
+    return filters
+
+
+def _print_search_results(query: str, hits: list[SearchHit]) -> None:
+    if not hits:
+        console.print("No results found.")
+        return
+    table = Table(title=f"Search: {query}", show_header=True, header_style="bold")
+    table.add_column("Score", justify="right")
+    table.add_column("Source")
+    table.add_column("Type")
+    table.add_column("Snippet", overflow="fold")
+    for hit in hits:
+        table.add_row(
+            f"{hit.score:.4f}",
+            hit.source,
+            hit.source_type,
+            " ".join(hit.text.split())[:200],
+        )
+    console.print(table)
 
 
 def _run_ingest(source: str | Path, *, expected_source_type: str) -> None:

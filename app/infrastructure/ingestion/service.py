@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 from urllib.parse import urlparse
 
+from app.core.config import CodeSettings, ImageSettings, MetadataSettings, Settings
 from app.core.logging import get_logger
 from app.domain.documents import DocumentIngestionError, DocumentIngestionResult, SourceDocument
+from app.infrastructure.document_intelligence.metadata import (
+    DocumentMetadataService,
+    get_default_hook_registry,
+)
+from app.infrastructure.document_intelligence.metadata.extractors import DEFAULT_EXTRACTORS
+from app.infrastructure.document_intelligence.metadata.hooks import IngestionHook
 from app.infrastructure.ingestion.archive_ingestor import ArchiveIngestor
 from app.infrastructure.ingestion.audio_ingestor import AudioIngestor
 from app.infrastructure.ingestion.base import (
@@ -41,12 +49,25 @@ logger = get_logger(__name__)
 class DocumentIngestionService:
     """Select and run the appropriate ingestor for a source document."""
 
-    def __init__(self, ingestors: list[BaseIngestor] | None = None) -> None:
+    def __init__(
+        self,
+        ingestors: list[BaseIngestor] | None = None,
+        *,
+        settings: Settings | None = None,
+        hooks: Iterable[IngestionHook] | None = None,
+        metadata_service: DocumentMetadataService | None = None,
+    ) -> None:
+        self._settings = settings
+        self._hook_registry = get_default_hook_registry()
+        self._hooks = {hook.name: hook for hook in (hooks or [])}
+        self._metadata_service = metadata_service or DocumentMetadataService(
+            list(DEFAULT_EXTRACTORS)
+        )
         self._ingestors = ingestors or [
             YouTubeTranscriptIngestor(),
             GitHubReadmeIngestor(),
             PdfIngestor(),
-            NotebookIngestor(),
+            NotebookIngestor(max_cell_outputs=self._code().max_cell_outputs),
             EpubIngestor(),
             MarkdownIngestor(),
             CodeIngestor(),
@@ -54,17 +75,32 @@ class DocumentIngestionService:
             TextIngestor(),
             CSVIngestor(),
             SpreadsheetIngestor(),
-            ImageIngestor(),
+            ImageIngestor(exif_enabled=self._images().exif_enabled),
             DocxIngestor(),
             PptxIngestor(),
             AudioIngestor(),
             VideoIngestor(),
             DiagramIngestor(),
             ArchiveIngestor(),
-            EmailIngestor(),
+            EmailIngestor(metadata=self._metadata()),
             DatabaseIngestor(),
             ResearchIngestor(),
         ]
+
+    def _metadata(self) -> MetadataSettings:
+        if self._settings is None:
+            return MetadataSettings()
+        return self._settings.intelligence.metadata
+
+    def _images(self) -> ImageSettings:
+        if self._settings is None:
+            return ImageSettings()
+        return self._settings.intelligence.images
+
+    def _code(self) -> CodeSettings:
+        if self._settings is None:
+            return CodeSettings()
+        return self._settings.intelligence.code
 
     def ingest(self, source: str | Path) -> DocumentIngestionResult:
         """Ingest a single source and return either a document or a structured error."""
@@ -118,9 +154,80 @@ class DocumentIngestionService:
                 raise IngestionError(f"Source file '{source}' does not exist.")
             if not source.is_file():
                 raise IngestionError(f"Source path '{source}' is not a file.")
+            self._enforce_size_limit(source)
 
+        source = self._run_pre_hooks(source)
         ingestor = self._select_ingestor(source)
-        return ingestor.ingest(source)
+        document = ingestor.ingest(source)
+        document = self._enrich_document(document)
+        return self._run_post_hooks(document)
+
+    def _enrich_document(self, document: SourceDocument) -> SourceDocument:
+        metadata = self._metadata()
+        if not metadata.enabled:
+            return document
+        if metadata.extractors != "default":
+            logger.debug(
+                "Unsupported extractor set '%s'; skipping enrichment.",
+                metadata.extractors,
+            )
+            return document
+        try:
+            extraction = self._metadata_service.extract(document)
+            merged = DocumentMetadataService.merge(document.metadata, extraction)
+        except Exception:
+            logger.debug("Metadata enrichment failed; document unchanged.", exc_info=True)
+            return document
+        return document.model_copy(update={"metadata": merged})
+
+    def _enforce_size_limit(self, source: Path) -> None:
+        metadata = self._metadata()
+        if not metadata.enabled:
+            return
+        limit_bytes = metadata.max_file_size_mb * 1024 * 1024
+        if source.stat().st_size > limit_bytes:
+            raise IngestionError(
+                f"Source file '{source}' exceeds the "
+                f"{metadata.max_file_size_mb} MB size limit."
+            )
+
+    def _resolve_hook(self, name: str) -> IngestionHook | None:
+        hook = self._hooks.get(name)
+        if hook is not None:
+            return hook
+        return self._hook_registry.get(name)
+
+    def _run_pre_hooks(self, source: SourceReference) -> SourceReference:
+        metadata = self._metadata()
+        if not metadata.enabled:
+            return source
+        for name in metadata.hooks.pre:
+            hook = self._resolve_hook(name)
+            if hook is None:
+                logger.warning("Pre-hook '%s' is not registered; skipping.", name)
+                continue
+            try:
+                source = hook.pre(source)
+            except IngestionError:
+                raise
+            except Exception:
+                logger.exception("Pre-hook '%s' raised; skipping.", name)
+        return source
+
+    def _run_post_hooks(self, document: SourceDocument) -> SourceDocument:
+        metadata = self._metadata()
+        if not metadata.enabled:
+            return document
+        for name in metadata.hooks.post:
+            hook = self._resolve_hook(name)
+            if hook is None:
+                logger.warning("Post-hook '%s' is not registered; skipping.", name)
+                continue
+            try:
+                document = hook.post(document)
+            except Exception:
+                logger.exception("Post-hook '%s' raised; skipping.", name)
+        return document
 
     def _select_ingestor(self, source: SourceReference) -> BaseIngestor:
         for ingestor in self._ingestors:

@@ -15,6 +15,8 @@ class VectorEntry:
     source: str = ""
     source_type: str = ""
     chunk_index: int = 0
+    start_char: int | None = None
+    end_char: int | None = None
     metadata: dict[str, str] = field(default_factory=dict)
 
 

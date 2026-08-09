@@ -147,24 +147,24 @@ Handles edge cases: extensionless files, misnamed files, nested archives, emails
 ## 4. Advanced OCR
 
 ### Current state
-Vision model OCR via Ollama, first 5 pages of scanned PDFs, heuristic handwriting detection.
+`DocumentOcrService` registry: `VisionOcrEngine` (primary) renders PDF pages via PyMuPDF (`render_pdf_pages`, configurable `zoom`/`page_limit`/`max_pages`) and sends each page to the vision model with bounded retry + early stop on empty page; `TesseractOcrEngine` (optional fallback) provides offline printed-text OCR with per-page confidence. Missing PyMuPDF raises a clear `ImportError`. Handwriting is routed by the classifier to the vision engine.
 
 ### Target additions
 
 | Feature | What it does |
 |---|---|
-| **Tesseract + PaddleOCR** | Local OCR engines for page-level text extraction without vision model |
+| **PaddleOCR** | Additional local OCR engine (Tesseract fallback already shipped as `TesseractOcrEngine`) |
 | **Layout preservation** | Detect columns, headers, footers, page numbers (layoutparser) |
-| **Full-page OCR** | Remove 5-page limit, process all pages via batching |
+| **Full-page OCR batching** | Page limit is already configurable (`page_limit`, 0 = all); add batched/parallel page processing for throughput |
 | **Table detection in images** | Detect table boundaries, extract structured rows/columns |
 | **Formula/equation OCR** | LaTeX extraction from scientific documents (LaTeX-OCR) |
 | **Multi-language OCR** | Per-page language detection + model selection |
-| **OCR confidence scoring** | Per-region confidence from OCR engine, store in metadata |
-| **Image preprocessing pipeline** | Deskew, denoise, binarize, contrast adjust before OCR |
+| **Region-level OCR confidence** | Per-page confidence is done (`PageOcrResult.confidence`); add per-region confidence stored in metadata |
+| **Image preprocessing enhancements** | Deskew → denoise → CLAHE pipeline exists (`imaging/preprocess.py`, default off); add binarize/contrast auto-tuning and enable by default |
 | **Document layout analysis** | Detect reading order, column flow, section hierarchy |
 
 ### Why it is useful
-Scanned PDFs and handwritten notes are a primary use case for a personal knowledge system. Current OCR is fragile and incomplete.
+Scanned PDFs and handwritten notes are a primary use case for a personal knowledge system. Core OCR works (vision + Tesseract fallback); layout preservation and region-level confidence remain.
 
 ### Benefits
 - Full-page OCR with layout preservation
@@ -661,7 +661,7 @@ Tables are the most information-dense content type. Current flat-text handling l
 ## 15. Image Intelligence
 
 ### Current state
-Base64-send to vision model. No preprocessing. No layout analysis.
+Vision model via Ollama (image kind routed to `VisionOcrEngine`). Optional preprocessing pipeline exists (deskew → denoise → CLAHE, `imaging/preprocess.py`, default off). No layout analysis.
 
 ### Target
 

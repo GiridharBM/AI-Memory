@@ -157,6 +157,57 @@ class TestAudioProcessorWiring:
         assert result.confidence == 0.60
 
 
+class TestWorkflowOcrWiring:
+    def test_ocr_service_none_passthroughs(self) -> None:
+        from app.pipelines.ingest_workflow import IngestionWorkflow
+
+        writer = MagicMock()
+        wf = IngestionWorkflow(
+            ingestion_service=MagicMock(),
+            ollama_client=MagicMock(),
+            note_generator=MagicMock(),
+            writer=writer,
+            ocr_service=None,
+        )
+        pdf = _tmp_file(".pdf")
+        try:
+            doc = _make_document(source_type="scanned_pdf", source_path=pdf, text="")
+            enriched, confidence, ocr = wf._run_routed_processor("OCRProcessor", doc)
+            assert enriched.text == ""
+            assert confidence == 0.50
+            assert ocr is None
+        finally:
+            pdf.unlink()
+
+    def test_configured_ocr_service_is_injected(self) -> None:
+        from unittest.mock import MagicMock
+
+        from app.infrastructure.document_intelligence.ocr.models import OcrResult, PageOcrResult
+        from app.pipelines.ingest_workflow import IngestionWorkflow
+
+        service = MagicMock()
+        service.extract.return_value = OcrResult(
+            pages=[PageOcrResult(page_no=0, text="extracted", confidence=0.9)]
+        )
+        writer = MagicMock()
+        wf = IngestionWorkflow(
+            ingestion_service=MagicMock(),
+            ollama_client=MagicMock(),
+            note_generator=MagicMock(),
+            writer=writer,
+            ocr_service=service,
+        )
+        pdf = _tmp_file(".pdf")
+        try:
+            doc = _make_document(source_type="scanned_pdf", source_path=pdf, text="")
+            enriched, _confidence, ocr = wf._run_routed_processor("OCRProcessor", doc)
+            assert enriched.text == "extracted"
+            assert ocr is service.extract.return_value
+            service.extract.assert_called_once()
+        finally:
+            pdf.unlink()
+
+
 class TestRouterSelectsCorrectProcessor:
     def setup_method(self) -> None:
         self.routing = ModelRoutingSettings()

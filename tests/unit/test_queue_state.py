@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import threading
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -60,3 +62,49 @@ def test_queue_state_store_persists_in_flight_item_for_recovery(tmp_path: Path) 
     restored_item = restored.dequeue()
     assert restored_item is not None
     assert restored_item.path == source
+
+
+def test_queue_state_load_ignores_invalid_utf8(tmp_path: Path) -> None:
+    state_path = tmp_path / "manifests" / "queue_state.json"
+    state_path.parent.mkdir(parents=True)
+    state_path.write_bytes(b"\xff\xfe{not utf8")
+
+    assert QueueStateStore(state_path).load() == []
+
+
+def test_queue_state_save_is_best_effort_when_path_unwritable(tmp_path: Path) -> None:
+    target = tmp_path / "queue_state.json"
+    target.mkdir()  # directory where a file is expected -> os.replace must fail
+
+    store = QueueStateStore(target)
+    store.save(QueueManager())  # must not raise
+
+
+def test_queue_state_save_is_thread_safe(tmp_path: Path) -> None:
+    state_path = tmp_path / "manifests" / "queue_state.json"
+    source = tmp_path / "inbox" / "notes.md"
+    source.parent.mkdir(parents=True)
+    source.write_text("# Notes", encoding="utf-8")
+
+    queue = QueueManager()
+    queue.enqueue(QueueItem(path=source, extension=".md", created_at=datetime.now(UTC)))
+    store = QueueStateStore(state_path)
+
+    errors: list[BaseException] = []
+
+    def saver() -> None:
+        try:
+            for _ in range(25):
+                store.save(queue)
+        except BaseException as exc:  # noqa: BLE001 - capture any thread failure
+            errors.append(exc)
+
+    threads = [threading.Thread(target=saver) for _ in range(4)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert errors == []
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    assert payload["items"][0]["path"] == str(source)

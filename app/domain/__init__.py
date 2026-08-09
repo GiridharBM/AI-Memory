@@ -14,6 +14,13 @@ from app.domain.documents import (
     DocumentMetadata,
     SourceDocument,
 )
+from app.domain.entity_relationship import (
+    Entity,
+    EntityMetadata,
+    Relationship,
+    RelationshipMetadata,
+    SourceReference,
+)
 from app.domain.knowledge_graph import (
     EdgeType,
     GraphBuildResult,
@@ -35,6 +42,8 @@ __all__ = [
     "DocumentMetadata",
     "DocumentSummary",
     "EdgeType",
+    "Entity",
+    "EntityMetadata",
     "GraphBuildResult",
     "ImportantEntity",
     "KeyConcept",
@@ -44,7 +53,10 @@ __all__ = [
     "NodeType",
     "ObsidianNote",
     "RelatedTopic",
+    "Relationship",
+    "RelationshipMetadata",
     "SearchResult",
     "SourceDocument",
+    "SourceReference",
     "VectorEntry",
 ]

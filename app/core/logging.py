@@ -51,6 +51,35 @@ class MinimumLevelFilter(logging.Filter):
         return record.levelno >= self._minimum_level
 
 
+_RESERVED_RECORD_ATTRS = frozenset(
+    {
+        "name",
+        "msg",
+        "args",
+        "levelname",
+        "levelno",
+        "pathname",
+        "filename",
+        "module",
+        "exc_info",
+        "exc_text",
+        "stack_info",
+        "lineno",
+        "funcName",
+        "created",
+        "msecs",
+        "relativeCreated",
+        "thread",
+        "threadName",
+        "processName",
+        "process",
+        "taskName",
+        "message",
+        "asctime",
+    }
+)
+
+
 class JsonFormatter(logging.Formatter):
     """Serialize log records as JSON for structured file output."""
 
@@ -64,11 +93,16 @@ class JsonFormatter(logging.Formatter):
             "function": record.funcName,
             "line": record.lineno,
         }
+        for key, value in record.__dict__.items():
+            if key not in _RESERVED_RECORD_ATTRS:
+                payload[key] = value
 
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)
 
-        return json.dumps(payload, ensure_ascii=True)
+        # default=str keeps the formatter robust to non-serializable extras
+        # (e.g. Path objects) instead of failing the whole record.
+        return json.dumps(payload, ensure_ascii=True, default=str)
 
 
 def setup_logging(settings: Settings, *, force: bool = False) -> None:

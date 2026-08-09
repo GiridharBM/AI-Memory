@@ -44,6 +44,32 @@ def test_setup_logging_supports_json_file_format(tmp_path: Path) -> None:
     assert payload["message"] == "json message"
 
 
+def test_setup_logging_json_preserves_structured_extra(tmp_path: Path) -> None:
+    settings = _settings(
+        tmp_path,
+        logging_settings=LoggingSettings(
+            level="INFO",
+            format="json",
+            console_enabled=False,
+            file_enabled=True,
+            filename="structured.json",
+        ),
+    )
+
+    setup_logging(settings, force=True)
+    logging.getLogger("app.tests.structured").info(
+        "processed",
+        extra={"path": tmp_path / "inbox" / "a.md", "sha256": "abc123"},
+    )
+
+    payload = json.loads(
+        (tmp_path / "logs" / "structured.json").read_text(encoding="utf-8").splitlines()[-1]
+    )
+    assert payload["message"] == "processed"
+    assert payload["sha256"] == "abc123"
+    assert payload["path"] == str(tmp_path / "inbox" / "a.md")
+
+
 def test_setup_logging_writes_component_logs(tmp_path: Path) -> None:
     settings = _settings(
         tmp_path,

@@ -142,12 +142,19 @@ Rules:
 """.strip()
 
 
-def build_document_analysis_user_prompt(document: SourceDocument) -> str:
-    """Build the user prompt for a source document."""
+def build_document_analysis_user_prompt(
+    document: SourceDocument, language: str = "en",
+) -> str:
+    """Build the user prompt for a source document.
+
+    When ``language`` is not ``"en"``, a respond-in-{language} instruction is
+    appended (R8: additive — the JSON schema contract is unchanged). The
+    default ``"en"`` keeps the prompt byte-identical to its pre-P2-205 form.
+    """
 
     existing_title = document.metadata.title or document.filename
 
-    return f"""
+    prompt = f"""
 Analyze this source for a personal Obsidian knowledge base.
 
 Return only the structured JSON requested by the system prompt.
@@ -163,3 +170,6 @@ Source text:
 {document.text}
 \"\"\"
 """.strip()
+    if language != "en":
+        prompt = f"{prompt}\n\nRespond in {language}."
+    return prompt

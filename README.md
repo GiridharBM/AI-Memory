@@ -9,7 +9,7 @@
 ![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-v2.0.0-blue?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-386%20Passing-success?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-1398%20Passing-success?style=for-the-badge)
 
 [Overview](#-overview) •
 [Features](#-features) •
@@ -91,7 +91,7 @@ Automatically extracts 21 fields:
 - **Cross-document linking** — finds related content via vector similarity
 - **Placeholder notes** — auto-creates stub notes for unresolved wiki-links
 - **Semantic search** — cosine similarity over embedded chunks
-- **Hybrid search** — combines 70% semantic + 30% keyword scoring
+- **Hybrid search** — reciprocal rank fusion (RRF, k=60) of semantic (dense) and BM25 (keyword) scores
 
 ### 📚 Obsidian Integration
 - Markdown generation with YAML frontmatter
@@ -151,7 +151,7 @@ Automatically extracts 21 fields:
 | Cross-document linking | |
 | Placeholder note creation | |
 | Semantic & hybrid search | |
-| Comprehensive testing (386 tests) | |
+| Comprehensive testing (1398 tests) | |
 
 ---
 
@@ -200,6 +200,10 @@ cd AI-Memory
 - Obsidian
 - Windows, macOS, or Linux
 
+> **Optional — offline OCR fallback (scanned documents):** scanned PDFs/images are OCR'd by the local vision model by default. To enable the CPU-only Tesseract fallback, install [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (add `tesseract` to PATH or set `intelligence.ocr.tesseract_cmd` in `config/default.yaml`) and run `uv pip install pytesseract pillow`. `pam doctor` reports whether the fallback is available.
+
+> **Image intelligence (optional):** photos and screenshots gain EXIF/metadata enrichment and `.drawio` files render as Mermaid when the `intelligence` extra is installed (`uv pip install -e ".[intelligence]"`). Set `intelligence.images.preprocess: true` to enable the shared deskew → denoise → CLAHE preprocessing before vision OCR (dimension/size guards default to `[8192, 8192]` / 20 MB per `intelligence.images.max_dimensions` / `max_bytes`). Toggles `intelligence.images.exif_enabled` / `diagram_enabled` restore plain passthrough behavior.
+
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/GiridharBM/AI-Memory.git
@@ -237,7 +241,7 @@ pam doctor
 
 Expected output:
 ```text
-36 passed
+1398 passed
 
 ✔ Configuration loaded
 ✔ Ollama available
@@ -540,7 +544,7 @@ Source Document
 Duplicate Detection
       │
       ▼
-  Classifier (18 kinds)
+  Classifier (24 kinds)
       │
       ▼
   Router (20 processors)
@@ -653,22 +657,33 @@ PAM_WATCHER__ENABLED=false
 Default configuration:
 ```yaml
 app:
-  name: AI Memory
+  name: personal-ai-memory
   environment: development
 
 paths:
   vault_root: ./vault
   inbox_root: ./data/inbox
+  staging_root: ./data/staging
+  manifest_root: ./data/manifests
   cache_root: ./data/cache
-  logs_root: ./data/logs
+  log_root: ./data/logs
 
 ollama:
   host: http://localhost:11434
   model: qwen3:8b
-  timeout_seconds: 120
+  timeout_seconds: 1800
+  request_retries: 3
+  retry_backoff_seconds: 1.0
 
 logging:
   level: INFO
+  format: console
+  console_enabled: true
+  file_enabled: true
+  use_colors: true
+  filename: application.log
+  max_bytes: 10485760
+  backup_count: 5
 
 watcher:
   enabled: true
@@ -678,14 +693,18 @@ watcher:
   recursive: true
   interval_seconds: 1
   supported_extensions:
-    - .md
     - .txt
+    - .md
     - .pdf
+    - .csv
+    - .xlsx
+    # ... code, image, audio, video extensions (100+ total)
 
 queue:
   enabled: true
   workers: 1
   max_size: 1000
+  state_path: ./data/manifests/queue_state.json
 
 manifest:
   enabled: true
@@ -694,6 +713,33 @@ manifest:
 processing:
   move_processed: true
   move_failed: true
+  processed_path: ./data/processed
+  failed_path: ./data/failed
+
+models:
+  general_text: qwen3:8b
+  programming: qwen2.5-coder:7b
+  vision: qwen2.5vl:latest
+  audio: faster-whisper
+  embeddings: nomic-embed-text
+
+intelligence:
+  ocr: { enabled: true, engine: "auto", page_limit: 5, max_pages: 200 }
+  metadata: { enabled: true, mime_enabled: true, language_detection_enabled: true, max_file_size_mb: 50, email_attachments: true }
+  structure: { enabled: true }
+  entities: { enabled: true }
+  relationships: { enabled: true }
+  graph: { enabled: true }
+  tables: { enabled: true, pdf_engine: "pdfplumber" }
+  images: { preprocess: false, exif_enabled: true, diagram_enabled: true }
+  code: { enabled: true }
+
+chunking:
+  sentence_tokenizer: "auto"
+  heading_size_step: 0
+  min_chunk_chars: 200
+  snap_overlap: false
+  heading_overlap_boundary: false
 ```
 
 View current configuration with `pam config`.
@@ -760,8 +806,8 @@ mypy app
 
 ### Test Suite
 
-- **386 unit tests** across 28 test files
-- Tests cover: ingestion, classification, routing, processing, AI analysis, markdown generation, knowledge engine, vector store, knowledge graph, embeddings, search, watcher, queue, CLI, and more
+- **1398 passing tests** (59 deselected — integration/live tests requiring Ollama, Tesseract, or network)
+- Tests cover: ingestion, classification, routing, processing, AI analysis, markdown generation, knowledge engine, vector store, knowledge graph, semantic chunking, hybrid search, watcher, queue, CLI, configuration, security, and more
 - External model behavior is mocked for deterministic tests
 - Run `python -m pytest` to execute the full suite
 
@@ -808,29 +854,26 @@ mypy app
 
 AI Memory has evolved from a manual document processor into an automated, local-first AI Memory System — one where knowledge capture happens continuously in the background instead of through one-off commands.
 
-Future versions will build on this foundation with **semantic memory**, **vector databases**, **retrieval-augmented generation (RAG)**, and **knowledge graphs**, moving AI Memory from a note generator toward a genuinely queryable, reasoning-capable second brain — all while staying local-first and offline by design.
+Version 3 and 4 foundations are already in place: **semantic memory** (local embeddings, semantic + hybrid search over the in-memory vector store), and a **knowledge graph** (entity/relationship extraction with JSON persistence and graph queries). Future versions build on this with external vector databases, **retrieval-augmented generation (RAG)**, and an agent layer — all while staying local-first and offline by design.
 
 ---
 
 ## 🗺️ Roadmap
 
-### ✅ Completed (v1 – v2)
-Local-first architecture · Ollama integration · PDF / Markdown / TXT ingestion · GitHub README ingestion · YouTube transcript ingestion · Markdown generation & vault management · CLI, logging, and config management · Automatic folder watching (`pam watch`) · Background watcher service · Processing queue with recovery · SHA-256 duplicate detection · Automatic processed / failed folders · Graceful shutdown · Rich CLI progress · Runtime statistics
+### ✅ Completed (v1 – v3.2)
+Local-first architecture · Ollama integration · PDF / Markdown / TXT ingestion · GitHub README ingestion · YouTube transcript ingestion · Markdown generation & vault management · CLI, logging, and config management · Automatic folder watching (`pam watch`) · Background watcher service · Processing queue with recovery · SHA-256 duplicate detection · Automatic processed / failed folders · Graceful shutdown · Rich CLI progress · Runtime statistics · 21-field document intelligence · Semantic chunking & embeddings · Vector store with similarity search · Knowledge graph with persistence · Cross-document linking · Placeholder note creation · Semantic & hybrid search · Entity/relationship extraction
 
-### 🔜 v3 — Semantic Memory
-- Local Embeddings
-- ChromaDB
-- FAISS
-- Qdrant
-- Semantic Search
-- Hybrid Search
-- RAG
-- Context Retrieval
+### 🔜 v3 — Semantic Memory (partially shipped)
+- ✅ Local embeddings & vector store — in-memory with JSON persistence
+- ✅ Semantic search — cosine similarity over embedded chunks
+- ✅ Hybrid search — RRF (dense + BM25)
+- ✅ `pam search` CLI — query, top-k, metadata filters, min-score
+- 🔜 External vector DB — ChromaDB / FAISS / Qdrant
+- 🔜 RAG & context retrieval over retrieved chunks
 
-### 🔮 v4 — Knowledge Graph
-- Neo4j
-- NetworkX
-- Relationship Discovery
+### 🔮 v4 — Knowledge Graph (partially shipped)
+- ✅ In-memory entity/relationship graph with JSON persistence and graph queries
+- 🔜 Neo4j / NetworkX for large-scale graph storage
 
 ### 🚀 v5 — Autonomous AI Agent
 - Personal Tutor

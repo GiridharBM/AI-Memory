@@ -118,3 +118,66 @@ models:
   scanned_ocr: qwen2.5vl:latest
   audio: faster-whisper
   embeddings: nomic-embed-text
+
+intelligence:
+  ocr:
+    enabled: true
+    engine: "auto"
+    page_limit: 5
+    zoom: 2.0
+    preprocess: false
+    tesseract_cmd: ""
+    tesseract_lang: "eng"
+    confidence_threshold: 0.0
+    max_pages: 200
+  prompts:
+    ocr: "This is a scanned PDF page. Extract all visible text accurately. Return only the extracted text, nothing else."
+    handwriting: "This is a handwritten document. Transcribe all handwritten text as accurately as possible. Return only the transcribed text, nothing else."
+    vision: "Analyze this image. If it contains handwritten text, transcribe all handwritten text accurately. If it contains printed text or digital content, extract all visible text. Return only the extracted text, nothing else."
+  metadata:
+    enabled: true
+    extractors: "default"
+    mime_enabled: true
+    language_detection_enabled: true
+    max_file_size_mb: 50
+    url_timeout_seconds: 30
+    email_attachments: true
+    max_attachments: 20
+    hooks:
+      pre: []
+      post: []
+  structure:
+    enabled: true                 # false ⇒ no "structure" key; M2.2-identical documents (R-4)
+    enrich_analysis_input: false  # addendum 3; CONTRACT-ONLY this milestone (C-5) - no code reads it (R-7)
+  entities:
+    enabled: true                 # false ⇒ no "entities" key; M2.2-identical documents (R-4)
+  relationships:
+    enabled: true                 # false ⇒ no "relationships" key (R-4)
+  graph:
+    enabled: true                 # false ⇒ no "knowledge_graph" key (R-4)
+  tables:
+    enabled: true                 # false ⇒ no "tables" key; Phase-1-identical notes (R-4)
+    pdf_engine: "pdfplumber"      # default engine (ADR-002); "camelot" = optional plugin w/ fallback
+    max_rows: 200                 # frozen §2.4 row cap
+    max_cols: 30                  # frozen §2.4 column cap
+    header_sniffing: true         # first row treated as header
+  images:
+    preprocess: false             # global image preprocessing toggle (R-a); ocr.preprocess stays separate
+    exif_enabled: true            # false => no image_info key; Phase-1-identical documents (R-4)
+    diagram_enabled: true         # false => .drawio raw text passthrough (R-4)
+    max_dimensions: [8192, 8192]  # frozen §4.5 [8192, 8192]; supersedes historical MAX_EDGE constant (P2-503)
+    max_bytes: 20971520           # 20 MiB preprocessing cap (frozen §4.5)
+  code:
+    enabled: true                 # false ⇒ no code_structure/notebook_structure keys; Phase-1 passthrough (R-4)
+    languages: "default"          # built-in extensions.py suffix→language map; other values deferred (frozen §4.6)
+    max_cell_outputs: 10          # notebook cell outputs capped during NotebookParser.parse() (frozen §4.6)
+    max_code_chars: 100000        # str-length cap; oversized code truncated with logged warning (frozen §4.6)
+    include_docstrings: true      # contract-only this milestone (C-5) - no code reads it
+
+chunking:
+  sentence_tokenizer: "auto"     # auto ⇒ nltk when available, stdlib heuristic fallback; "heuristic" ⇒ deterministic stdlib; "nltk" ⇒ force nltk
+  heading_size_step: 0           # P3-205: shrink chunk budget by this many chars per heading level below 1 (0 ⇒ fixed sizing)
+  min_chunk_chars: 200           # P3-205: floor for the dynamic budget
+  snap_overlap: false            # P3-205: snap overlap tails to paragraph/list-item boundaries
+  snap_max_back: 2000            # P3-205: max chars the overlap snap may walk back
+  heading_overlap_boundary: false  # P3-205: never prepend overlap into a chunk that begins with a heading

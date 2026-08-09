@@ -18,6 +18,14 @@ _RETRIES = 2
 _RETRY_BACKOFF_SECONDS = 1.0
 
 
+class EmbeddingCountMismatchError(ValueError):
+    """Ollama returned a different number of vectors than the requested batch.
+
+    Not transient: a mismatch means chunk-to-vector alignment cannot be trusted,
+    so it is raised without retry instead of silently mis-pairing chunks.
+    """
+
+
 @dataclass(slots=True)
 class EmbeddingResult:
     """Result of embedding generation."""
@@ -56,6 +64,8 @@ class EmbeddingService:
         for attempt in range(1, _RETRIES + 2):
             try:
                 return operation()
+            except EmbeddingCountMismatchError:
+                raise
             except Exception as exc:
                 logger.warning("%s generation failed: %s", action, exc)
                 if attempt > _RETRIES:
@@ -77,6 +87,11 @@ class EmbeddingService:
         response = self._client.embed(model=self._model, input=texts)
         data = response.model_dump() if hasattr(response, "model_dump") else dict(response)
         embeddings_list = data.get("embeddings", [])
+        if len(embeddings_list) != len(texts):
+            raise EmbeddingCountMismatchError(
+                f"Embedding response contained {len(embeddings_list)} vectors for "
+                f"{len(texts)} texts; refusing to misalign chunks with embeddings."
+            )
         results: list[EmbeddingResult] = []
         for vector in embeddings_list:
             results.append(EmbeddingResult(

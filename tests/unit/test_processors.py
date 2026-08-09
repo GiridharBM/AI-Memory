@@ -11,6 +11,12 @@ import pytest
 
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.domain.processed_document import ProcessedDocument
+from app.infrastructure.document_intelligence.ocr.base import (
+    DocumentOcrService,
+    OCRSelectionError,
+)
+from app.infrastructure.document_intelligence.ocr.engines import VisionOcrEngine
+from app.infrastructure.document_intelligence.ocr.models import OcrResult, PageOcrResult
 from app.infrastructure.routing.processor_impls import (
     ArchiveProcessor,
     AudioProcessor,
@@ -32,7 +38,8 @@ from app.infrastructure.routing.processor_impls import (
     VideoProcessor,
     VisionProcessor,
     WebProcessor,
-    _ocr_extract_from_pdf,
+    _prompt_templates,
+    _resolve_prompt,
     get_processor_by_name,
 )
 
@@ -332,11 +339,18 @@ class TestOCRProcessor:
         result = proc.process(doc)
         assert result.extracted_text == "existing text"
 
-    def test_scanned_pdf_requires_pymupdf(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_scanned_pdf_requires_pymupdf(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         monkeypatch.setitem(sys.modules, "fitz", None)
+        pdf = tmp_path / "scan.pdf"
+        pdf.write_bytes(b"%PDF-1.4")
+        service = DocumentOcrService(engines=[VisionOcrEngine(MagicMock())])
 
+        proc = OCRProcessor(ocr_service=service)
+        doc = _make_document(source_type="scanned_pdf", source_path=pdf)
         with pytest.raises(ImportError, match="PyMuPDF"):
-            _ocr_extract_from_pdf(MagicMock(), Path("scan.pdf"), prompt="x")
+            proc.process(doc)
 
 
 # ── HandwritingProcessor ───────────────────────────────────────────────
@@ -381,6 +395,110 @@ class TestHandwritingProcessor:
         assert result.extracted_text == "fallback"
 
 
+# ── OCR service delegation (P2-107) ─────────────────────────────────────
+
+EXPECTED_OCR_PROMPT = (
+    "This is a scanned PDF page. Extract all visible text accurately. "
+    "Return only the extracted text, nothing else."
+)
+EXPECTED_HANDWRITING_PROMPT = (
+    "This is a handwritten document. Transcribe all handwritten text "
+    "as accurately as possible. Return only the transcribed text, "
+    "nothing else."
+)
+EXPECTED_VISION_PROMPT = (
+    "Analyze this image. If it contains handwritten text, transcribe "
+    "all handwritten text accurately. If it contains printed text or "
+    "digital content, extract all visible text. Return only the "
+    "extracted text, nothing else."
+)
+
+
+class TestOcrServiceDelegation:
+    def test_vision_delegates_to_service(self, tmp_path: Path) -> None:
+        path = tmp_path / "img.png"
+        path.write_bytes(b"fake")
+        service = MagicMock()
+        service.extract.return_value = OcrResult(
+            pages=[PageOcrResult(page_no=0, text="Extracted from service")]
+        )
+
+        doc = _make_document(source_type="image", source_path=path)
+        result = VisionProcessor(ocr_service=service).process(doc)
+
+        assert result.extracted_text == "Extracted from service"
+        assert result.confidence == 0.85
+        assert result.metadata["model_used"] is True
+        assert result.ocr is service.extract.return_value
+        service.extract.assert_called_once_with(
+            doc, prompt=EXPECTED_VISION_PROMPT, preprocess=False
+        )
+
+    def test_ocr_delegates_to_service(self, tmp_path: Path) -> None:
+        path = tmp_path / "scan.pdf"
+        path.write_bytes(b"%PDF-1.4")
+        service = MagicMock()
+        service.extract.return_value = OcrResult(pages=[])
+
+        doc = _make_document(source_type="scanned_pdf", source_path=path)
+        result = OCRProcessor(ocr_service=service).process(doc)
+
+        assert result.metadata["ocr"] is True
+        assert result.ocr is service.extract.return_value
+        service.extract.assert_called_once_with(
+            doc, prompt=EXPECTED_OCR_PROMPT, preprocess=False
+        )
+
+    def test_handwriting_delegates_to_service(self, tmp_path: Path) -> None:
+        path = tmp_path / "note.png"
+        path.write_bytes(b"fake")
+        service = MagicMock()
+        service.extract.return_value = OcrResult(pages=[])
+
+        doc = _make_document(source_type="handwritten", source_path=path)
+        result = HandwritingProcessor(ocr_service=service).process(doc)
+
+        assert result.metadata["handwriting"] is True
+        assert result.ocr is service.extract.return_value
+        service.extract.assert_called_once_with(
+            doc, prompt=EXPECTED_HANDWRITING_PROMPT, preprocess=False
+        )
+
+    def test_missing_source_path_falls_back_to_document_text(self) -> None:
+        service = MagicMock()
+        service.extract.side_effect = ValueError("source path is missing")
+
+        doc = _make_document(text="existing text", source_type="image")
+        result = VisionProcessor(ocr_service=service).process(doc)
+
+        assert result.extracted_text == "existing text"
+        assert result.confidence == 0.85
+
+    def test_no_fallback_raise_when_engine_missing(self, tmp_path: Path) -> None:
+        path = tmp_path / "scan.pdf"
+        path.write_bytes(b"%PDF-1.4")
+        proc = OCRProcessor(ocr_service=DocumentOcrService())
+        doc = _make_document(source_type="scanned_pdf", source_path=path)
+
+        with pytest.raises(OCRSelectionError):
+            proc.process(doc)
+
+
+class TestPromptTemplates:
+    def test_defaults_are_byte_identical_to_phase1(self) -> None:
+        templates = _prompt_templates()
+        assert templates["ocr"] == EXPECTED_OCR_PROMPT
+        assert templates["handwriting"] == EXPECTED_HANDWRITING_PROMPT
+        assert templates["vision"] == EXPECTED_VISION_PROMPT
+
+    def test_language_slot_substitution(self) -> None:
+        template = "Extract all text. Respond in {language}."
+        assert _resolve_prompt(template, language="French") == (
+            "Extract all text. Respond in French."
+        )
+        assert _resolve_prompt(template) == "Extract all text. Respond in ."
+
+
 # ── get_processor_by_name ──────────────────────────────────────────────
 
 
@@ -417,7 +535,9 @@ class TestProcessedDocumentStructure:
         for proc in self.ALL_PROCESSORS:
             doc = _make_document(source_type=list(proc.supported_kinds)[0])
             result = proc.process(doc)
-            assert isinstance(result, ProcessedDocument), f"{proc.name} did not return ProcessedDocument"
+            assert isinstance(result, ProcessedDocument), (
+                f"{proc.name} did not return ProcessedDocument"
+            )
 
     def test_all_have_required_fields(self) -> None:
         for proc in self.ALL_PROCESSORS:

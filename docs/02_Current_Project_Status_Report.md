@@ -1,6 +1,6 @@
 # LLM Wiki – Current Project Status Report
 
-> Generated from live codebase inspection (394 tests, 21+ ingestors, full pipeline analysis).
+> Generated from live codebase inspection (506 passing tests / 508 collected, 21+ ingestors, full pipeline analysis).
 
 ---
 
@@ -10,10 +10,10 @@
 |---|---|---|
 | **Architecture** | 85% | Clean layered architecture with domain/infrastructure separation. No web layer, no API, no database. |
 | **Ingestion** | 90% | 21 ingestors covering 50+ file types. Missing: email attachments, advanced archive recursion. |
-| **OCR** | 60% | Vision-model-based OCR for images and scanned PDFs (first 5 pages). Heuristic handwriting detection. |
-| **Images** | 55% | VisionClient sends images to Ollama. No preprocessing. No layout preservation. |
+| **OCR** | 85% | `DocumentOcrService` registry: vision-model engine (primary) + optional Tesseract fallback, configurable `page_limit` (default 5, 0 = all), per-page confidence, classifier-routed handwriting. |
+| **Images** | 65% | VisionClient sends images to Ollama. Optional preprocessing pipeline (deskew → denoise → CLAHE). No layout preservation. |
 | **Tables** | 30% | Passthrough only — cells as flat text. No Markdown table formatting. No structure parsing. |
-| **Chunking** | 70% | Three-tier (headings → paragraphs → sentences). `overlap_chars` declared but unused. |
+| **Chunking** | 75% | Three-tier (headings → paragraphs → sentences). Sentence splitting via pluggable `sentence_tokenizer` (M3.1: auto → nltk `punkt_tab` / stdlib heuristic); `overlap_chars` implemented (`_apply_overlap`). |
 | **Embeddings** | 75% | Working via Ollama `/api/embed`. Batch support. No caching, no dimension validation. |
 | **Vector DB** | 60% | Custom in-memory `dict` with brute-force cosine search. JSON persistence. No indexing. |
 | **Search** | 40% | `SemanticSearch` and `HybridSearch` classes exist. No CLI/API binding. Not wired into UX. |
@@ -24,7 +24,7 @@
 | **Queue** | 75% | Single-worker, state-persisted. No priority, no retry, no dead letter. |
 | **CLI** | 80% | 8 commands with rich formatting. Tab completion disabled. No progress bars. |
 | **Logging** | 75% | Console + rotating file. JSON format available. No structlog, no correlation IDs. |
-| **Testing** | 80% | 394 pytest functions, 26 test files, integration tests, E2E standalone scripts. 80% coverage threshold. |
+| **Testing** | 80% | 506 pytest functions, 36 test files, integration tests, E2E standalone scripts. 80% coverage threshold (measured 87.02%). |
 | **Documentation** | 40% | Code lacks inline comments. No developer setup guide. README has basic overview. |
 | **Deployment** | 10% | No Docker, no CI/CD, no packaging. Manual `uv run` only. |
 
@@ -70,7 +70,7 @@ Full list in `CURRENT-STATE.md`. All ingestors produce `SourceDocument` with ext
 - Corrupted manifest quarantine
 
 ### 2.8 Testing
-- 394 pytest functions across 26 test files
+- 506 passing pytest functions across 36 test files (508 collected, 2 deselected)
 - Integration tests exercise full pipeline with fake AI processors
 - Standalone E2E scripts test with real Ollama
 - 80% coverage threshold with `show_missing` reporting
@@ -79,12 +79,16 @@ Full list in `CURRENT-STATE.md`. All ingestors produce `SourceDocument` with ext
 
 ## 3. Partially Completed Features
 
-### 3.1 OCR (`app/infrastructure/routing/processor_impls.py`)
-- Vision-model OCR works for images and scanned PDFs
-- **Limited to first 5 pages** of scanned PDFs (`processor_impls.py`)
-- Falls back to empty string if PyMuPDF not installed
-- Handwriting detection is regex heuristic (`_looks_handwritten()`), not ML
-- No OCR confidence per page or region
+### 3.1 OCR (`app/infrastructure/document_intelligence/ocr/`)
+- `DocumentOcrService` registry + `OcrEngine` protocol (`run(source, *, prompt, preprocess=False) -> OcrResult`)
+- `VisionOcrEngine` (primary) — PyMuPDF renders pages via `render_pdf_pages` (configurable `zoom`, `page_limit`, `max_pages`), sends each page to the vision model with bounded retry + early stop on empty page; per-page failures degrade, never abort
+- `TesseractOcrEngine` (optional fallback) — offline printed-text OCR via pytesseract, per-page confidence mapping, lazy import with clear `ImportError` if absent
+- `OcrResult`/`PageOcrResult` — per-page confidence, empty/low-confidence page flags, aggregation via `from_pages`
+- `get_default_ocr_service(settings)` factory — `engine="auto"` (vision primary, Tesseract fallback), `enabled: false` → empty registry → passthrough
+- **Configurable page limit** — `page_limit` (default 5, 0 = all) + `max_pages` cap 200 replace the old hardcoded 5-page cap
+- **PyMuPDF required** — missing `fitz` raises a clear `ImportError` (pdf.py), no silent empty-text fallback
+- **Per-page confidence** — Tesseract maps `image_to_data` confidence; vision path keeps `confidence=None` and flags empty pages
+- **Handwriting** — routed by classifier (`source_type == "handwritten"` → `HandwritingProcessor` → vision engine); the Phase-1 regex heuristic was removed
 
 ### 3.2 Table Extraction
 - Raw cell text extracted by CSV/Spreadsheet ingestors
@@ -106,9 +110,10 @@ Full list in `CURRENT-STATE.md`. All ingestors produce `SourceDocument` with ext
 
 ### 3.5 Chunking (`app/infrastructure/semantic_chunking.py`)
 - Three-tier splitting: headings → paragraphs → sentences
-- `overlap_chars: int = 200` declared but **never used** in logic
-- No semantic boundary detection beyond regex
-- Character-based sizing, not token-aware
+- Sentence splitting via pluggable `sentence_tokenizer` engine (M3.1): `"auto"` (default) → nltk `punkt_tab` when the `intelligence` extra is installed, else stdlib heuristic; `"heuristic"`/`"nltk"` explicit
+- `overlap_chars: int = 200` implemented — `_apply_overlap` prepends the previous chunk's tail to each subsequent chunk
+- No semantic/topic boundary detection beyond sentence boundaries
+- Character-based sizing, not token-aware (G13 / M3.3)
 
 ### 3.6 Search (`app/infrastructure/search.py`)
 - `SemanticSearch` and `HybridSearch` implemented as library classes
@@ -145,7 +150,6 @@ Full list in `CURRENT-STATE.md`. All ingestors produce `SourceDocument` with ext
 ## 5. Technical Debt
 
 ### 5.1 Dead Code
-- `semantic_chunking.py:23` — `overlap_chars: int = 200` declared, never read
 - `domain/routing.py:22` — `requires_table_extraction` flag never consumed by any processor
 
 ### 5.2 Inefficient Code
@@ -180,7 +184,7 @@ Full list in `CURRENT-STATE.md`. All ingestors produce `SourceDocument` with ext
 | **Vector search O(n) at scale** | Medium (at >10K chunks) | High — seconds per query | Add basic indexing (FAISS IVF) |
 | **No token budget management** | High | Medium — LLM context overflows silently | Add token counting before prompt building |
 | **Vision model not pulled** | High (new users) | High — OCR/image pipeline fails silently | Add automated model pull or clear error message |
-| **PyMuPDF optional for OCR** | Medium | High — scanned PDF OCR returns empty text | Make PyMuPDF required or add clearer fallback |
+| **PyMuPDF required for OCR** | Low | Low — missing PyMuPDF raises a clear `ImportError` | PyMuPDF is a required dependency; install errors are explicit |
 | **Vector store JSON corruption** | Low | High — all vector data lost | Add atomic write + backup |
 | **Single queue worker** | Low (single user) | Medium — blocks on failed items | Add retry + dead letter |
 | **No graph persistence in pipeline** | High | Medium — KG rebuilt on every run | Call `KnowledgeGraph.save()` in pipeline |
@@ -197,7 +201,7 @@ Full list in `CURRENT-STATE.md`. All ingestors produce `SourceDocument` with ext
 | **Scalability** | 4/10 | O(n) vector search. Single worker. No async. No database. Designed for single-user local use. |
 | **Readability** | 7/10 | Clear naming conventions. Short methods. Missing inline comments on complex logic. |
 | **Modularity** | 8/10 | Well-separated concerns. Ingestors are pluggable. Processors are registrable. Queue/watcher decoupled. |
-| **Testing** | 8/10 | 394 tests. Integration + unit + E2E. Some gaps in edge cases and performance. |
+| **Testing** | 8/10 | 506 tests. Integration + unit + E2E. Some gaps in edge cases and performance. |
 | **Performance** | 5/10 | Synchronous pipeline. O(n) search. No caching. Adequate for single-user hobbyist scale. |
 
 ---
@@ -213,11 +217,11 @@ Source File
   │
   ├─ 📁 Processor Route   ✅ Complete — per-kind processor + model selection
   │
-  ├─ 📁 OCR/Image         🟡 Partial — first 5 pages, no preprocessing
+  ├─ 📁 OCR/Image         🟡 Partial — configurable page limit, vision + Tesseract, per-page confidence
   │
   ├─ 📁 Table Extract     🔴 Missing — flat text passthrough only
   │
-  ├─ 📁 Chunking          🟡 Partial — overlap_chars unused, no token awareness
+  ├─ 📁 Chunking          🟡 Partial — sentence tokenizer + overlap done, no token awareness
   │
   ├─ 📁 Embeddings        🟡 Partial — works, no caching, no dimension validation
   │
@@ -249,9 +253,9 @@ Source File
 | Priority | Milestone | Rationale |
 |---|---|---|
 | **High** | Wire search into CLI (`pam search <query>`) | Search classes exist but have no user binding. This unlocks the core value proposition. |
-| **High** | Make PyMuPDF required or add clear fallback | Scanned PDFs silently fail for users without PyMuPDF. |
 | **High** | Add progress bars to long-running operations | LLM analysis can take 30+ seconds with no visual feedback. |
-| **High** | Implement overlap in SemanticChunker | `overlap_chars` declared but unimplemented — context continuity between chunks is lost. |
+| **High** | Add progress bars to long-running operations | LLM analysis can take 30+ seconds with no visual feedback. |
+| **High** | Add token-aware chunk sizing | `max_chunk_chars` is character-based; token-aware sizing (G13 / M3.3) needed for consistent chunk sizes across languages. |
 
 ### Medium
 | Priority | Milestone | Rationale |
@@ -285,13 +289,13 @@ The project has a solid, well-architected foundation with good test coverage and
 - Obsidian note generation with 21 structured sections
 - CLI with diagnostics and configuration
 - State management with deduplication
-- Test suite with 394 tests
+- Test suite with 506 tests
 
 ### What needs work before v1.0:
 - **Vector store scaling** — O(n) scan won't hold up beyond a few thousand chunks
 - **Token budget management** — essential before processing large documents
 - **Search UX** — the core value (semantic search over your notes) has no user interface
-- **OCR completeness** — first-5-pages limit and silent PyMuPDF fallback
+- **OCR completeness** — configurable page limit is done; remaining gaps are layout preservation, region-level confidence, and multi-language OCR
 
 ### Verdict:
 The project is a **functional beta** for text-heavy personal knowledge management. It excels at its core use case: ingesting documents and generating structured Obsidian notes. It is not yet suitable for large-scale or multi-user scenarios. The architecture is clean enough that the critical paths are straightforward to improve.

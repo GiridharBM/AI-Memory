@@ -68,6 +68,18 @@ def test_create_default_wires_knowledge_engine(tmp_settings: Settings) -> None:
     assert workflow._vector_store._persistence_path == manifest_root / "vector_store.json"
 
 
+def test_create_default_plumbs_chunking_settings(tmp_settings: Settings) -> None:
+    workflow = IngestionWorkflow.create_default(tmp_settings)
+    assert workflow._chunker is not None
+    assert workflow._chunker.sentence_tokenizer == "auto"
+
+    tmp_settings.chunking.sentence_tokenizer = "heuristic"
+    workflow = IngestionWorkflow.create_default(tmp_settings)
+    assert workflow._chunker is not None
+    assert workflow._chunker.sentence_tokenizer == "heuristic"
+    assert workflow._chunker._tokenizer.__class__.__name__ == "_HeuristicSentenceTokenizer"
+
+
 def test_knowledge_engine_persists_and_merges(tmp_settings: Settings) -> None:
     workflow = IngestionWorkflow.create_default(tmp_settings)
     workflow._embedding_service = FakeEmbeddingService()

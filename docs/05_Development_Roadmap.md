@@ -78,7 +78,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Make PyMuPDF a required dependency. Replace the silent fallback with a clear `ImportError` at module level when `fitz` cannot be imported and OCR processing is requested. |
-| **Current status** | PyMuPDF is optional. Scanned PDF OCR silently returns empty text if not installed. |
+| **Current status** | **Done** — PyMuPDF is now a required dependency; `render_pdf_pages` (`ocr/pdf.py`) raises a clear `ImportError` with install instructions when `fitz` is missing. |
 | **Dependencies** | Add `PyMuPDF` to `pyproject.toml` dependencies |
 | **Priority** | Critical |
 | **Difficulty** | Trivial |
@@ -213,7 +213,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Add BM25 (Okapi BM25) sparse retrieval alongside dense vector search. Tokenize queries and documents, build inverted index with term frequencies + document frequencies. BM25 ranking formula. |
-| **Current status** | Simple keyword overlap (`sum(1 for w in query_words if w in text)`) in `HybridSearch`. No IDF weighting. No tokenization. |
+| **Current status** | **DELIVERED** (P5-101/102): deterministic Okapi-BM25 (`app/infrastructure/bm25.py`, k1=1.5, b=0.75), fused with dense via RRF. |
 | **Dependencies** | None (pure Python implementation or `rank_bm25` package) |
 | **Priority** | High |
 | **Difficulty** | Low |
@@ -226,7 +226,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Implement RRF to merge BM25 + Dense + (optional ColBERT) results. RRF score = Σ 1/(k + rank_i) for each result set. Default k=60. Returns top-k fused results. |
-| **Current status** | No fusion. `HybridSearch` does a weighted sum of semantic + keyword scores. |
+| **Current status** | **DELIVERED** (P5-102): `_rrf_fuse` in `search.py`, k=60, fuses dense + BM25 candidate sets. |
 | **Dependencies** | Phase 4.1 (BM25) |
 | **Priority** | High |
 | **Difficulty** | Low |
@@ -265,7 +265,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Add structured filter support to search: filter by `source_type`, `date_range`, `tags`, `categories`, `difficulty`. Filters can be pre-filter (before vector search) or post-filter (after). Implement filter query syntax: `search("query", filter={"source_type": {"$in": ["pdf", "markdown"]}})`. |
-| **Current status** | No filtering. `VectorStore.search()` scans all entries. |
+| **Current status** | **PARTIAL** (P5-105): exact-match filters on entry fields then metadata keys (`SearchService.search(filter=...)`, `VectorStore.search(filters=...)`, `pam search --filter/--source-type`). Structured `$in`/range syntax **deferred**. |
 | **Dependencies** | Phase 1.1 (FAISS, which supports ID-based filtering) |
 | **Priority** | High |
 | **Difficulty** | Medium |
@@ -291,7 +291,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Add `pam search <query>` CLI command. Accepts: `--top-k`, `--filter`, `--source-type`, `--min-score`. Uses `SemanticSearch` or `HybridSearch`. Displays results as a rich table with score, source, and snippet. |
-| **Current status** | `SemanticSearch` and `HybridSearch` exist as library classes only. No CLI binding, no API, no way to search from the command line. |
+| **Current status** | **DELIVERED** (P5-104): `pam search <query> [--top-k] [--filter] [--source-type] [--min-score]` renders a Rich table with score, source, and snippet. |
 | **Dependencies** | Phase 1.1 (FAISS for speed) |
 | **Priority** | High |
 | **Difficulty** | Low |
@@ -323,7 +323,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Add a simple graph query API: `graph.query("MATCH (n:concept)-[:mentioned_in]->(m:note) WHERE n.label = 'Attention' RETURN m")`. Implement as method chaining or simple pattern matching over the in-memory graph. Not a full Cypher engine — a Python API. |
-| **Current status** | Only `neighbors()` and `subgraph()` methods. No declarative query interface. |
+| **Current status** | **DELIVERED (P4-105)** — `query_graph(start_node=..., edge_type=..., target_type=..., max_depth=..., limit=...)` in `app/infrastructure/document_intelligence/graph/query.py` implements the roadmap success criterion as a Python API over the in-memory `KnowledgeGraph` (no Cypher engine). Complements the P4-104 `find_relationships` filter and the existing `neighbors()`/`subgraph()` methods. The pipeline's `metadata.extra["knowledge_graph"]` artifact loads via `graph_from_dict` for direct querying.
 | **Dependencies** | Phase 5.1 |
 | **Priority** | Medium |
 | **Difficulty** | Medium |
@@ -368,7 +368,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Add preprocessing before sending images to vision model: deskew (correct rotation), denoise (Gaussian/median filter), binarize (Otsu threshold for document images), contrast enhancement (CLAHE). Configurable pipeline stages. |
-| **Current status** | Raw image bytes sent to vision model. No preprocessing. Noisy/dark/rotated images produce poor OCR. |
+| **Current status** | **Partial** — deskew → denoise → CLAHE pipeline shipped (`imaging/preprocess.py`, default off via `preprocess` flag); binarize/auto-tune and on-by-default remain. |
 | **Dependencies** | `opencv-python` or `pillow` + `scikit-image` |
 | **Priority** | Medium |
 | **Difficulty** | Medium |
@@ -381,7 +381,7 @@
 | Field | Value |
 |---|---|
 | **Description** | Add Tesseract OCR as a local alternative (or complement) to vision-model OCR. Tesseract is faster, lighter, and runs without GPU. Use `pytesseract` wrapper. Fall back to vision model for handwritten or unusual fonts. |
-| **Current status** | Vision-model-only OCR. PyMuPDF renders pages at 2x zoom, sends to vision model. 5-page limit. |
+| **Current status** | **Done** — `TesseractOcrEngine` shipped (`ocr/engines.py`); `intelligence.ocr` config with `engine="auto"` (vision primary, Tesseract fallback), configurable `page_limit` (default 5, 0 = all), per-page confidence. |
 | **Dependencies** | Tesseract OCR engine + `pytesseract` |
 | **Priority** | Medium |
 | **Difficulty** | Medium |
@@ -612,8 +612,8 @@
 | Token counting + truncation | Critical | Low | 1 week | 1 | Pending |
 | KG persistence in pipeline | Critical | Trivial | 1 day | 1 | Pending |
 | Chunk overlap implementation | Critical | Low | 1 day | 1 | Pending |
-| Atomic vector store writes | Critical | Trivial | 1 day | 1 | Pending |
-| PyMuPDF as required dependency | Critical | Trivial | 1 hour | 1 | Pending |
+| Atomic vector store writes | Critical | Trivial | 1 day | 1 | Done (Phase 1) |
+| PyMuPDF as required dependency | Critical | Trivial | 1 hour | 1 | Done (Phase 1) |
 | MIME-type detection | High | Low | 3 days | 2 | Pending |
 | Language detection | High | Low | 2 days | 2 | Pending |
 | Ingestion hooks | Medium | Medium | 1 week | 2 | Pending |
@@ -633,8 +633,8 @@
 | Graph query API | Medium | Medium | 2 weeks | 5 | Pending |
 | Entity resolution | Medium | High | 3 weeks | 5 | Pending |
 | Graph-augmented retrieval | Low | High | 3 weeks | 5 | Pending |
-| Image preprocessing | Medium | Medium | 2 weeks | 6 | Pending |
-| Tesseract full-page OCR | Medium | Medium | 2 weeks | 6 | Pending |
+| Image preprocessing | Medium | Medium | 2 weeks | 6 | Partial (M2.1) |
+| Tesseract full-page OCR | Medium | Medium | 2 weeks | 6 | Done (M2.1) |
 | Layout preservation | Medium | High | 3 weeks | 6 | Pending |
 | Diagram-to-Mermaid | Low | High | 3 weeks | 6 | Pending |
 | Table detection in PDFs | High | Medium | 2 weeks | 7 | Pending |

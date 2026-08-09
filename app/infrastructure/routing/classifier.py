@@ -26,6 +26,7 @@ from app.core.extensions import (
 )
 from app.domain.documents import SourceDocument
 from app.domain.routing import DocumentClassification
+from app.infrastructure.document_intelligence.metadata import detect_language, detect_mime
 
 EXTENSION_KIND_MAP: dict[str, str] = {
     **{ext: "config" for ext in CONFIG_EXTENSIONS},
@@ -78,11 +79,16 @@ SOURCE_TYPE_FALLBACK: dict[str, str] = {
 class DocumentClassifier:
     """Classify source documents into structured kinds."""
 
+    def __init__(self, mime_enabled: bool = True, language_detection_enabled: bool = True) -> None:
+        self._mime_enabled = mime_enabled
+        self._language_enabled = language_detection_enabled
+
     def classify(self, document: SourceDocument) -> DocumentClassification:
         path = document.source_path
         extension = path.suffix.lower() if path else Path(document.filename).suffix.lower()
-        mime_type, _ = mimetypes.guess_type(document.filename)
+        mime_type = self._detect_mime(document)
         kind = self._detect_kind(extension, document.source_type)
+        language = self._detect_language(document)
         requires_ocr = kind in {"scanned_pdf", "handwritten", "image"}
         requires_vision = kind in {"image", "handwritten", "video"}
         requires_table = kind in {"csv", "spreadsheet", "database"}
@@ -94,12 +100,25 @@ class DocumentClassifier:
             extension=extension or None,
             mime_type=mime_type,
             kind=kind,
+            language=language,
             requires_ocr=requires_ocr,
             requires_vision=requires_vision,
             requires_table_extraction=requires_table,
             requires_code_parsing=requires_code,
             confidence=self._confidence_for(kind),
         )
+
+    def _detect_mime(self, document: SourceDocument) -> str | None:
+        if self._mime_enabled and document.source_path is not None:
+            return detect_mime(document.source_path)
+        guessed, _ = mimetypes.guess_type(document.filename)
+        return guessed
+
+    def _detect_language(self, document: SourceDocument) -> str | None:
+        if not self._language_enabled:
+            return None
+        lang, _ = detect_language(document.text)
+        return lang
 
     @staticmethod
     def _detect_kind(extension: str, source_type: str) -> str:

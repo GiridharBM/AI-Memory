@@ -73,6 +73,9 @@ def test_cli_doctor_reports_mocked_ollama_available(monkeypatch: pytest.MonkeyPa
     assert result.exit_code == 0
     assert "Doctor" in result.output
     assert "Ollama" in result.output
+    assert "OCR" in result.output
+    assert "Vision model" in result.output
+    assert "Tesseract binary" in result.output
 
 
 def test_cli_ingest_markdown_uses_workflow(
@@ -131,6 +134,160 @@ def test_cli_watch_starts_service(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "Queue started" in result.output
     assert "Worker started" in result.output
     assert "Waiting..." in result.output
+
+
+def test_cli_search_displays_ranked_results(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeSearchService:
+        last: tuple[object, ...] | None = None
+
+        @classmethod
+        def create_default(
+            cls, settings: object, *, embed: object | None = None
+        ) -> FakeSearchService:
+            return cls()
+
+        def search(
+            self,
+            query: str,
+            *,
+            top_k: int = 5,
+            filter: object | None = None,
+            min_score: float = 0.0,
+        ) -> list[SimpleNamespace]:
+            type(self).last = (query, top_k, filter, min_score)
+            return [
+                SimpleNamespace(
+                    score=0.5,
+                    source="doc.md",
+                    source_type="markdown",
+                    text="python async snippet " * 10,
+                ),
+            ]
+
+    monkeypatch.setattr(entry, "SearchService", FakeSearchService)
+
+    result = runner.invoke(entry.cli, ["search", "python async", "--top-k", "3"])
+
+    assert result.exit_code == 0
+    assert "Search: python async" in result.output
+    assert "doc.md" in result.output
+    assert "markdown" in result.output
+    assert "0.5000" in result.output
+    assert FakeSearchService.last == ("python async", 3, None, 0.0)
+
+
+def test_cli_search_merges_source_type_and_filter(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeSearchService:
+        last: tuple[object, ...] | None = None
+
+        @classmethod
+        def create_default(
+            cls, settings: object, *, embed: object | None = None
+        ) -> FakeSearchService:
+            return cls()
+
+        def search(
+            self,
+            query: str,
+            *,
+            top_k: int = 5,
+            filter: object | None = None,
+            min_score: float = 0.0,
+        ) -> list[SimpleNamespace]:
+            type(self).last = (query, top_k, filter, min_score)
+            return []
+
+    monkeypatch.setattr(entry, "SearchService", FakeSearchService)
+
+    result = runner.invoke(
+        entry.cli,
+        [
+            "search", "python",
+            "--source-type", "pdf",
+            "--filter", '{"heading": "Intro"}',
+            "--min-score", "0.1",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert FakeSearchService.last == (
+        "python", 5, {"heading": "Intro", "source_type": "pdf"}, 0.1,
+    )
+
+
+def test_cli_search_no_results(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeSearchService:
+        @classmethod
+        def create_default(
+            cls, settings: object, *, embed: object | None = None
+        ) -> FakeSearchService:
+            return cls()
+
+        def search(
+            self,
+            query: str,
+            *,
+            top_k: int = 5,
+            filter: object | None = None,
+            min_score: float = 0.0,
+        ) -> list[SimpleNamespace]:
+            return []
+
+    monkeypatch.setattr(entry, "SearchService", FakeSearchService)
+
+    result = runner.invoke(entry.cli, ["search", "zzz"])
+
+    assert result.exit_code == 0
+    assert "No results found." in result.output
+
+
+def test_cli_search_empty_query_exits_one() -> None:
+    result = runner.invoke(entry.cli, ["search", "   "])
+    assert result.exit_code == 1
+    assert "must not be empty" in result.output
+
+
+def test_cli_search_bad_filter_json_exits_one() -> None:
+    result = runner.invoke(entry.cli, ["search", "python", "--filter", "{not-json"])
+    assert result.exit_code == 1
+    assert "Invalid --filter JSON" in result.output
+
+
+def test_cli_search_non_object_filter_exits_one() -> None:
+    result = runner.invoke(entry.cli, ["search", "python", "--filter", "[1, 2]"])
+    assert result.exit_code == 1
+    assert "must be a JSON object" in result.output
+
+
+def test_cli_search_zero_top_k_exits_two() -> None:
+    result = runner.invoke(entry.cli, ["search", "python", "--top-k", "0"])
+    assert result.exit_code == 2
+
+
+def test_cli_search_handles_service_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeSearchService:
+        @classmethod
+        def create_default(
+            cls, settings: object, *, embed: object | None = None
+        ) -> FakeSearchService:
+            return cls()
+
+        def search(
+            self,
+            query: str,
+            *,
+            top_k: int = 5,
+            filter: object | None = None,
+            min_score: float = 0.0,
+        ) -> list[SimpleNamespace]:
+            raise RuntimeError("store corrupt")
+
+    monkeypatch.setattr(entry, "SearchService", FakeSearchService)
+
+    result = runner.invoke(entry.cli, ["search", "python"])
+
+    assert result.exit_code == 1
+    assert "Search failed" in result.output
 
 
 def _workflow_result(tmp_path: Path) -> SimpleNamespace:

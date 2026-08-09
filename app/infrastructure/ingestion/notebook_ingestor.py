@@ -6,6 +6,7 @@ import json
 
 from app.core.logging import get_logger
 from app.domain.documents import DocumentMetadata, SourceDocument
+from app.infrastructure.document_intelligence.code import parse_notebook
 from app.infrastructure.ingestion.base import (
     BaseIngestor,
     IngestionError,
@@ -22,6 +23,10 @@ class NotebookIngestor(BaseIngestor):
 
     source_type = "notebook"
     supported_suffixes = (".ipynb",)
+
+    def __init__(self, *, max_cell_outputs: int | None = None) -> None:
+        """Cap cell outputs via ``CodeSettings.max_cell_outputs``; None = parser default."""
+        self._max_cell_outputs = max_cell_outputs
 
     def ingest(self, source: SourceReference) -> SourceDocument:
         path = require_path_source(source, ingestor_name="NotebookIngestor")
@@ -72,6 +77,7 @@ class NotebookIngestor(BaseIngestor):
                     "cell_count": len(cells),
                     "kernel": kernel.get("display_name", ""),
                     "language": lang,
+                    "notebook_structure": parse_notebook(notebook, self._max_cell_outputs),
                 },
             ),
         )

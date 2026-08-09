@@ -31,6 +31,10 @@ Thumbs.db
 data/cache/*
 data/logs/*
 data/staging/*
+data/inbox/*
+data/processed/*
+data/failed/*
+data/manifests/*
 
 # Keep directory structure
 !data/cache/.gitkeep

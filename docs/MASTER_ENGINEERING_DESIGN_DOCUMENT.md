@@ -2,13 +2,27 @@
 
 > **Project:** Personal AI Memory System (PAM) / LLM-Wiki
 >
-> **Version:** 0.1.0
+> **Version:** 0.12.0
 >
 > **Classification:** Internal — Single Source of Truth
 >
 > **Author:** Principal Software Architect & AI Systems Architect
 >
-> **Date:** 2026-07-30
+> **Date:** 2026-08-09
+>
+> **Version history:**
+> - **0.12.0 (2026-08-09)** — Phase 6 (Production Hardening & Final Validation, P6-101..P6-106) implemented and verified: performance benchmark (P6-102, 20k-document corpus, 352 ms/query), failure isolation — child attachment failures no longer abort the parent item and a manifest save failure keeps the item DONE (P6-103, +2 tests); security/configuration audit (P6-104) — 34 personal runtime files untracked from git (`.gitignore` extended to `data/inbox|processed|failed|manifests/*`, `.gitkeep` whitelist preserved), `PyMuPDF`/`openpyxl` added to `requirements.txt`, production/development config separation locked by test; independent end-to-end validation (P6-105) — 15 flows × 10 dimensions verified by 25 independent checks against the live application; final project approval (P6-106). Suite: 1398 tests, 90.04% coverage. No new features; no architectural changes; Phase 6 evaluation-tooling roadmap rows (§5 Phase 6) deferred to backlog — the executed Phase 6 delivered hardening + validation instead.
+> - **0.11.0 (2026-08-09)** — Phase 5 (Hybrid Retrieval, P5-101..P5-105) implemented: deterministic Okapi-BM25 sparse index (`app/infrastructure/bm25.py`, `k1=1.5`, `b=0.75`, stdlib-only, P5-101/102); reciprocal rank fusion `_rrf_fuse` (k=60) replacing the weighted-sum hybrid (P5-102); scoring verification locking the roadmap 4.1 success criterion (P5-103); `SearchService` facade (`create_default` + `search(query, *, top_k=5, filter=None, min_score=0.0)`) and `pam search` CLI (P5-104); retrieval optimization — precomputed entry norms, version-keyed BM25 cache (`store.version`), deterministic `(-score, entry.id)` ordering, additive `start_char`/`end_char` on `VectorEntry`, exact-match metadata filtering, and embedder/BM25 failure fallback (P5-105). §7.6 Retrieval Module Current Implementation/Interfaces rewritten; Phase 4 roadmap §4.1/§4.2/§4.7 rows marked delivered, §4.5 marked partial (exact-match shipped, `$in` deferred); §4.3/§4.4/§4.6 deferred. Phase 5 adds no dependencies.
+> - **0.10.0 (2026-08-08)** — Phase 4 (Document Knowledge Graph, P4-101..P4-105) implemented: validated `Entity`/`Relationship` domain models (`app/domain/entity_relationship.py`, P4-101); deterministic regex `EntityExtractor` (P4-102); co-occurrence `RelationshipDetector` (P4-103); `DocumentGraphBuilder` mapping entities/relationships onto the existing in-memory `KnowledgeGraph` with `find_relationships` + `graph_to_dict` (P4-104); query layer (`get_entity`, `related_entities`, `nodes_by_source`, `query_graph`, `graph_from_dict`) consuming the pipeline's `metadata.extra["knowledge_graph"]` artifact (P4-105). Phase 4 ships no graph storage/retrieval and no graph DB; additive `EntitySettings`/`RelationshipSettings`/`GraphSettings` toggles (R-4 rollback). §7.7 Knowledge Graph Module Current Implementation added; Phase 5 §5.2 roadmap Graph Query row marked delivered (P4-105 `query_graph`).
+> - **0.9.0 (2026-08-08)** — Milestone 3.2 (Hierarchical Semantic Chunking, G14) implemented: `SemanticChunker` is now a block tokenizer over heading hierarchy — heading path/parent/level metadata on every chunk (P3-201, native in-chunker hierarchy per the P3-201 O-1 user decision over the `metadata.extra["structure"]` seam); list-aware splitting at whole top-level items (P3-202); fenced-code atomic blocks with language metadata + inline-code sentence masking (P3-203); structured content preserved byte-for-byte (Markdown/HTML tables, blockquotes, callouts, definition lists) with hard-boundary overlap (P3-204); and an adaptive `ChunkingPolicy` (dynamic heading-depth sizing, paragraph/list-snapped overlap, heading hard boundaries) with P3-204-identical defaults, configurable via `ChunkingSettings` + `config/default.yaml` + env (P3-205). §7.4 Current Implementation/Interfaces rewritten; Phase 3 §5 roadmap G14 row marked delivered.
+> - **0.8.0 (2026-08-06)** — Milestone 3.1 (NLP Sentence Segmentation, G12) implemented: new `sentence_tokenizer.py` module (`SentenceTokenizer` protocol + engine registry + `get_sentence_tokenizer` factory; abbreviation-aware stdlib heuristic engine; optional NLTK `punkt_tab` engine via the `intelligence` extra); `SemanticChunker` sentence splitting now delegates to the configurable engine (`sentence_tokenizer: str = "auto"`), `overlap_chars` implemented (`_apply_overlap`), `_SENTENCE_END` regex removed; `ChunkingSettings` + `chunking:` config block plumbed end-to-end; regression suite proves all existing chunking tests pass under `heuristic`/`nltk`/`auto` (R-2). §7.4 Current Implementation rewritten; Phase 3 §5 roadmap G12 row marked delivered.
+> - **0.7.0 (2026-08-04)** — Milestone 2.6 (Code & Notebook Intelligence) implemented: new `code/` module (`language_from_filename` registry + `_AstCodeParser`/`_HeuristicCodeParser` + `NotebookParser`); `_enrich_code` wiring at the shared P2-305 call site (`code_structure` / `notebook_structure` channels); `CodeSettings` config (frozen §4.6); notebook ingestor upgrade (Option 2); Phase 2 roadmap, gap matrix, and checklist marked delivered; §2.4 ingestion subsystem and new §7.3d module spec refreshed.
+> - **0.6.0 (2026-08-04)** — Milestone 2.5 (Image Intelligence) implemented: new `images/` module (`ImageAnalyzer` single EXIF owner + `DiagramParser` Mermaid conversion); shared preprocessing wired into both OCR engines; config `max_dimensions`/`max_bytes` aligned to frozen §4.5; G37/G33 status and Epic 8 rows marked delivered; subsystem table refreshed.
+> - **0.5.0 (2026-08-03)** — Milestone 2.4 (Table Intelligence) implemented: new Table Intelligence module (`TableExtractor` registry + CSV/spreadsheet/PDF extractors + `MarkdownTableRenderer`); tables ride `metadata.extra["tables"]` (R-1 channel, §7.3 cross-reference); G35/G36 marked delivered; ADR-002 consequence chain updated (pdfplumber default engine); subsystem table refreshed.
+> - **0.4.0 (2026-08-02)** — Milestone 2.3 (Document Structure Analysis) implemented: new §7.3 module (`StructureAnalyzer` + heading/block detection + tree builder); §7.4 chunking target-architecture input contract; subsystem table and top-level architecture diagram refreshed; Phase 2 roadmap and Epic 2 rows marked delivered.
+> - **0.3.0 (2026-08-01)** — Milestone 2.2 (Metadata Extraction Framework) synchronized: §2.4 subsystem rewritten (enrichment pipeline, hooks, MIME/language detection, email attachments); ADR-001 consequence chain updated; subsystem table refreshed.
+> - **0.2.0 (2026-08-01)** — Milestone 2.1 (OCR Engine) implemented: OCR module §7.2 rewritten to the `DocumentOcrService` architecture; constraint 9 (No Tesseract OCR) and 8 (No image preprocessing) updated; Gap G33/G34 and Epic 8 status updated; subsystem table refreshed.
+> - **0.1.0 (2026-07-30)** — Initial baseline; Phase 1 foundation fixes documented (atomic writes, PyMuPDF gate, DoD tests).
 
 ---
 
@@ -33,7 +47,7 @@
 
 Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian knowledge-base builder that processes documents through an AI pipeline powered by Ollama. It ingests 100+ file types across 20+ categories, extracts structured knowledge via local LLMs, and generates interconnected Obsidian notes with YAML frontmatter, wiki-links, semantic chunking, embeddings, vector search, and a knowledge graph.
 
-**Current version:** 0.1.0 (pre-1.0). Maturity: ~65%.
+**Current version:** 0.12.0 (pre-1.0). Maturity: ~80%.
 
 ## 1.2 Overall Architecture
 
@@ -63,9 +77,10 @@ Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian k
 │                      IngestionWorkflow                               │
 │                                                                      │
 │  1. DocumentIngestionService ───→ 20+ ingestors                     │
-│  2. DocumentClassifier ────────→ extension → kind mapping           │
+│  2. DocumentClassifier ────────→ extension + MIME + language → kind  │
 │  3. ProcessorRouter ───────────→ selects processor + model          │
 │  4. RoutedProcessor ───────────→ OCR / Vision / Audio / Text        │
+│  4a. StructureAnalyzer ────────→ heading/block tree → extra["structure"] (M2.3) │
 │  5. DocumentAIProcessor ───────→ Ollama LLM analysis                │
 │  6. SemanticChunker ───────────→ heading→paragraph→sentence         │
 │  7. EmbeddingService ──────────→ nomic-embed-text vectors           │
@@ -95,6 +110,10 @@ Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian k
 | **Document Ingestion** | 20+ Protocol-based ingestors | ~800 | Stable |
 | **Classifier & Routing** | Extension mapping → processor selection | ~250 | Stable |
 | **Document Processing** | 20 processors (text, OCR, vision, audio) | ~500 | Stable |
+| **OCR Engine** | `DocumentOcrService` + vision/Tesseract engines + render service | ~400 | Stable (M2.1) |
+| **Metadata Extraction** | `DocumentMetadataService` + extractors + MIME/language detection + hooks | ~800 | Stable (M2.2) |
+| **Document Structure Analysis** | `StructureAnalyzer` + heading/block detection + tree builder | ~330 | Stable (M2.3) |
+| **Table Intelligence** | `TableExtractor` registry + CSV/spreadsheet/PDF extractors + `MarkdownTableRenderer` | ~470 | Stable (M2.4) |
 | **LLM Client** | Ollama with retry, JSON extraction | 323 | Stable |
 | **Vision Client** | Ollama multimodal | 95 | Functional |
 | **Whisper Transcriber** | faster-whisper integration | 39 | Basic |
@@ -111,7 +130,7 @@ Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian k
 | **Vault Writer** | Managed content blocks, index, overview, log | 343 | Stable |
 | **Version Manager** | Per-note version history | 110 | Functional |
 | **File Extensions** | 17 categories, 110+ frozensets | 62 | Stable |
-| **Tests** | 386 unit + integration, 84.77% coverage | ~5000 | Strong |
+| **Tests** | 1398 unit + integration, 90.04% coverage | ~6000 | Strong |
 
 ## 1.3 Strengths
 
@@ -119,7 +138,7 @@ Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian k
 
 2. **Clean Architecture with Protocol-based DI.** The separation of domain, infrastructure, and pipelines layers is genuine, not aspirational. `Protocol` classes for `DocumentProcessor`, `NoteGenerator`, `NoteWriter`, and `BaseIngestor` make the system testable and replaceable.
 
-3. **Exceptional test suite maturity.** 386 tests at 84.77% coverage with unit, integration, and E2E layers. The structural consistency pattern (`test_all_return_processed_document`) that iterates ALL processors is a best practice rarely seen. The milestone report artifacts (MILESTONE_3_REPORT, MILESTONE_4_REPORT, PROJECT_HEALTH_REPORT) demonstrate engineering maturity beyond typical 0.1.0 projects.
+3. **Exceptional test suite maturity.** 1398 tests at 90.04% coverage with unit, integration, and E2E layers. The structural consistency pattern (`test_all_return_processed_document`) that iterates ALL processors is a best practice rarely seen. The milestone report artifacts (MILESTONE_3_REPORT, MILESTONE_4_REPORT, PROJECT_HEALTH_REPORT) demonstrate engineering maturity beyond typical 0.1.0 projects.
 
 4. **Comprehensive file type support.** 20+ ingestors covering 100+ extensions across 17 categories — from PDF and DOCX to YouTube transcripts, SQLite databases, and GitHub READMEs.
 
@@ -184,9 +203,9 @@ See [Section 4: Technical Debt Report](#4-technical-debt-report) for the complet
 
 7. **No table intelligence.** Tables in PDFs are extracted as jumbled flat text. No `camelot`/`tabula` integration for structured table extraction. No markdown table formatting in notes.
 
-8. **No image preprocessing.** Raw image bytes sent to the vision model. No deskew, denoise, CLAHE enhancement, or binarization.
+8. **No image preprocessing by default.** Preprocessing (deskew, denoise, CLAHE) is implemented (Milestone 2.1) but disabled by default (`intelligence.ocr.preprocess: false`) and optional (Pillow/numpy absent → no-op). Documented in §7.2.
 
-9. **No Tesseract OCR.** OCR relies entirely on the vision model — slow (~15s/page) and GPU-dependent. No local Tesseract fallback for printed text.
+9. **Tesseract OCR is optional.** OCR defaults to the vision model (primary) with a Tesseract offline fallback (`engine="auto"`). The Tesseract binary and `pytesseract` package are optional dependencies; the vision path remains GPU/network-dependent, the Tesseract path CPU-only.
 
 10. **No web UI.** Terminal-only CLI. No REST API, no web interface, no Obsidian plugin integration.
 
@@ -204,7 +223,7 @@ See [Section 4: Technical Debt Report](#4-technical-debt-report) for the complet
 
 | Dimension | Score | Notes |
 |-----------|-------|-------|
-| **Test coverage** | 8/10 | 84.77%, strong unit + integration + E2E, but live-service tests fragile |
+| **Test coverage** | 8/10 | 90.04%, strong unit + integration + E2E, but live-service tests fragile |
 | **Error handling** | 6/10 | Inconsistent — some paths have retry with backoff, others have bare `except Exception` |
 | **Observability** | 5/10 | Good structured logging, but no metrics, no tracing, no health endpoints |
 | **Data integrity** | 6/10 | Atomic writes on critical paths, but no transactions across multi-step operations |
@@ -218,7 +237,7 @@ See [Section 4: Technical Debt Report](#4-technical-debt-report) for the complet
 
 The project demonstrates **above-average engineering maturity** for a pre-1.0 project:
 
-- **Strong testing culture:** 386 tests, 84.77% coverage, layered unit/integration/E2E strategy, structural consistency checks.
+- **Strong testing culture:** 1398 tests, 90.04% coverage, layered unit/integration/E2E strategy, structural consistency checks.
 - **Clean architecture:** Genuine layer separation, dependency injection via Protocols, testable by design.
 - **Professional documentation:** Milestone reports, health reports, convergence documents.
 - **Good practices:** Atomic writes, structured logging, Pydantic validation, type annotations everywhere, pre-commit hooks.
@@ -375,21 +394,29 @@ Convert source files (filesystem paths or URLs) into standardized `SourceDocumen
 - Return success/failure result
 
 ### Current Implementation
-20+ ingestors in `app/infrastructure/ingestion/`, each implementing `BaseIngestor` protocol. Registration is eager (all instantiated in `DocumentIngestionService.__init__()`). Selection is first-match by extension.
+21 ingestors in `app/infrastructure/ingestion/`, each implementing `BaseIngestor` protocol. Registration is eager (all instantiated in `DocumentIngestionService.__init__()`). Selection is first-match by extension. The service additionally runs a metadata enrichment pipeline (Milestone 2.2): size guard → pre-hooks → ingestor → metadata extraction/merge → post-hooks.
+
+The metadata subsystem lives in `app/infrastructure/document_intelligence/metadata/`:
+- **Metadata registry** — `DocumentMetadataService` (in `__init__.py`) registers `MetadataExtractor` implementations, selects them by `source_types` in registration order, and merges their output into a `MetadataExtraction`; unknown keys route to `DocumentMetadata.extra`.
+- **Built-in extractors** — `extractors.py`: `PdfExtractor` (pypdf metadata, moved out of `PdfIngestor`), `DocxExtractor`, `PptxExtractor` (OOXML core/app properties via stdlib `zipfile` + `ElementTree`), `NotebookExtractor`, `AudioExtractor`, `EmailExtractor`; all stdlib-only except PDF.
+- **MIME detection** — `mime.py` `detect_mime(path)`: extension → magic-byte sniff → stdlib fallback table (see ADR-001). Consumed by `DocumentClassifier` for extensionless files.
+- **Language detection** — `language.py` `detect_language(text)`: optional `py3langid`, else stdlib heuristic (en/fr/de/ja). Populated on `DocumentClassification.language` and drives the analysis prompt's respond-in-{language} instruction.
+- **Hook system** — `hooks.py` `IngestionHook` protocol (pre/post); named hooks resolved from `intelligence.metadata.hooks.pre/post`; per-hook `try/except` containment.
+- **Email attachment parsing** — `EmailIngestor` writes `Content-Disposition: attachment` parts to a per-run temp dir (sanitized filenames); `IngestionWorkflow._ingest_children` re-ingests them as child documents with `parent_id`, capped by `max_attachments` and depth-limited to one level.
+- **Notebook structure** — `NotebookIngestor` attaches `metadata.extra["notebook_structure"]` via `parse_notebook` (M2.6, Option 2); consumed (passed through) by `_enrich_code` at the pipeline enrichment site. Flattened fenced text is preserved for backward compatibility.
 
 ### Problems
 - Eager instantiation of all ingestors regardless of use
-- First-match selection ignores MIME type; extension-only
+- First-match ingestor selection is extension-only (MIME type is applied by the classifier, not the ingestor registry)
 - URL-based ingestors must override `can_ingest()` — inconsistent
-- No timeout for URL-based ingestion
-- No pre/post processing hooks
+- `url_timeout_seconds` config key defined but not yet consumed (URL ingestors use hardcoded timeouts)
 
 ### Goals
-- MIME-type based detection alongside extension
-- Lazy ingestor instantiation
-- Pre/post processing hook system
-- Timeout and size limits for remote sources
-- Unified URL and file handling
+- ~~MIME-type based detection alongside extension~~ → **Implemented** (`detect_mime`, ADR-001)
+- Lazy ingestor instantiation (future)
+- ~~Pre/post processing hook system~~ → **Implemented** (`IngestionHook`, hook chain)
+- ~~Size limits~~ → **Implemented** (`max_file_size_mb` reject-before-read); timeout config key defined, consumption pending
+- Unified URL and file handling (future)
 
 ### Functional Requirements
 - `FR-ING-1`: Accept file path (str or Path) and URL string
@@ -413,24 +440,31 @@ Convert source files (filesystem paths or URLs) into standardized `SourceDocumen
 sequenceDiagram
     participant C as Caller
     participant S as DocumentIngestionService
+    participant G as SizeGuard
+    participant H as HookExecutor
     participant R as IngestionRegistry
     participant I as BaseIngestor
-    participant H as HookExecutor
+    participant M as MetadataService
     participant D as domain
 
     C->>S: ingest(source)
     S->>S: _normalize_source(source)
-    S->>R: select(source)
-    R->>R: match by extension + MIME
+    S->>G: _enforce_size_limit(source)
+    S->>H: _run_pre_hooks(source)
+    S->>R: _select_ingestor(source)
+    R->>R: match by extension
     R-->>S: ingestor
-    S->>H: execute_pre_hooks(source)
     S->>I: ingest(source)
     I->>I: read + normalize + extract
     I-->>S: SourceDocument
-    S->>H: execute_post_hooks(document)
+    S->>M: _enrich_document(document)
+    M->>M: extract matching extractors + merge
+    M-->>S: enriched SourceDocument
+    S->>H: _run_post_hooks(document)
     S->>S: wrap in result
     S-->>C: DocumentIngestionResult
 ```
+*Email attachments:* `IngestionWorkflow.run()` then calls `_ingest_children(document)` — each `attachment_paths` entry is re-ingested through the same service as a child document (`parent_id` set), capped by `max_attachments` and depth-limited to one level.
 
 ### Interfaces
 
@@ -443,10 +477,20 @@ class BaseIngestor(ABC):
     def ingest(self, source: SourceReference) -> SourceDocument  # abstract
 
 class DocumentIngestionService:
-    def __init__(self, ingestors: list[BaseIngestor] | None = None)
+    def __init__(self, ingestors: list[BaseIngestor] | None = None, *,
+                 settings: Settings | None = None,
+                 hooks: Iterable[IngestionHook] | None = None,
+                 metadata_service: DocumentMetadataService | None = None)
     def ingest(self, source: str | Path) -> DocumentIngestionResult
     def register(self, ingestor: BaseIngestor) -> None
     def supported_extensions(self) -> tuple[str, ...]
+
+class DocumentMetadataService:
+    def register(self, extractor: MetadataExtractor) -> None
+    def extractors_for(self, source_type: str) -> list[MetadataExtractor]
+    def extract(self, document: SourceDocument) -> MetadataExtraction
+    @staticmethod
+    def merge(metadata: DocumentMetadata, extraction: MetadataExtraction) -> DocumentMetadata
 ```
 
 ### Public Contracts
@@ -457,6 +501,7 @@ class DocumentIngestionService:
 ### Data Models
 - `SourceDocument`: source, source_path, source_type, filename, text, metadata
 - `DocumentMetadata`: title, author, created_at, modified_at, page_count, mime_type, encoding, extra
+- `MetadataExtraction` (`app/domain/document_intelligence.py`): source_type, values, extractor — produced by `DocumentMetadataService.extract`
 - `DocumentIngestionResult`: document (optional), error (optional), succeeded (property)
 - `DocumentIngestionError`: source, source_path, source_type, reason
 
@@ -466,6 +511,8 @@ class DocumentIngestionService:
 - Read failure: `IngestionError` wrapped from underlying I/O exception
 - Timeout: configurable, raises `IngestionError`
 - Size limit exceeded: raises `IngestionError` before reading
+- Metadata enrichment failure: document returned unchanged (debug-logged), never raises
+- Hook failure: pre-hook `IngestionError` aborts; any other hook exception logged and skipped
 
 ### Failure Modes
 - **Corrupt file:** Ingestor raises, result returns error — no crash
@@ -479,9 +526,10 @@ class DocumentIngestionService:
 - Ingestor selection: O(1) via hash map
 
 ### Security Considerations
-- Path traversal: `require_path_source` validates `source_path` is within allowed boundaries
+- Path traversal: `require_path_source` validates `source_path` is within allowed boundaries; email attachment filenames sanitized via `_safe_attachment_name` (strips path components)
 - Remote URL timeout: prevents slow-loris style attacks
 - Size limits: prevents disk or memory exhaustion
+- Email attachments: `max_attachments` cap and shared per-file size limit bound per-run resource use; temp child files removed in `finally`
 - No shell execution: all ingestors use pure Python or safe FFI
 
 ### Scalability
@@ -493,7 +541,7 @@ class DocumentIngestionService:
 - `IngestionHook`: pre/post processing via plugin registration
 
 ### Trade-offs
-- **Extension vs. MIME detection:** Extension is fast and file-system native; MIME detection (via `python-magic`) adds latency (~50ms) but detects real content. Solution: try MIME first for extensionless files, fall back to extension for known-safe types.
+- **Extension vs. MIME detection:** Extension is fast and file-system native; MIME detection (via `python-magic`) adds latency (~50ms) but detects real content. Solution (ADR-001): known extensions win without reading content; extensionless/unknown-extension files are sniffed (magic bytes → stdlib fallback table).
 - **Eager vs. Lazy instantiation:** Eager catches import errors at startup but wastes memory. Lazy is memory-efficient but may fail mid-run. Recommendation: lazy with startup validation (ping each ingestor's can_ingest).
 
 ### Alternatives Considered
@@ -503,17 +551,27 @@ class DocumentIngestionService:
 
 ### Architecture Decision Record
 
-**ADR-001:** Keep extension-based ingestion as primary with MIME-based as fallback.
-- **Context:** `python-magic` is not available on all platforms (needs libmagic DLL on Windows)
-- **Decision:** `python-magic` is optional; extension-only when unavailable
-- **Consequence:** Users on Windows without libmagic get extension-only detection
+**ADR-001:** Extension-first MIME detection with magic-byte sniff and stdlib fallback.
+- **Context:** `python-magic` is not available on all platforms (needs libmagic DLL on Windows), and libmagic does not reliably identify Markdown or plain text
+- **Decision:** `python-magic` is optional and lazily imported. Detection precedence is:
+
+  ```
+  Extension (mimetypes.guess_type + .ipynb supplement)
+      ↓  (extensionless or unknown extension only)
+  Magic-byte sniff: python-magic from_buffer (if importable)
+      ↓  (absent, or libmagic returns generic text/plain / application/octet-stream)
+  Stdlib fallback table (_sniff_mime: PDF/zip/image/audio/XML/HTML/JSON/Markdown/plain-text)
+  ```
+
+- **Consequence:** A known extension resolves without reading file content (fast, deterministic); users on Windows without libmagic still get content detection for extensionless files via the stdlib magic-number table, and a warn-once log when `python-magic` is absent. Known extensions always win over content sniff.
 
 ### Acceptance Criteria
-- All 20+ existing file types continue to ingest correctly
-- Extensionless file with known content is detected via MIME
-- `python-magic` absence logs a warning but doesn't crash
-- Pre-hook can reject a file before ingestion
-- Post-hook can modify text after ingestion
+- All 20+ existing file types continue to ingest correctly — ✅ verified (M2.1/M2.2 suites)
+- Extensionless file with known content is detected via MIME — ✅ `detect_mime` + classifier tests (AC 1)
+- `python-magic` absence logs a warning but doesn't crash — ✅ warn-once test (AC 5)
+- Pre-hook can reject a file before ingestion — ✅ pre-hook tests (AC 3a)
+- Post-hook can modify text after ingestion — ✅ post-hook tests (AC 3b)
+- Email with 3 PDF attachments produces 1 parent + 3 child notes — ✅ frozen AC integration test (AC 6)
 
 ### Testing Strategy
 - Unit: Each ingestor tested with known-good and known-bad inputs
@@ -524,7 +582,8 @@ class DocumentIngestionService:
 - Plugin-based ingestor discovery (entry points)
 - Streaming ingestion for very large files
 - Encrypted file support (GPG auto-decrypt)
-- Email attachment recursive processing
+- Consume `url_timeout_seconds` config in URL ingestors
+- Nested email attachment recursion (currently depth-limited to one level)
 
 ## 2.5 Subsystem: Document Classifier & Router
 
@@ -711,7 +770,7 @@ flowchart LR
 Provide hybrid semantic + sparse retrieval with optional re-ranking and query expansion.
 
 ### Current Implementation
-`SemanticSearch` wraps `VectorStore.search()` with cosine similarity. `HybridSearch` adds naive keyword overlap scoring (0.3 keyword + 0.7 semantic weighted sum). No BM25. No re-ranking. No query rewriting.
+`SearchService` (facade) + `HybridSearch` in `search.py`: dense cosine over `VectorStore.search()` fused with deterministic Okapi-BM25 (`bm25.py`, k1=1.5, b=0.75) via reciprocal rank fusion (k=60). BM25 index is cached behind a version key (`store.version`) and rebuilt only when the corpus changes; failures degrade gracefully (embedder → lexical-only, BM25 → dense-only, no poisoned cache). `VectorStore.search` uses precomputed entry norms, exact-match metadata filtering, and deterministic `(-score, entry.id)` ordering. CLI: `pam search` (Rich table). No re-ranking, no query rewriting.
 
 ### Target Architecture: Hybrid Multi-Stage
 
@@ -1053,7 +1112,7 @@ Typer-based CLI with subcommands. Rich formatting for tables, panels, and progre
 
 ## 3.1 Overview
 
-This section compares the **current architecture** (v0.1.0) against the **desired architecture** (v1.0 target as defined in Section 2). Each gap identifies what exists, what's needed, and the recommended path.
+This section compares the **current architecture** (v0.2.0) against the **desired architecture** (v1.0 target as defined in Section 2). Each gap identifies what exists, what's needed, and the recommended path.
 
 ## 3.2 Gap Matrix
 
@@ -1072,7 +1131,7 @@ This section compares the **current architecture** (v0.1.0) against the **desire
 | G11 | Parent-Child Retrieval | Flat chunks only | Return parent section context | Missing context for answers | High | Low |
 | G12 | NLP Sentence Splitting | English-centric regex | spaCy/nltk tokenization | Broken on abbreviations, Unicode | High | Low |
 | G13 | Token-Aware Chunking | Character-based (2000 chars) | Token-based (512-1024 tokens) | Inconsistent across languages | High | Low |
-| G14 | Hierarchical Chunks | Flat chunk list | Parent section tracking | No context for matched chunk | High | Medium |
+| G14 | Hierarchical Chunks | Flat chunk list | Parent section tracking | No context for matched chunk | High | Medium | ✅ implemented M3.2 (heading path/parent/level metadata; native in-chunker seam P3-201 O-1) |
 | G15 | MIME Type Detection | Extension only | Content-based MIME detection | Misclassified extensionless files | High | Low |
 | G16 | Language Detection | `language` field never populated | Detect + use in prompts | English-only prompts for non-English | High | Low |
 | G17 | Retrieval Evaluation | No evaluation | Labeled dataset + metrics | Cannot measure search quality | High | Medium |
@@ -1091,11 +1150,11 @@ This section compares the **current architecture** (v0.1.0) against the **desire
 | G30 | Monitoring | Basic logging | OpenTelemetry + metrics | No performance visibility | Low | Medium |
 | G31 | Cloud LLM Providers | Ollama only | OpenAI/Anthropic/Gemini adapters | Vendor lock-in | Low | Medium |
 | G32 | Hallucination Detection | None | Claim verification against source | Untrusted LLM output | Medium | High |
-| G33 | Image Preprocessing | Raw image bytes | Deskew, denoise, CLAHE | Poor OCR on real-world photos | Medium | Medium |
-| G34 | Tesseract OCR | Vision-model only | Tesseract for printed text | Slow OCR, GPU-dependent | Medium | Medium |
-| G35 | Table Detection | Flat text extraction | Camelot/Tabula integration | Unreadable tables in notes | High | Medium |
-| G36 | Table-to-Markdown | Tables are flat text | Markdown table formatting | Unreadable tables | High | Low |
-| G37 | Diagram Conversion | Raw XML in notes | Mermaid.js representation | Unreadable diagrams | Low | High |
+| G33 | Image Preprocessing | Raw image bytes | Deskew, denoise, CLAHE | Poor OCR on real-world photos | Medium | Medium | **Implemented (M2.1)** — `imaging/preprocess.py`; default off |
+| G34 | Tesseract OCR | Vision-model only | Tesseract for printed text | Slow OCR, GPU-dependent | Medium | Medium | **Implemented (M2.1)** — `TesseractOcrEngine`, `engine="auto"` fallback |
+| G35 | Table Detection | Flat text extraction | Camelot/Tabula integration | Unreadable tables in notes | High | Medium | **Implemented (M2.4)** — `tables/extractor.py` (CSV/spreadsheet/PDF); pdfplumber default, camelot optional (ADR-002) |
+| G36 | Table-to-Markdown | Tables are flat text | Markdown table formatting | Unreadable tables | High | Low | **Implemented (M2.4)** — `tables/render.py` `MarkdownTableRenderer` |
+| G37 | Diagram Conversion | Raw XML in notes | Mermaid.js representation | Unreadable diagrams | Low | High | **Implemented (M2.5)** — `images/diagram.py` `drawio_to_mermaid` + `DiagramParser` (`.drawio` → Mermaid skeleton, `.mmd` passthrough, raw fallback) |
 | G38 | Chunking Quality Metric | No metrics | Coherence/distinction scores | No objective chunking quality | Medium | Low |
 | G39 | CI/CD Pipeline | No automation | GitHub Actions on push/PR | Tests don't run automatically | High | Low |
 | G40 | Conftest Migration | Some tests use local fixtures | All tests use conftest | Fixture duplication | Low | Low |
@@ -1399,10 +1458,12 @@ pie title Gap Priority Distribution
 
 | Deliverable | Gaps Addressed | Est. Effort |
 |------------|----------------|-------------|
-| MIME-type based content detection | G15 | 3 days |
-| Language detection for source documents | G16 | 2 days |
-| Intelligent ingestion pre/post hooks | — | 1 week |
-| Email attachment parsing | — | 1 week |
+| MIME-type based content detection | G15 | 3 days — ✅ delivered (M2.2, `detect_mime`) |
+| Language detection for source documents | G16 | 2 days — ✅ delivered (M2.2, `detect_language`) |
+| Intelligent ingestion pre/post hooks | — | 1 week — ✅ delivered (M2.2, `IngestionHook`) |
+| Email attachment parsing | — | 1 week — ✅ delivered (M2.2, `EmailIngestor` + `_ingest_children`) |
+| Document structure analysis | — | 4 dev-days — ✅ delivered (M2.3, `StructureAnalyzer` → `metadata.extra["structure"]`) |
+| Code & notebook structure intelligence | — | 3-4 dev-days — ✅ delivered (M2.6, `code/` module → `metadata.extra["code_structure"]` / `["notebook_structure"]`) |
 | Table detection in PDFs (Camelot/Tabula) | G35 | 2 weeks |
 | Table-to-Markdown formatting | G36 | 2 days |
 
@@ -1422,9 +1483,9 @@ pie title Gap Priority Distribution
 
 | Deliverable | Gaps Addressed | Est. Effort |
 |------------|----------------|-------------|
-| NLP sentence segmentation (spaCy) | G12 | 3 days |
+| NLP sentence segmentation (nltk `punkt_tab`, D1 — deviation from spaCy) | G12 | 3 days — ✅ delivered (M3.1, `sentence_tokenizer.py` engines + `SemanticChunker.sentence_tokenizer`) |
 | Token-aware chunk sizing | G13 | 3 days |
-| Hierarchical chunk structure with parent tracking | G14 | 1 week |
+| Hierarchical chunk structure with parent tracking | G14 | ✅ delivered (M3.2, `semantic_chunking.py` heading path/parent/level metadata) |
 | Semantic topic segmentation | — | 2 weeks |
 
 **Dependencies:** Phase 2.
@@ -1485,6 +1546,8 @@ pie title Gap Priority Distribution
 
 ## Phase 6: Evaluation & Quality
 
+> **Status note (0.12.0):** The executed Phase 6 (P6-101..P6-106) delivered **Production Hardening & Final Validation** — performance benchmark, failure isolation, security/configuration audit, and independent end-to-end validation — per the version history above. The evaluation-tooling deliverables below (chunking/retrieval/LLM quality metrics, hallucination detection) were **not** built and remain in the engineering backlog.
+
 **Objective:** Measure quality objectively. Catch regressions automatically.
 
 | Deliverable | Gaps Addressed | Est. Effort |
@@ -1516,8 +1579,8 @@ pie title Gap Priority Distribution
 | OpenTelemetry + Prometheus metrics | G30 | 2 weeks |
 | Cloud LLM provider support (OpenAI, Anthropic) | G31 | 3 weeks |
 | CI/CD pipeline (GitHub Actions) | G39 | 2 days |
-| Image preprocessing pipeline | G33 | 2 weeks |
-| Tesseract full-page OCR | G34 | 2 weeks |
+| Image preprocessing pipeline | G33 | **Done (M2.1)** — `imaging/preprocess.py` |
+| Tesseract full-page OCR | G34 | **Done (M2.1)** — `TesseractOcrEngine`, auto fallback |
 | Layout preservation for OCR | — | 3 weeks |
 
 **Dependencies:** Phase 1-6.
@@ -1569,10 +1632,11 @@ pie title Gap Priority Distribution
 **Description:** Expand file detection, add language awareness, extract tables from PDFs.
 
 **Features:**
-- MIME-type based file detection
-- Language detection with prompt adaptation
-- Ingestion pre/post processing hooks
-- Email attachment parsing
+- MIME-type based file detection — ✅ delivered (M2.2)
+- Language detection with prompt adaptation — ✅ delivered (M2.2)
+- Ingestion pre/post processing hooks — ✅ delivered (M2.2)
+- Email attachment parsing — ✅ delivered (M2.2)
+- Document structure analysis — ✅ delivered (M2.3)
 - PDF table detection (Camelot/Tabula)
 - Table-to-Markdown formatting
 
@@ -1722,23 +1786,26 @@ pie title Gap Priority Distribution
 
 **Description:** Robust image preprocessing, Tesseract OCR, layout preservation.
 
+**Status:** Partially implemented (Milestone 2.1 delivered preprocessing + Tesseract; Milestone 2.5 delivered diagram→Mermaid + EXIF image intelligence; layout preservation remains).
+
 **Features:**
-- Image preprocessing (deskew, denoise, CLAHE)
-- Tesseract OCR integration
-- Document layout analysis and preservation
-- Diagram-to-Mermaid conversion
+- ~~Image preprocessing (deskew, denoise, CLAHE)~~ — **Implemented (M2.1)** in `app/infrastructure/document_intelligence/imaging/preprocess.py`; wired into both OCR engines (M2.5 remediation)
+- ~~Tesseract OCR integration~~ — **Implemented (M2.1)** via `TesseractOcrEngine` (CPU-only offline fallback; `engine="auto"` or explicit selection)
+- ~~EXIF / image intelligence~~ — **Implemented (M2.5)** via `images/metadata.py` `ImageAnalyzer` (single EXIF owner, R-3) + `images/diagram.py`
+- Document layout analysis and preservation — Remaining
+- ~~Diagram-to-Mermaid conversion~~ — **Implemented (M2.5)** via `images/diagram.py` `drawio_to_mermaid` / `DiagramParser` (.drawio → Mermaid skeleton; .mmd passthrough)
 
 **Dependencies:** None (standalone).
 
 **Priority:** P3 — Low.
 
-**Estimated effort:** 10 weeks.
+**Estimated effort:** 10 weeks (3 completed in M2.1/M2.5; ~7 weeks remaining).
 
 **Acceptance Criteria:**
-- Rotated 5° image deskewed before OCR
-- Tesseract OCR 50-page PDF in <60s
-- Two-column paper produces correct reading order
-- .drawio → valid Mermaid flowchart
+- ~~Rotated 5° image deskewed before OCR~~ — **Met (M2.1)** when `preprocess: true`
+- ~~Tesseract OCR 50-page PDF in <60s~~ — **Met (M2.1)** via `TesseractOcrEngine` + `page_limit`
+- Two-column paper produces correct reading order — Remaining
+- ~~.drawio → valid Mermaid flowchart~~ — **Met (M2.5)** via `drawio_to_mermaid` (fixed-fixture comparison)
 
 **Definition of Done:** CER reduced by >= 25% vs. baseline.
 
@@ -1824,7 +1891,7 @@ stateDiagram-v2
 
 ### Extension Points
 - `register(ingestor)` — third-party ingestors
-- `IngestionHook` protocol for pre/post processing
+- `IngestionHook` protocol for pre/post processing — implemented (M2.2); `register_hook()` / `intelligence.metadata.hooks.{pre,post}`
 
 ### Future Work
 - Plugin-based ingestor discovery via entry points
@@ -1835,27 +1902,473 @@ stateDiagram-v2
 
 ### Responsibilities
 - Extract text from scanned PDFs and images
-- Coordinate between PyMuPDF (page rendering), vision model (text extraction), and optional Tesseract (local OCR)
-- Report confidence scores
+- Coordinate between PyMuPDF (page rendering), vision model (primary text extraction), and optional Tesseract (CPU-only local OCR fallback)
+- Report per-page confidence scores and flag empty/low-confidence pages
 
-### Current Implementation
-`_ocr_extract_from_pdf()` in `processor_impls.py` renders pages with PyMuPDF (2x zoom), converts to PNG, sends to vision model. Limited to 5 pages. No Tesseract fallback.
+### Current Implementation (Milestone 2.1)
+Decoupled `DocumentOcrService` registry in `app/infrastructure/document_intelligence/ocr/`:
+
+- **`OcrEngine` protocol** — `name: str`, `supported_kinds: set[str]`, `run(source: Path, *, prompt: str, preprocess: bool = False) -> OcrResult`. Engines:
+  - **`VisionOcrEngine`** — primary. Renders PDF pages via `render_pdf_pages` (PyMuPDF, configurable zoom/`page_limit`/`max_pages`), sends each rendered page to `OllamaVisionClient` sequentially with a bounded retry and early stop on empty page. Per-page failures degrade, never abort the pass.
+  - **`TesseractOcrEngine`** — optional offline fallback. Lazy-imports pytesseract (clear `ImportError` if missing), maps `image_to_data` confidence per page, supports `tesseract_cmd`/`tesseract_lang`.
+- **`DocumentOcrService`** — selects the first registered engine matching the document kind (`engine="auto"` → vision primary, Tesseract fallback; explicit `engine=` selects directly), runs it, and returns a single `OcrResult`.
+- **`OcrResult` / `PageOcrResult`** — text, per-page confidence, mean confidence, empty/low-confidence page flags.
+- **`get_default_ocr_service(settings)`** factory — `enabled: false` → empty registry → processors passthrough (Phase-1 behavior); also the injection point used by `IngestionWorkflow` and the three processors.
+- **`imaging/preprocess.py`** — shared deskew → denoise (median) → CLAHE pipeline, disabled by default (`intelligence.ocr.preprocess: false`), optional Pillow/numpy.
+- **Prompts** — configurable via `intelligence.prompts.{ocr,handwriting,vision}` with a `{language}` slot; defaults byte-identical to the Phase-1 hardcoded prompts.
 
 ### Data Flow
 ```
-Scanned PDF
-    → PyMuPDF page rendering (2x zoom)
-    → PNG conversion
-    → OllamaVisionClient.describe_image_bytes()
-    → extracted text
+Scanned PDF / image
+    → DocumentClassifier (scanned_pdf | handwritten | image kind)
+    → ProcessorRouter → OCRProcessor | HandwritingProcessor | VisionProcessor
+    → DocumentOcrService.extract()
+    → VisionOcrEngine: render_pdf_pages (PyMuPDF, zoom) → [preprocess] → OllamaVisionClient.describe_image() per page
+    → TesseractOcrEngine (fallback/explicit): pytesseract per page
+    → OcrResult (text + per-page confidence)
+    → ProcessedDocument.ocr → frontmatter ocr_confidence → note reference line
 ```
 
-### Extension Points
-- Tesseract OCR integration (planned)
-- Image preprocessing pipeline (planned)
-- Layout analysis for multi-column documents (planned)
+### Interfaces
+```python
+from pathlib import Path
+from typing import Protocol, runtime_checkable
 
-## 7.3 Chunking Module
+from app.domain.documents import SourceDocument
+from app.infrastructure.document_intelligence.ocr.models import OcrResult
+
+
+@runtime_checkable
+class OcrEngine(Protocol):
+    """Contract implemented by every OCR engine."""
+
+    name: str
+    supported_kinds: set[str]
+
+    def run(self, source: Path, *, prompt: str, preprocess: bool = False) -> OcrResult:
+        """Extract text from a rendered PDF or image path."""
+        ...
+
+
+class DocumentOcrService:
+    """Registry that selects an OCR engine for a document and runs it."""
+
+    def __init__(self, engines: list[OcrEngine] | None = None) -> None: ...
+
+    def register(self, engine: OcrEngine) -> None:
+        """Register an OCR engine."""
+        ...
+
+    @property
+    def engines(self) -> list[OcrEngine]:
+        """Registered engines in registration order."""
+        ...
+
+    def select(self, kind: str, *, engine: str = "auto") -> OcrEngine:
+        """First registered engine matching ``kind``.
+
+        ``engine="auto"`` returns the first engine (registration order) that
+        supports the kind; an explicit engine name requires both the name and
+        the kind to match. Raises ``OCRSelectionError`` if none matches.
+        """
+        ...
+
+    def extract(
+        self,
+        document: SourceDocument,
+        *,
+        prompt: str,
+        engine: str = "auto",
+        preprocess: bool = False,
+    ) -> OcrResult:
+        """Run OCR on a document's source file via the selected engine."""
+        ...
+
+
+class PageOcrResult(BaseModel):
+    """OCR result for a single page."""
+
+    page_no: int
+    text: str
+    confidence: float | None = None
+
+
+class OcrResult(BaseModel):
+    """Aggregated OCR result for a document."""
+
+    pages: list[PageOcrResult] = Field(default_factory=list)
+    confidence: float | None = None            # mean of per-page confidences
+    empty_pages: list[int] = Field(default_factory=list)
+    low_confidence_pages: list[int] = Field(default_factory=list)
+
+    @property
+    def text(self) -> str:
+        """Concatenated non-empty page text (legacy joined output)."""
+        ...
+
+    @classmethod
+    def from_pages(
+        cls,
+        pages: list[PageOcrResult],
+        *,
+        confidence_threshold: float = 50.0,
+    ) -> "OcrResult":
+        """Aggregate per-page results and flag empty/low-confidence pages."""
+        ...
+
+
+def get_default_ocr_service(settings: Settings) -> DocumentOcrService:
+    """Build the OCR service from ``intelligence.ocr`` config (P2-108).
+
+    ``enabled: false`` returns an empty registry (no OCR). ``engine="auto"``
+    registers vision first, then Tesseract. Explicit ``engine="vision"`` /
+    ``"tesseract"`` registers only that engine.
+    """
+    ...
+```
+
+### Configuration
+`intelligence.ocr.*` in `config/default.yaml` (bound in `OcrSettings`):
+`enabled` (default true; false → passthrough), `engine` (`auto`/`vision`/`tesseract`), `page_limit` (default 5, 0 = all), `zoom` (default 2.0), `preprocess` (default false), `tesseract_cmd`, `tesseract_lang`, `confidence_threshold`, `max_pages` (default 200).
+
+### Dependencies
+- `pymupdf` — required for scanned-PDF rendering (clear `ImportError` if absent, G06)
+- `ollama` — required, vision model for primary path
+- `pytesseract` + Tesseract binary + `Pillow` — optional, for offline fallback and preprocessing
+
+### Extension Points
+- New `OcrEngine` implementations registered into `DocumentOcrService`
+- Layout analysis for multi-column documents (planned)
+- Multi-language Tesseract selection via `tesseract_lang`
+- ML-based handwriting recognition engine (planned)
+
+### Future Work
+- Layout preservation (reading order, tables, columns)
+- Benchmark report of vision vs. Tesseract CER/latency on a fixed corpus
+
+## 7.3 Document Structure Analysis Module
+
+### Responsibilities
+- Detect the hierarchical structure of source text — ATX headings, sections, paragraphs, lists, code fences, blockquotes, tables — and represent it in typed models
+- Provide the Phase 3 hierarchical-chunking input contract (MEDD G14): `DocumentSection.id` → chunk `parent_id`
+- Enrich the document that survives the pipeline (`metadata.extra["structure"]`) without modifying `ProcessedDocument` or changing chunker behavior
+
+### Current Implementation (Milestone 2.3)
+Pure-stdlib `StructureAnalyzer` in `app/infrastructure/document_intelligence/structure/detector.py`:
+
+- **`_detect_headings(lines)`** — nested ATX heading hierarchy (rule `^#{1,6}\s+\S`); document-global triple-backtick fence state so fenced `#` lines are never headings; each heading attaches to the nearest preceding lower-level heading (level-skip handled); levels > 6 normalize to 6 (`MAX_HEADING_LEVEL`).
+- **`_detect_blocks(text, ranges)`** — typed blocks (paragraph / list / code fence / blockquote / Markdown table) with exact `start_char`/`end_char` into the analyzed text; list-continuation and pipe-table separator heuristics; bisect membership over sorted range starts keeps the scan O(n).
+- **`_build_tree(sections)` + `analyze(text, source)`** — sections contain their blocks; stable path-style section IDs (`s-1`, `s-1-1`, …) and block IDs (`b-<section_id>-<n>`); degenerate/empty input → empty structure, never raises; `MAX_SECTIONS = 10_000` (warn + truncate) and `max_structure_text_bytes = 5_000_000` (skip + single warning) caps.
+- **Enrichment (P2-305)** — `IngestionWorkflow._run_routed_processor` calls `_enrich_structure` after processor success; when `structure.enabled` is true and `source_type in TEXT_BEARING_KINDS` (`{"markdown", "text"}`), the serialized structure is stored as `enriched.metadata.extra["structure"] = structure.model_dump(mode="json")` (the same channel `parent_id` uses). A raised analyzer is logged and skipped — ingestion continues (L4).
+- **Domain models** — `DocumentStructure` / `DocumentSection` / `DocumentBlock` (+ `BlockType` literal) in `app/domain/document_intelligence.py`, with offset validators (`end_char >= start_char`; blocks require `len(text) == end_char - start_char`).
+- **Composition root** — `app/infrastructure/document_intelligence/__init__.py` exposes `analyze_document_structure` + `get_default_structure_analyzer`.
+
+### Data Flow
+```
+Routed processor success
+    → _run_routed_processor → _enrich_structure(text=result.extracted_text or doc.text)
+    → gated: structure.enabled && source_type in TEXT_BEARING_KINDS && ≤ 5 MB
+    → StructureAnalyzer.analyze() → _detect_headings → _detect_blocks → _build_tree
+    → metadata.extra["structure"] = structure.model_dump(mode="json")
+    → SemanticChunker (unchanged)  /  note generation (unchanged)
+    → Phase 3 input contract: read extra["structure"] → DocumentStructure.model_validate
+      → map DocumentSection.id → chunk parent_id
+```
+
+### Interfaces
+```python
+from app.domain.document_intelligence import DocumentStructure
+
+
+class StructureAnalyzer:
+    """Detect and build the hierarchical structure of source text."""
+
+    def analyze(self, text: str, source: str) -> DocumentStructure:
+        """Return a DocumentStructure; never raises (empty structure for degenerate input)."""
+        ...
+
+
+def get_default_structure_analyzer() -> StructureAnalyzer:
+    """Return a StructureAnalyzer (stateless; reentrant-safe)."""
+    ...
+
+
+def analyze_document_structure(text: str, source: str) -> DocumentStructure:
+    """Analyze source text into a DocumentStructure (public API)."""
+    ...
+```
+
+### Configuration
+`intelligence.structure.*` in `config/default.yaml` (bound in `StructureSettings` in `app/core/config.py`):
+- `enabled` (default true) — `false` ⇒ no `"structure"` key; M2.2-identical documents (R-4 rollback contract)
+- `enrich_analysis_input` (default false) — **contract-only** this milestone (baseline addendum 3 / R-7); declared for future structure-aware prompting, read by no code
+
+Caps are code constants (`ponytail:` fixed defaults), not config keys: `TEXT_BEARING_KINDS = {"markdown", "text"}`, `MAX_HEADING_LEVEL = 6`, `MAX_SECTIONS = 10_000`, `max_structure_text_bytes = 5_000_000`.
+
+### Dependencies
+- `re` (stdlib) — heading/block line classification
+- `pydantic` — domain models (existing dependency)
+- None new — zero new runtime or optional dependencies
+
+### Extension Points
+- `TEXT_BEARING_KINDS` extension (e.g. PDF/OCR-prose kinds) when a consumer exists
+- Shared enrichment call site (`_run_routed_processor`) reused by M2.4 tables (P2-406), M2.5 images (P2-506), M2.6 code/notebook (P2-606)
+- Phase 3 hierarchical chunking consumes `metadata.extra["structure"]` (G14)
+- Structure-aware prompting via the `enrich_analysis_input` contract field (future)
+
+### Future Work
+- NLP sentence segmentation and semantic topic segmentation (Phase 3)
+- Structure-aware note-template/TOC rendering
+- Richer block classification (HTML/markup-aware beyond regex)
+
+## 7.3b Table Intelligence Module
+
+### Responsibilities
+- Extract structured tables from CSV/TSV, spreadsheet, and PDF sources
+- Render extracted tables as GitHub-flavored Markdown in notes
+- Degrade gracefully when an optional engine is absent (flat fallback + logged warning)
+
+### Current Implementation
+`app/infrastructure/document_intelligence/tables/`:
+- `extractor.py` — `TableExtractor` protocol (`source_kinds` + `extract`), `TableExtractorRegistry` (select by kind; empty registry/unknown kind → `None`, never raises), `CsvTableExtractor` (csv.Sniffer dialect sniff + header sniffing), `SpreadsheetTableExtractor` (per-sheet tables; merged cells flattened by propagating the top-left value; loaded non-read-only with `data_only=True` for `merged_cells.ranges`, spec R1), `PdfTableExtractor` (pdfplumber default engine, ADR-002; camelot optional plugin with fallback), `get_table_extractor` / `get_default_table_extractor` / `extract_tables`
+- `render.py` — `MarkdownTableRenderer` (`\|` and newline `<br>` escaping) + `render_tables_to_markdown`
+- Domain models `Table` / `TableCell` / `TableRow` / `TableHeader` in `app/domain/document_intelligence.py` (`extra="forbid"`, `source_position` provenance)
+
+### Enrichment Channel (R-1)
+`_run_routed_processor` in `app/pipelines/ingest_workflow.py` calls `_enrich_tables(document, kind)` beside `_enrich_structure` and writes `document.metadata.extra["tables"] = [table.model_dump(mode="json")]` when `intelligence.tables.enabled` AND kind is `csv`/`spreadsheet`/`database`/`pdf` (R2 gate). `ObsidianMarkdownGenerator` renders a `## Tables` note-body section from that key; no key ⇒ Phase-1-identical output (AC5). `ProcessedDocument` untouched; `database` kind has no extractor this milestone (registry miss ⇒ no tables, flat text preserved).
+
+### Configuration
+`intelligence.tables.*` in `config/default.yaml` (bound in `TableSettings` in `app/core/config.py`):
+- `enabled` (default true) — `false` ⇒ no `"tables"` key; Phase-1-identical notes (R-4 rollback contract)
+- `pdf_engine` (default `"pdfplumber"`) — `"camelot"` = optional plugin with fallback (ADR-002)
+- `max_rows` (200), `max_cols` (30), `header_sniffing` (true) — the frozen §2.4 `min_confidence` key was removed: pdfplumber exposes no per-table confidence to gate on (review R1; deviation recorded in the M2.4 remediation report)
+
+### Dependencies
+- `openpyxl>=3.1.0` (core) — spreadsheet extraction
+- `pdfplumber` (optional `intelligence` extra, ADR-002) — PDF tables
+- `camelot` (optional plugin) — alternate PDF engine with pdfplumber fallback
+
+### Extension Points
+- Shared enrichment call site (`_run_routed_processor`, R-2) — reused by M2.5 images / M2.6 code
+- `database` kind extractor (registry registration) when a consumer exists
+- Additional PDF engines or layout algorithms behind the `TableExtractor` protocol
+
+## 7.3c Image Intelligence Module
+
+### Responsibilities
+- Extract EXIF/metadata from images (single owner, R-3)
+- Apply optional preprocessing (deskew → denoise → CLAHE) before vision OCR
+- Convert `.drawio` diagrams to Mermaid skeleton; `.mmd` passthrough
+- Extract embedded images from PDFs with page provenance
+- Provide configurable vision/OCR/handwriting prompts with `{language}` substitution
+
+### Current Implementation (Milestone 2.5)
+
+`app/infrastructure/document_intelligence/images/`:
+- `metadata.py` — `ImageAnalyzer`/`analyze_image` (P2-502): sole raw-EXIF reader (R-3); returns `ImageInfo` (dimensions, format, EXIF raw+decoded, optional GPS); corrupt EXIF → empty `ImageExif`, no crash; absent Pillow → file-level info only + logged warning (C-3 DoD)
+- `diagram.py` — `drawio_to_mermaid`/`DiagramParser` (P2-504): `.drawio` XML → Mermaid skeleton (fixed-fixture comparison); `.mmd` passthrough; parse failure → raw text fallback; gated by `intelligence.images.diagram_enabled`
+- `multi.py` — `MultiImageExtractor` (P2-506): PDF embedded image extraction with page provenance (`page_no`, `index`); byte-stream open fixes Windows PyMuPDF handle leak on failed open; `kind == "pdf"` classifier trigger (R2 precedent); `_enrich_images` helper at shared P2-305 call site coexists with table gate
+- `preprocess.py` — shared `imaging/preprocess.py` guard contract (P2-503): `max_dimensions`/`max_bytes` kwargs resolved at call time from `intelligence.images.*` (single source of truth, supersedes module `MAX_EDGE = 8000`)
+
+### Data Flow
+
+```
+Image file (.jpg/.png/.tiff/etc.)
+    → ImageIngestor (reads bytes, returns SourceDocument with placeholder text)
+    → DocumentClassifier (kind="image", requires_vision=True)
+    → VisionProcessor (delegates to DocumentOcrService with vision prompt)
+    → DocumentOcrService.extract()
+    → VisionOcrEngine: render_pdf_pages / direct image → [preprocess if images.preprocess] → OllamaVisionClient.describe_image()
+
+.drawio file
+    → DiagramIngestor (classifies as "diagram")
+    → DiagramProcessor (delegates to DiagramParser)
+    → Mermaid skeleton → note body / raw fallback
+
+PDF with embedded images (kind="pdf")
+    → _run_routed_processor → _enrich_images (shared P2-305 site)
+    → MultiImageExtractor (byte-stream open)
+    → Per-image ImageInfo → metadata.extra["images"] = [ImageInfo.model_dump()] with page_no/index provenance
+```
+
+### Enrichment Channels (R-1)
+
+- `metadata.extra["image_info"]` — `ImageInfo` for image kinds, gated by `intelligence.images.exif_enabled` (P2-502)
+- `metadata.extra["images"]` — list of `ImageInfo` for PDF embedded images, gated by `kind == "pdf"` (P2-506)
+- `metadata.extra["diagram"]` — Mermaid string from `.drawio`, gated by `intelligence.images.diagram_enabled` (P2-504)
+
+### Preprocessing Wiring (Post-Remediation)
+
+The shared `imaging/preprocess.py` `Preprocessor` is bridged into both OCR engines via `ocr/__init__.py` `_shared_preprocessor`:
+
+- Bridge is only built when at least one preprocess toggle (`ocr.preprocess` or `images.preprocess`) is enabled
+- All three processors carry an explicit `preprocess` kwarg driven by per-path config:
+  - `VisionProcessor` consumes `intelligence.images.preprocess`
+  - `OCRProcessor` and `HandwritingProcessor` consume `intelligence.ocr.preprocess`
+- `_extract_via_service` helper and `DocumentOcrService.extract` / `OcrEngine.run` defaults are `False` — no production path enables preprocessing without config
+
+### Interfaces
+
+```python
+from app.domain.document_intelligence import ImageInfo, ImageExif
+from pathlib import Path
+
+class ImageAnalyzer:
+    """Sole owner of raw EXIF read (R-3)."""
+    def analyze_image(self, path: Path, *, include_exif: bool = True) -> ImageInfo:
+        """Extract dimensions, format, EXIF, optional GPS. Corrupt EXIF → empty ImageExif."""
+
+def drawio_to_mermaid(path: Path) -> str:
+    """Convert .drawio XML to Mermaid skeleton. Parse failure → empty string."""
+
+class DiagramParser:
+    """Parse .drawio/.vsdx/.puml files."""
+    def parse(self, path: Path) -> str:
+        """Return Mermaid string or raw fallback."""
+
+class MultiImageExtractor:
+    """Extract embedded images from PDF with page provenance."""
+    def extract(self, pdf_bytes: bytes) -> list[ImageInfo]:
+        """Return per-image ImageInfo with page_no/index provenance."""
+
+class Preprocessor:
+    """Shared deskew → denoise → CLAHE pipeline."""
+    def __init__(
+        self,
+        *,
+        enabled: bool = False,
+        max_dimensions: int | tuple[int, int] | None = None,
+        max_bytes: int | None = None,
+    ) -> None: ...
+    def process(self, path: Path) -> Path:
+        """Return preprocessed temp path, or original path unchanged when disabled/failed."""
+```
+
+### Configuration
+
+`intelligence.images.*` in `config/default.yaml` (bound in `ImageSettings` in `app/core/config.py`):
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `preprocess` | `false` | Opt-in preprocessing (deskew → denoise → CLAHE) |
+| `exif_enabled` | `true` | `false` ⇒ no `image_info` key; Phase-1-identical (R-4) |
+| `diagram_enabled` | `true` | `false` ⇒ `.drawio` raw text passthrough (R-4) |
+| `max_dimensions` | `[8192, 8192]` | Scalar max-edge or `[width, height]` pair (frozen §4.5) |
+| `max_bytes` | `20971520` | 20 MiB preprocessing cap (frozen §4.5) |
+
+`ImageSettings.max_dimensions` is `int | tuple[int, int] = (8192, 8192)`; invalid values rejected at parse time.
+
+### Dependencies
+
+- `pymupdf` (core, existing) — PDF page rendering + embedded image extraction
+- `pillow>=10.0.0`, `numpy>=1.24.0` (optional `intelligence` extra) — EXIF, preprocessing, diagram parsing; absent → logged-warning no-op (C-3 DoD)
+- No new dependencies beyond existing optional extra
+
+### Extension Points
+
+- Shared enrichment call site (`_run_routed_processor`, R-2) — reused by M2.4 tables (P2-406), M2.6 code/notebook (P2-606)
+- Additional diagram formats (`vsdx`, `puml`) behind `DiagramParser` protocol
+- ML-based handwriting detection to replace source-type routing
+
+### Future Work
+
+- Layout preservation from OCR output
+- Multi-language Tesseract selection for image OCR
+- Vectorization/vision-heavy diagram semantic understanding (beyond Mermaid skeleton)
+
+## 7.3d Code & Notebook Intelligence Module
+
+### Responsibilities
+- Parse code files into structured `CodeStructure` (imports, functions, classes, docstrings, offsets)
+- Parse Jupyter notebooks into structured `NotebookStructure` (ordered typed cells, outputs, kernel, language)
+- Attach structure to `metadata.extra` via the shared P2-305 enrichment call site (R-2)
+- Provide a rollback toggle (`intelligence.code.enabled: false` ⇒ Phase-1-identical passthrough, R-4)
+
+### Current Implementation (Milestone 2.6)
+
+`app/infrastructure/document_intelligence/code/`:
+- `languages.py` — `language_from_filename(filename)`: pure-dict suffix→language map covering every `extensions.CODE_EXTENSIONS` entry; unknown → `"generic"`; case-insensitive (P2-602)
+- `parser.py` — `parse_code(text, filename, max_chars=None)`: dispatches Python → `_AstCodeParser` (stdlib `ast`, exact offsets via 3.12 `end_lineno`/`end_col_offset`), all other languages + syntax-invalid Python → `_HeuristicCodeParser` (line-based regex, approximate char offsets, **never raises**) (P2-603/P2-604)
+- `notebook.py` — `NotebookParser`/`parse_notebook(raw, max_cell_outputs=None)`: ordered typed cells (`markdown`/`code`/`raw`), `execution_count`, outputs capped at `max_cell_outputs` (beyond-cap → `"[truncated]"`), kernel/language from notebook metadata; never raises on malformed cells (P2-605)
+- `__init__.py` — public re-exports
+
+Domain models (`app/domain/document_intelligence.py`, P2-601): `CodeStructure`, `CodeImport`, `CodeFunction`, `CodeClass`, `NotebookCell`, `NotebookStructure` — additive, `extra="forbid"`, `end >= start` validated.
+
+Wiring: `NotebookIngestor` attaches `metadata.extra["notebook_structure"]` at ingestion (Option 2); `_enrich_code` in `ingest_workflow.py` runs at the shared P2-305 call site for `kind == "code"` (parses `document.text`) and `kind == "notebook"` (passes through the ingestor-attached structure). `CodeProcessor`/`NotebookProcessor` remain passthrough (M2.4 TableProcessor pattern).
+
+### Data Flow
+
+```
+Code file (.py/.js/.java/etc.)
+    → CodeIngestor (direct text read)
+    → DocumentClassifier (kind="code")
+    → CodeProcessor (passthrough)
+    → _enrich_code (kind in {"code","notebook"} + code.enabled)
+    → parse_code(text, filename, max_chars=max_code_chars)
+    → CodeStructure → metadata.extra["code_structure"]
+
+Notebook (.ipynb)
+    → NotebookIngestor (JSON parse → flattened fenced text + NotebookStructure)
+    → DocumentClassifier (kind="notebook")
+    → NotebookProcessor (passthrough)
+    → _enrich_code (passthrough of metadata.extra["notebook_structure"])
+```
+
+### Enrichment Channels (R-1)
+
+- `metadata.extra["code_structure"]` — `CodeStructure` for code kinds, gated by `intelligence.code.enabled` (P2-606)
+- `metadata.extra["notebook_structure"]` — `NotebookStructure` for notebook kinds, gated by `intelligence.code.enabled` (P2-605/P2-606)
+
+### Interfaces
+
+```python
+from app.domain.document_intelligence import (
+    CodeStructure, NotebookStructure, NotebookCell,
+)
+
+def language_from_filename(filename: str) -> str:
+    """Map filename extension to a language name; "generic" for unknown."""
+
+def parse_code(text: str, filename: str, max_chars: int | None = None) -> CodeStructure:
+    """Python → AST parser; others/syntax-invalid Python → heuristic. Never raises."""
+
+def parse_notebook(raw: dict, max_cell_outputs: int | None = None) -> NotebookStructure:
+    """Parse a notebook JSON dict into NotebookStructure. Never raises."""
+
+class NotebookIngestor:
+    def ingest(self, source: SourceReference) -> SourceDocument:
+        """Attaches metadata.extra["notebook_structure"] (Option 2)."""
+```
+
+### Configuration
+
+`intelligence.code.*` in `config/default.yaml` (bound in `CodeSettings` in `app/core/config.py`):
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `enabled` | `true` | `false` ⇒ no `code_structure`/`notebook_structure` keys; Phase-1-identical (R-4) |
+| `languages` | `"default"` | Contract-only (C-5): built-in `code/languages.py` suffix→language map over the `CODE_EXTENSIONS` suffix set; other values deferred |
+| `max_cell_outputs` | `10` | Notebook cell outputs capped during `NotebookParser.parse()`; beyond-cap → `"[truncated]"` |
+| `max_code_chars` | `100000` | Python `str`-length cap; oversized code truncated at parse time with logged warning |
+| `include_docstrings` | `true` | Contract-only (C-5); read by no code this milestone |
+
+### Dependencies
+
+- Stdlib only (`ast`, `re`, `json`) — no new runtime dependencies
+
+### Extension Points
+
+- Shared enrichment call site (`_run_routed_processor`, R-2) — same site reused by M2.4 tables, M2.5 images, M2.6 code/notebook
+- Additional language parsers can be registered behind `parse_code` dispatch (C-5 `languages` extensibility deferred)
+- Heuristic parser covers all `CODE_EXTENSIONS`; per-language refinements future work
+
+### Future Work
+
+- Consumer for `code_structure`/`notebook_structure` (e.g., structure-aware prompts; `include_docstrings`/`languages` contract fields)
+- Exact offsets for non-Python languages (beyond line-based approximation)
+- Notebook cell-level chunking (structure-aware, aligned with Phase 3)
+
+## 7.4 Chunking Module
 
 ### Responsibilities
 - Decompose document text into semantically coherent chunks
@@ -1864,38 +2377,51 @@ Scanned PDF
 - Enforce token budget per chunk
 
 ### Current Implementation
-`SemanticChunker` with recursive heading→paragraph→sentence decomposition. 2000 char max. Regex sentence splitting. Dead `overlap_chars` field.
+`SemanticChunker` (`app/infrastructure/semantic_chunking.py`) is a **block tokenizer over the heading hierarchy** (Milestone 3.2, G14). It first parses top-level blocks with `_split_blocks` (Markdown/HTML tables, fenced code, blockquotes, callouts, definition lists — see Structured kinds below — plus heading-led sections, paragraphs, and lists), then tokenizes each block with heading-aware recursive decomposition. Every emitted chunk carries heading metadata: `metadata.extra["heading"]`, `heading_path` (the heading ancestry, e.g. `"M3 » §1 » ¶"`), and `heading_level`; the heading-parent ID assignment is derived natively in-chunker (P3-201 O-1 — the user-selected hierarchy seam, replacing the Milestone 2.3 `metadata.extra["structure"]` consumption contract; the `DocumentStructure` input seam is retained only as a fallback for pre-structured inputs). Lists split at whole top-level items (P3-202); fenced code blocks are emitted as single atomic chunks with `language` metadata and inline code is masked during sentence splitting so backticks cannot fragment it (P3-203); structured content is preserved byte-for-byte (P3-204). Overlap is a live, configurable policy: `_apply_overlap` snap-splits at sentence boundaries within `max_overlap_back` characters, honors paragraph/list boundaries, and treats headings as hard boundaries (the `snap_overlap` / `snap_max_back` / `heading_overlap_boundary` policy knobs, P3-205). Sentence splitting delegates to the pluggable `sentence_tokenizer` engine (Milestone 3.1, G12): `"auto"` prefers NLTK `punkt_tab` when the `intelligence` extra is installed, else degrades to the stdlib abbreviation-aware heuristic engine with one logged warning; `"heuristic"` and `"nltk"` select explicitly. The engine is resolved **once per chunker instance** at construction (`sentence_tokenizer.py` `get_sentence_tokenizer`, D8). NLTK is an optional dependency (`nltk>=3.9` in the `intelligence` extra; runtime stays offline).
 
 ### Target Architecture
 ```
-Text → NLP sentence segmentation → heading detection → section splitting →
-  paragraph splitting (within long sections) → overlap application →
-  parent ID assignment → DocumentChunk[]
+Text → top-level block parse (tables/code/quotes/callouts/definitions/sections/lists)
+  → heading-aware decomposition → heading path/parent/level metadata
+  → sentence segmentation (engine, G12) → adaptive overlap application
+    (snap/back-off/heading hard boundaries, P3-205) → DocumentChunk[]
 ```
+
+**Hierarchy seam (P3-201 O-1):** Milestone 3.2 delivers the G14 `parent ID assignment` step using **native in-chunker heading detection** (user-selected over the Milestone 2.3 `DocumentStructure` consumption seam, which is documented as a deviation in the P3-201 engineering review). The seam is pinned: chunk `parent_id` = the most recent chunk belonging to the nearest ancestor heading, and every chunk's `metadata.extra` carries `heading` / `heading_path` / `heading_level` for downstream retrieval context.
 
 ### Interfaces
 ```python
+@dataclass(frozen=True)
+class ChunkingPolicy:
+    max_chunk_chars: int = 2000          # config.max_chunk_chars
+    overlap_chars: int = 200             # config.overlap_chars
+    sentence_tokenizer: str = "auto"     # "auto"|"heuristic"|"nltk"; resolved once per instance (D8)
+    heading_size_step: int = 0           # adaptive: +per-level char budget (0 = flat, P3-205)
+    min_chunk_chars: int = 200           # adaptive floor; short items coalesce under it
+    snap_overlap: bool = False           # overlap snaps to sentence/paragraph/list boundaries
+    snap_max_back: int = 2000            # max backward scan for the snap boundary (0 = none)
+    heading_overlap_boundary: bool = False  # headings are hard boundaries (no cross-heading overlap)
+
 @dataclass
 class SemanticChunker:
-    max_chunk_chars: int = 2000
-    max_chunk_tokens: int = 512
-    overlap_chars: int = 200
-    tokenizer: str = "cl100k_base"
+    policy: ChunkingPolicy = ChunkingPolicy()   # flat: identical to the M3.1 recursive algorithm (P3-204 defaults)
 
     def chunk(self, text: str, source: str, source_type: str) -> list[DocumentChunk]
 ```
 
+> **Naming (G12 vs G13):** `sentence_tokenizer` is the ratified M3.1 field for sentence segmentation (G12). `tokenizer: str = "cl100k_base"` and `max_chunk_tokens` remain the **future token-aware fields** (G13 / Milestone 3.3) and are intentionally not present in the current implementation (roadmap naming decision C-1).
+
 ### Dependencies
-- `tiktoken` for token counting
-- `spaCy` or `nltk` for sentence segmentation
+- `nltk>=3.9` (optional, `intelligence` extra) for sentence segmentation (M3.1, D1 — nltk over spaCy; deviation recorded, pending Phase 3 spec ratification)
 - `app.domain.semantic_chunking.DocumentChunk`
+- `tiktoken` for token counting is a **future G13 dependency** — importable but undeclared in `pyproject.toml` today (C-3); M3.3 must declare it formally and preflight wheels
 
 ### Future Work
 - ML-based topic segmentation
 - Code-aware chunking for programming files
 - Query-aware chunk retrieval
 
-## 7.4 Embedding Module
+## 7.5 Embedding Module
 
 ### Responsibilities
 - Convert text to dense vector representations
@@ -1925,7 +2451,7 @@ class EmbeddingService:
 - Caching layer for repeated texts
 - GPU acceleration support
 
-## 7.5 Retrieval Module
+## 7.6 Retrieval Module
 
 ### Responsibilities
 - Execute hybrid search (dense + sparse) with multi-stage pipeline
@@ -1933,7 +2459,7 @@ class EmbeddingService:
 - Return ranked results with scores and context
 
 ### Current Implementation
-`SemanticSearch` and `HybridSearch` in `search.py`. Naive keyword overlap. No BM25, no RRF, no re-ranking.
+`SearchService` + `HybridSearch` in `search.py` (0.11.0): dense cosine (precomputed-norm `VectorStore.search`) fused with deterministic Okapi-BM25 (`bm25.py`, k1=1.5, b=0.75) via reciprocal rank fusion `_rrf_fuse` (k=60, roadmap 4.2). BM25 index cached behind a version key (`store.version`) — rebuilt exactly when the corpus changes; build/search failures degrade to the surviving leg (dense-only / lexical-only) with cache reset (no poisoning). Exact-match metadata filtering (`filter=` on `SearchService`, `filters=` on `VectorStore.search`) — entry fields win, then metadata keys; structured `$in` syntax is roadmap 4.5. `SearchService.create_default` reads the same persisted `manifest_root/vector_store.json` the ingest pipeline writes; `pam search` CLI (Rich table). `SearchHit` carries `text`, `source`, `score`, `entry_id`, `parent_section` (metadata `parent_section_id`; roadmap 4.6 slot, `None` until parent-child retrieval ships), `source_type`, `chunk_index`, `start_char`, `end_char`, `metadata`. No re-ranking (4.3), no query rewriting (4.4) — deferred.
 
 ### Target Architecture
 ```
@@ -1972,7 +2498,7 @@ class SearchService:
 - Custom sparse retrieval implementations
 - Custom fusion strategies
 
-## 7.6 Knowledge Graph Module
+## 7.7 Knowledge Graph Module
 
 ### Responsibilities
 - Build entity-relationship graphs from document analysis
@@ -2015,7 +2541,17 @@ class KnowledgeGraph:
 - `app.domain.knowledge_graph.*`
 - `app.domain.analysis.DocumentAnalysis`
 
-## 7.7 LLM Module
+### Current Implementation (Phase 4, P4-101…P4-105)
+Phase 4 adds a deterministic, offline, **document-level** graph pipeline on top of the persistent M4 graph (which continues to own cross-document merge + JSON persistence). It ships **no graph storage/retrieval and no graph database** — construction and queries run over the in-memory `KnowledgeGraph`; the pipeline artifact rides `metadata.extra["knowledge_graph"]`:
+
+- **Domain models** — `app/domain/entity_relationship.py` (P4-101): `Entity`, `Relationship`, `EntityMetadata`, `RelationshipMetadata`, `SourceReference`; validated Pydantic models reusing the `EntityType`/`ImportanceLevel`/`EdgeType` vocabulary and `DocumentChunk` provenance conventions; deterministic JSON (`to_dict`/`to_json`/`from_dict`/`from_json`), `extra="forbid"`, JSON-safe metadata, offset-pairing and self-loop rejection.
+- **Entity extraction** — `app/infrastructure/document_intelligence/entities/extractor.py` (P4-102): deterministic regex `EntityExtractor` (technology + person patterns), structure-block-aware with global offset stitching, code blocks excluded, "first rule wins" overlap resolution, `Entity.make_id` normalization.
+- **Relationship detection** — `app/infrastructure/document_intelligence/relationships/detector.py` (P4-103): deterministic `RelationshipDetector` emitting `related_to` from co-occurrence within a shared section/document; canonical lexicographic direction, evidence-merge dedup, deterministic ordering.
+- **Graph construction** — `app/infrastructure/document_intelligence/graph/builder.py` (P4-104): `DocumentGraphBuilder` maps entities/relationships onto the in-memory `KnowledgeGraph`; deterministic ordering, dedup, missing-endpoint edges skipped with a warning; `find_relationships` conjunctive filter; `graph_to_dict` mirrors `KnowledgeGraph.save`.
+- **Graph queries** — `app/infrastructure/document_intelligence/graph/query.py` (P4-105): `get_entity`, `related_entities` (undirected BFS, visited set, `max_depth`/`limit`), `nodes_by_source`, `query_graph` (roadmap §5.2 shape), `graph_from_dict` (loads the `metadata.extra["knowledge_graph"]` artifact without a disk round-trip). All queries deterministic, cycle-safe, `None`/`[]` on unknown ids and empty graphs.
+- **Wiring** — `IngestionWorkflow` enrichment stages `_enrich_entities`/`_enrich_relationships`/`_enrich_graph` (`ingest_workflow.py:576-598`), each failure-contained (no key + ingestion continues) and gated by `intelligence.{entities,relationships,graph}.enabled` (R-4 rollback: disabled toggle → key absent → M2.2-identical documents).
+
+## 7.8 LLM Module
 
 ### Responsibilities
 - Communicate with local LLM (Ollama) for text and JSON generation
@@ -2054,7 +2590,7 @@ OllamaClientError(RuntimeError)
 - `ollama` Python SDK
 - `pydantic` for response validation
 
-## 7.8 Storage Module (Vector Store)
+## 7.9 Storage Module (Vector Store)
 
 ### Responsibilities
 - Persist vector embeddings to disk
@@ -2076,7 +2612,7 @@ VectorEntr(y)ies
       → Filter + format as SearchResult[]
 ```
 
-## 7.9 Pipeline Module
+## 7.10 Pipeline Module
 
 ### Responsibilities
 - Orchestrate the end-to-end ingestion workflow
@@ -2120,7 +2656,7 @@ class IngestionWorkflowResult:
 13. VersionManager.record_version(note)
 ```
 
-## 7.10 Configuration Module
+## 7.11 Configuration Module
 
 ### Responsibilities
 - Load and merge layered configuration (defaults → YAML → env vars)
@@ -2153,7 +2689,7 @@ class Settings(BaseSettings):
 4. PAM_* environment variables (highest priority)
 ```
 
-## 7.11 Logging Module
+## 7.12 Logging Module
 
 ### Responsibilities
 - Structured logging with JSON formatter
@@ -2169,7 +2705,7 @@ class Settings(BaseSettings):
 | `processing.log` | Pipeline and queue events |
 | `errors.log` | All ERROR+ entries across all loggers |
 
-## 7.12 Evaluation Module
+## 7.13 Evaluation Module
 
 ### Responsibilities
 - Measure retrieval quality (precision, recall, NDCG)
@@ -2292,7 +2828,7 @@ class ChunkingEvaluator:
 | Metric | Target | Current |
 |--------|--------|---------|
 | Lines per file | <300 avg | ~200 avg (good) |
-| Test coverage | >= 85% | 84.77% |
+| Test coverage | >= 85% | 90.04% |
 | Mypy strictness | strict | disallow_untyped_defs=True |
 | Ruff rules | All recommended | All recommended |
 | Complexity (per file) | < 15 McCabe | Most < 10 |
@@ -2349,7 +2885,7 @@ class ChunkingEvaluator:
 | R04 | Tesseract OCR not installed or wrong version | Medium | Medium | Clear error message with install instructions. Fall back to vision model. | OCR Team |
 | R05 | spaCy model download fails in CI | Low | Medium | Cache model downloads. Fall back to regex tokenizer. | Chunking Team |
 | R06 | faster-whisper model download fails | Low | Low | Clear error. Audio processing skipped with warning. | Audio Team |
-| R07 | python-magic libmagic missing on Windows | Medium | Low | Optional dependency. Fall back to extension-only detection. | Ingestion Team |
+| R07 | python-magic libmagic missing on Windows | Medium | Low | Optional dependency. Known extensions resolve by extension; extensionless files fall back to stdlib magic-number sniff table (`_sniff_mime`) with a warn-once log. | Ingestion Team |
 
 ## 9.2 Architecture Risks
 
@@ -2410,7 +2946,7 @@ class ChunkingEvaluator:
 
 ## 10.1 Architecture
 
-- [ ] **ADR-001** Documented: MIME detection as optional add-on
+- [x] **ADR-001** Documented: extension-first MIME detection with magic-byte sniff + stdlib fallback table
 - [ ] **ADR-002** Resolve Pydantic/dataclass inconsistency — all domain models use same pattern
 - [ ] **ADR-003** Decide on transaction strategy for multi-step pipeline
 - [ ] **ADR-004** Choose between SQLite and JSON for vector store metadata
@@ -2419,7 +2955,7 @@ class ChunkingEvaluator:
 ## 10.2 Testing
 
 - [ ] **All critical bugs fixed:** TD-01 through TD-06 resolved
-- [ ] **Coverage >= 85%:** Current 84.77%, need CI enforcement
+- [ ] **Coverage >= 85%:** Current 90.04% (meets target; CI enforcement still pending)
 - [ ] **CI pipeline active:** GitHub Actions runs on push/PR to main
 - [ ] **Live-service tests excluded from CI:** YouTube, Ollama tests marked `@pytest.mark.integration`
 - [ ] **Retrieval evaluation dataset committed:** 20+ labeled query-doc pairs
@@ -2454,6 +2990,10 @@ class ChunkingEvaluator:
 ## 10.5 Documentation
 
 - [ ] **README** covers: install, configure, run, Docker, FAQ (current: 858 lines, excellent)
+- [x] **Document Structure Analysis documented** — MEDD §7.3 module + chunking input contract (§7.4), 01 report §8, changelog `[0.4.0]` (M2.3)
+- [x] **Table Intelligence documented** — MEDD §7.3b module, 01 report §10, changelog `[0.5.0]` (M2.4)
+- [x] **Image Intelligence documented** — MEDD Epic 8/G37/G33, 01 report image/EXIF + diagram rows, changelog `[0.6.0]` (M2.5)
+- [x] **Code & Notebook Intelligence documented** — MEDD §7.3d module + Phase 2 roadmap, 01 report §10b, changelog `[0.7.0]` (M2.6)
 - [ ] **Architecture diagram** in docs (Mermaid)
 - [ ] **API documentation** (if REST API exists)
 - [ ] **Troubleshooting guide** (current: `pam doctor` covers)

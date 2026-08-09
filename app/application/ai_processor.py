@@ -51,10 +51,12 @@ class DocumentAIProcessor:
         *,
         model: str | None = None,
         validation_retries: int = 2,
+        language: str | None = None,
     ) -> None:
         self._ollama_client = ollama_client
         self._model = model
         self._validation_retries = validation_retries
+        self._language = language
 
     def process(self, document: SourceDocument) -> AIProcessingResult:
         """Analyze a source document with Ollama and validate the JSON response."""
@@ -92,7 +94,9 @@ class DocumentAIProcessor:
         ) from last_error
 
     def _request_analysis(self, document: SourceDocument, *, attempt: int) -> DocumentAnalysis:
-        prompt = build_document_analysis_user_prompt(document)
+        prompt = build_document_analysis_user_prompt(
+            document, language=self._language or "en",
+        )
         if attempt > 1:
             prompt = _add_retry_instruction(prompt)
 

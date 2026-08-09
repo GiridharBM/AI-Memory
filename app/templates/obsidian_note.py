@@ -7,11 +7,13 @@ from datetime import UTC, datetime
 
 from app.domain.analysis import (
     DocumentAnalysis,
-    ImportantEntity,
     ExtractedMetadata,
+    ImportantEntity,
 )
+from app.domain.document_intelligence import Table
 from app.domain.documents import SourceDocument
 from app.domain.notes import ObsidianNote
+from app.infrastructure.document_intelligence.tables.render import MarkdownTableRenderer
 
 _FILENAME_UNSAFE_PATTERN = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 _MULTISPACE_PATTERN = re.compile(r"\s+")
@@ -69,6 +71,11 @@ class ObsidianMarkdownGenerator:
         if analysis.categories:
             sections.extend(["## Categories", "", _categories_section(analysis), ""])
             toc_entries.append("Categories")
+
+        tables_markdown = _tables_section(document)
+        if tables_markdown:
+            sections.extend(["## Tables", "", tables_markdown, ""])
+            toc_entries.append("Tables")
 
         sections.extend([
             "## Key Concepts", "",
@@ -183,6 +190,28 @@ def _keywords_section(analysis: DocumentAnalysis) -> str:
     if not analysis.keywords:
         return "- No keywords identified."
     return ", ".join(f"`{kw}`" for kw in analysis.keywords)
+
+
+def _tables_section(document: SourceDocument) -> str:
+    """Render ``metadata.extra["tables"]`` as Markdown (frozen §2.4).
+
+    Returns ``""`` when no tables key exists (Phase-1-identical output). Each
+    stored table is a serialized ``Table`` dict (``model_dump(mode="json")``).
+    """
+    raw_tables = document.metadata.extra.get("tables")
+    if not raw_tables:
+        return ""
+    renderer = MarkdownTableRenderer()
+    blocks: list[str] = []
+    for raw in raw_tables:
+        try:
+            table = Table.model_validate(raw)
+        except Exception:
+            continue
+        markdown = renderer.to_markdown(table)
+        if markdown:
+            blocks.append(markdown)
+    return "\n\n".join(blocks)
 
 
 def _categories_section(analysis: DocumentAnalysis) -> str:

@@ -187,16 +187,31 @@ class QueueWorker:
                 return True
 
             self._advance(progress, task, "Writing Markdown...")
+            # Move the source file into processed/ BEFORE recording it in the
+            # manifest. If the move fails the file stays in the inbox and the
+            # manifest is untouched, so a later scan retries it. Recording first
+            # would mark a file permanently processed even though its move
+            # (and therefore the whole item) had failed.
+            self._move_to_processed(item.path)
             self.manifest_manager.add_processed_file(
                 path=item.path,
                 sha256=digest,
                 extension=item.extension,
                 generated_note=result.note.filename,
             )
-            self.manifest_manager.save()
+            try:
+                self.manifest_manager.save()
+            except OSError:
+                # The file already moved to processed/ and its note is written.
+                # A disk failure here must not strand the item as FAILED; keep
+                # the in-memory record so dedup still works this session. The
+                # stale disk manifest only means a later restart may re-process
+                # the file, which is idempotent (same note path, updated=False).
+                logger.exception(
+                    "Manifest save failed; keeping in-memory record.",
+                    extra={"path": str(item.path), "sha256": digest},
+                )
             logger.info("Manifest updated.", extra={"path": str(item.path), "sha256": digest})
-
-            self._move_to_processed(item.path)
             self._advance(progress, task, "Finished")
 
         item.status = QueueStatus.DONE

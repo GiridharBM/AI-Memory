@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +22,7 @@ class QueueStateStore:
 
     def __init__(self, path: Path) -> None:
         self.path = path
+        self._lock = threading.Lock()
 
     def restore_into(self, queue_manager: QueueManager) -> int:
         """Restore queue items into a manager and return the count restored."""
@@ -39,8 +41,8 @@ class QueueStateStore:
 
         try:
             payload = json.loads(self.path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            logger.warning("Queue state was invalid JSON and will be ignored.")
+        except (json.JSONDecodeError, ValueError, OSError):
+            logger.warning("Queue state was unreadable or invalid and will be ignored.")
             return []
 
         raw_items = payload.get("items", []) if isinstance(payload, dict) else []
@@ -57,22 +59,31 @@ class QueueStateStore:
         return items
 
     def save(self, queue_manager: QueueManager) -> None:
-        """Save current pending queue items."""
+        """Save current pending queue items (thread-safe, best-effort).
 
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+        The watcher's observer thread and the worker thread both persist state,
+        so writes are serialized. A failed write is logged, never raised: an
+        unwritable state file must not take down the worker mid-processing.
+        """
+
         payload = {
             "version": 1,
             "items": [
                 _item_to_payload(item) for item in queue_manager.list_recoverable_items()
             ],
         }
-        temporary_path = self.path.with_suffix(f"{self.path.suffix}.tmp")
-        try:
-            temporary_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-            os.replace(temporary_path, self.path)
-        finally:
-            with suppress(FileNotFoundError):
-                temporary_path.unlink()
+        with self._lock:
+            try:
+                self.path.parent.mkdir(parents=True, exist_ok=True)
+                temporary_path = self.path.with_suffix(f"{self.path.suffix}.tmp")
+                try:
+                    temporary_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+                    os.replace(temporary_path, self.path)
+                finally:
+                    with suppress(FileNotFoundError):
+                        temporary_path.unlink()
+            except OSError:
+                logger.warning("Failed to persist queue state.", exc_info=True)
 
 
 def _item_to_payload(item: QueueItem) -> dict[str, Any]:

@@ -53,27 +53,33 @@
 
 ### 1.2 OCR
 
-**Status:** 🟡 Partial — tested via `test_processor_wiring.py` and `test_processors.py`
+**Status:** ✅ Tested — OCR engine unit + processor wiring + pipeline integration
 
 **Coverage:**
-- `processor_impls.py` — 95% (OCRProcessor, HandwritingProcessor, VisionProcessor)
-- `routing/classifier.py` — 83% (scanned_pdf, handwritten, image classification)
-- `vision_client.py` — 43% (**Low** — only constructor tested, `describe_image`/`describe_image_bytes` untested without a running vision model)
-- `whisper_transcriber.py` — 46% (**Low** — requires running Whisper)
+- `ocr/base.py` — 100% (OcrEngine protocol, DocumentOcrService, OCRSelectionError)
+- `ocr/models.py` — 100% (OcrResult, PageOcrResult, from_pages aggregation)
+- `ocr/engines.py` — 95% (VisionOcrEngine, TesseractOcrEngine; vision-call and preprocessor branches untested without live model)
+- `ocr/pdf.py` — 93% (render_pdf_pages; open/render failure branches)
+- `ocr/__init__.py` — 91% (get_default_ocr_service; vision-client construction failure branch)
+- `imaging/preprocess.py` — 95% (deskew → denoise → CLAHE; dependency-missing and write-failure branches)
+- `routing/processor_impls.py` — 100% (OCRProcessor, HandwritingProcessor, VisionProcessor)
+- `routing/classifier.py` — 97% (scanned_pdf, handwritten, image classification)
+- `llm/vision_client.py` — 43% (**Low** — only constructor tested, `describe_image`/`describe_image_bytes` untested without a running vision model)
 
 **What's tested:**
-- `OCRProcessor.process()` returns enriched document with correct confidence
-- `HandwritingProcessor.process()` returns enriched document with correct confidence
-- `VisionProcessor.process()` returns enriched document with correct confidence
+- `OcrEngine` protocol conformance: `run(source, *, prompt, preprocess=False) -> OcrResult` for both engines
+- `DocumentOcrService.select()` / `extract()` — auto selection, explicit engine, `OCRSelectionError` on no match
+- `OcrResult.from_pages()` — confidence aggregation, empty/low-confidence page flags
+- `render_pdf_pages()` — page_limit/max_pages/zoom behavior, missing PyMuPDF `ImportError`
+- `OCRProcessor.process()` / `HandwritingProcessor.process()` / `VisionProcessor.process()` return enriched documents
 - `DocumentClassifier` correctly sets `requires_ocr=True` for scanned_pdf, handwritten, image
 - Router selection for scanned_pdf → OCRProcessor, image → VisionProcessor, handwritten → HandwritingProcessor
+- `TesseractOcrEngine` — lazy import, clear G06 `ImportError` when pytesseract absent, per-page confidence mapping
 
 **What's NOT tested:**
 - `OllamaVisionClient.describe_image()` — requires live vision model
-- `_ocr_extract_from_pdf()` — PyMuPDF page rendering path
-- `_looks_handwritten()` heuristic
-- OCR confidence scoring accuracy
-- PDF >5 page truncation behavior
+- Vision engine's real vision-model call path and preprocessor branch
+- OCR confidence scoring accuracy against real OCR output (aggregation logic is tested)
 
 ### 1.3 Search
 
@@ -270,10 +276,10 @@ All measurements taken on the test machine. CPU: unknown, RAM: unknown, OS: Wind
 |---|---|---|
 | **Python import time** | **0.32s** | `time python -c "import app"` |
 | **Ollama connection time** | **1.78s** | `time ollama.Client().ps()` |
-| **Unit tests (24 files)** | **5.2s** | `pytest tests/unit/ -q` |
-| **Integration tests (2 files)** | **2.2s** | `pytest tests/integration/test_complete_workflow.py tests/integration/test_queue_worker_pipeline.py` |
-| **Full test suite (394 tests)** | **92.9s** | `pytest --cov=app` |
-| **Test coverage** | **84.77%** | `pytest --cov=app` (4247 statements, 647 missed) |
+| **Unit tests (31 files)** | **3.5s** | `pytest tests/unit/ -q` |
+| **Integration tests (5 files)** | **1.0s** | `pytest tests/integration/ -q` |
+| **Full test suite (508 collected / 506 passed)** | **4.5s** | `pytest --cov=app` |
+| **Test coverage** | **87.02%** | `pytest --cov=app` (4584 statements, 595 missed) |
 
 ### 3.2 Estimated Values
 
@@ -287,7 +293,8 @@ These values are **estimates based on code analysis**, not measurements. They ca
 | **Ingestion: 10MB .pdf file** | ~5–20s | Full file in memory, pypdf scales linearly |
 | **Ingestion: 50MB .csv file** | ~0.5–1s | File read, no complex parsing |
 | **OCR: single page image** | ~10–30s | Vision model inference via Ollama (GPU-dependent) |
-| **OCR: 5-page scanned PDF** | ~50–150s | 5 pages × 10–30s per page |
+| **OCR: 5-page scanned PDF (vision)** | ~50–150s | 5 pages × 10–30s per page (configurable `page_limit`, default 5) |
+| **OCR: printed text (Tesseract fallback)** | ~1s/page | `TesseractOcrEngine` offline, CPU-only |
 | **Embedding: single text** | ~0.1–0.5s | Ollama nomic-embed-text inference |
 | **Embedding: batch of 50** | ~2–10s | Ollama batch endpoint, scales sub-linearly |
 | **Search: 100 entries** | ~0.001s | O(n) cosine similarity, 100 entries × 384 dim |
@@ -592,12 +599,12 @@ def test_analysis_quality(case, settings, ollama_client):
 
 | Dimension | Score | Evidence |
 |---|---|---|
-| **Test coverage** | 84.77% | 4247 stmts, 647 missed. Above 80% threshold. |
-| **Test count** | 394 passing | 26 pytest files, 0 failures in last run |
-| **Test speed** | 92.9s full suite | Unit: 5.2s, Integration: 2.2s |
+| **Test coverage** | 87.02% | 4584 stmts, 595 missed. Above 80% threshold. |
+| **Test count** | 506 passing (508 collected, 2 deselected) | 36 pytest files, 0 failures in last run |
+| **Test speed** | 4.5s full suite | Unit: 3.5s, Integration: 1.0s |
 | **Untested modules** | 28 files | Mostly ingestors with no file fixtures |
 | **Low-coverage modules** | 7 below 50% | epub (25%), spreadsheet (32%), pptx (37%), vision_client (43%), whisper (46%), docx (45%) |
-| **Integration tests** | 8 tests | Two workflow files with fake AI processors |
+| **Integration tests** | 10 tests (2 deselected) | 5 workflow/pipeline files with fake AI processors |
 | **E2E tests** | 3 standalone scripts | Require real Ollama, not in pytest suite |
 | **Performance benchmarks** | None | No benchmark tests, no regression tracking |
 | **Retrieval evaluation** | None | No precision/recall/NDCG metrics |
