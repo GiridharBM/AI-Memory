@@ -41,7 +41,9 @@ def _full_analysis() -> DocumentAnalysis:
         difficulty="intermediate",
         key_concepts=[KeyConcept(name="Concept A", explanation="Expl A", importance="high")],
         definitions=[Definition(term="Term A", definition="Def A")],
-        important_entities=[ImportantEntity(name="Entity A", type="technology", description="Desc A")],
+        important_entities=[
+            ImportantEntity(name="Entity A", type="technology", description="Desc A")
+        ],
         tags=["test", "example"],
         related_topics=[RelatedTopic(topic="Topic B", reason="Reason B")],
         suggested_related_notes=["Related Note 1", "Related Note 2"],

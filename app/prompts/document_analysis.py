@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from app.domain.documents import SourceDocument
 
-DOCUMENT_ANALYSIS_SYSTEM_PROMPT = """
+DOCUMENT_ANALYSIS_SYSTEM_PROMPT = ("""
 You are a local personal knowledge assistant helping build an Obsidian wiki.
 
 Your job is to transform source material into structured knowledge notes.
@@ -138,9 +138,9 @@ Rules:
 - The suggested note title must be clear, specific, and suitable for an Obsidian note filename.
 - suggested_related_notes should suggest Obsidian note titles that would complement this note.
 - suggested_backlinks should suggest notes that should link TO this note.
-- extracted_metadata: extract author, word_count, language, and any other metadata from the source. Use empty strings and 0 when not determinable.
-""".strip()
-
+- extracted_metadata: extract author, word_count, language, and any other """
+"""metadata from the source. Use empty strings and 0 when not determinable.
+""").strip()
 
 def build_document_analysis_user_prompt(
     document: SourceDocument, language: str = "en",

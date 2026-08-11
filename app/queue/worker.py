@@ -156,7 +156,10 @@ class QueueWorker:
             logger.info("SHA256 calculated.", extra={"path": str(item.path), "sha256": digest})
 
             if self.manifest_manager.contains_hash(digest):
-                logger.info("Duplicate detected, skipping.", extra={"path": str(item.path), "sha256": digest})
+                logger.info(
+                    "Duplicate detected, skipping.",
+                    extra={"path": str(item.path), "sha256": digest},
+                )
                 item.status = QueueStatus.DONE
                 self.stats.record_duplicate()
                 return True

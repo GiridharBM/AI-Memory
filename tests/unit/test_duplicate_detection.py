@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from app.core.config import Settings
 from app.infrastructure.state.manifest import ManifestManager
 from app.pipelines import IngestionWorkflowResult
 from app.queue import QueueItem, QueueManager, QueueStatus, QueueWorker

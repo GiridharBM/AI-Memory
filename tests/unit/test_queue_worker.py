@@ -86,7 +86,9 @@ def test_worker_moves_unsupported_file_to_failed(tmp_settings: Settings, tmp_pat
     assert queue.is_empty()
 
 
-def test_worker_handles_missing_source_without_crashing(tmp_settings: Settings, tmp_path: Path) -> None:
+def test_worker_handles_missing_source_without_crashing(
+    tmp_settings: Settings, tmp_path: Path
+) -> None:
     queue = QueueManager()
     source = tmp_path / "inbox" / "missing.md"
     item = QueueItem(path=source, extension=".md", created_at=datetime.now(UTC))

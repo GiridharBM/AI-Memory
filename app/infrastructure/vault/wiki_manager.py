@@ -143,7 +143,10 @@ class WikiManager:
             f"- [[{backlink_source}]]\n"
         )
         note_path.write_text(content, encoding="utf-8")
-        logger.info("Created placeholder note.", extra={"path": str(note_path), "backlink": backlink_source})
+        logger.info(
+            "Created placeholder note.",
+            extra={"path": str(note_path), "backlink": backlink_source},
+        )
         return note_path
 
     def initialize(self) -> None:

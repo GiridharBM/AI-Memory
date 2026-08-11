@@ -46,6 +46,6 @@ class DocxIngestor(BaseIngestor):
         except ImportError:
             raise IngestionError(
                 "python-docx is required for DOCX ingestion. Install with: pip install python-docx"
-            )
+            ) from None
         except Exception as exc:
             raise IngestionError(f"Unable to read DOCX file '{path}'.") from exc

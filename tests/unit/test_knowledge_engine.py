@@ -1064,7 +1064,10 @@ class TestEntityExtraction:
         assert entity.type == "technology"
 
     def test_entity_type_literal(self) -> None:
-        for etype in ["person", "organization", "product", "project", "technology", "place", "paper", "concept", "other"]:
+        for etype in [
+            "person", "organization", "product", "project", "technology",
+            "place", "paper", "concept", "other",
+        ]:
             entity = ImportantEntity(name="X", type=etype, description="Y")
             assert entity.type == etype
 
@@ -1089,7 +1092,11 @@ class TestKnowledgeGraph:
 
     def test_add_edge_ignores_missing_nodes(self) -> None:
         g = KnowledgeGraph()
-        g.add_edge(KnowledgeEdge(source_id="missing", target_id="also_missing", edge_type="related_to"))
+        g.add_edge(
+            KnowledgeEdge(
+                source_id="missing", target_id="also_missing", edge_type="related_to"
+            )
+        )
         assert len(g.edges) == 0
 
     def test_add_edge_valid_endpoints_returns_true(self) -> None:
@@ -1225,7 +1232,7 @@ class TestEmbeddingService:
         from app.infrastructure.embeddings import EmbeddingService
         svc = EmbeddingService(OllamaSettings())
         raw_dict = {"embeddings": [[0.5, 0.6]], "prompt_eval_count": None}
-        with patch.object(svc._client, "embed", return_value=raw_dict) as m:
+        with patch.object(svc._client, "embed", return_value=raw_dict):
             result = svc.embed("test")
             assert result.embedding == [0.5, 0.6]
 
@@ -1859,7 +1866,11 @@ class TestKnowledgeGraphPersistence:
         g = KnowledgeGraph()
         g.add_node(KnowledgeNode(id="n1", label="A", node_type="concept", source="t.md"))
         g.add_node(KnowledgeNode(id="n2", label="B", node_type="entity", source="t.md"))
-        g.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type="related_to", weight=0.8))
+        g.add_edge(
+            KnowledgeEdge(
+                source_id="n1", target_id="n2", edge_type="related_to", weight=0.8
+            )
+        )
         g.save(path)
 
         loaded = KnowledgeGraph.load(path)

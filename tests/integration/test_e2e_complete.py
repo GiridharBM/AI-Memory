@@ -53,7 +53,10 @@ class FakeEmbeddingService:
 
     def embed_batch(self, texts: list[str]) -> list[Any]:
         from app.infrastructure.embeddings import EmbeddingResult
-        return [EmbeddingResult(model="fake-embed", embedding=self._text_to_vector(t)) for t in texts]
+        return [
+            EmbeddingResult(model="fake-embed", embedding=self._text_to_vector(t))
+            for t in texts
+        ]
 
 
 @dataclass
@@ -92,13 +95,21 @@ class FakeAnalysis:
         {"front": "Front of card", "back": "Back of card"},
     ])
     multiple_choice_questions: list[dict] = field(default_factory=lambda: [
-        {"question": "What is 2+2?", "options": ["3", "4", "5"], "correct_answer": "4", "explanation": "Basic math."},
+        {
+            "question": "What is 2+2?",
+            "options": ["3", "4", "5"],
+            "correct_answer": "4",
+            "explanation": "Basic math.",
+        },
     ])
     short_answer_questions: list[dict] = field(default_factory=lambda: [
         {"question": "Define X.", "answer": "X is a variable."},
     ])
     long_answer_questions: list[dict] = field(default_factory=lambda: [
-        {"question": "Explain the concept.", "answer": "This is a long explanation covering all aspects."},
+        {
+            "question": "Explain the concept.",
+            "answer": "This is a long explanation covering all aspects.",
+        },
     ])
     revision_notes: list[dict] = field(default_factory=lambda: [
         {"heading": "Key Points", "points": ["Point 1", "Point 2"]},
@@ -144,7 +155,9 @@ def _build_fake_analysis(cat_name: str) -> Any:
         suggested_backlinks=f.suggested_backlinks,
         questions_and_answers=[QuestionAnswer(**qa) for qa in f.questions_and_answers],
         flashcards=[Flashcard(**fc) for fc in f.flashcards],
-        multiple_choice_questions=[MultipleChoiceQuestion(**mcq) for mcq in f.multiple_choice_questions],
+        multiple_choice_questions=[
+            MultipleChoiceQuestion(**mcq) for mcq in f.multiple_choice_questions
+        ],
         short_answer_questions=[ShortAnswerQuestion(**sa) for sa in f.short_answer_questions],
         long_answer_questions=[LongAnswerQuestion(**la) for la in f.long_answer_questions],
         revision_notes=[RevisionNote(**rn) for rn in f.revision_notes],
@@ -407,7 +420,9 @@ def _make_ipynb(path: Path) -> Path:
              "outputs": [{"text": "describe output", "output_type": "stream", "name": "stdout"}],
              "execution_count": None},
         ],
-        "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}},
+        "metadata": {
+            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}
+        },
         "nbformat": 4,
         "nbformat_minor": 5,
     }
@@ -633,7 +648,6 @@ def _check_features(
 ) -> list[FeatureResult]:
     """Check all 23 features against the pipeline result."""
     md = note.markdown
-    fm_lines = md.split("---")[1] if "---" in md else ""
     features: list[FeatureResult] = []
 
     # 1. File detection
@@ -799,14 +813,10 @@ def _check_features(
 def run_phase1() -> list[FileResult]:
     """Run all categories through the pipeline with FakeProcessor."""
     from app.infrastructure.ingestion import DocumentIngestionService
-    from app.infrastructure.routing.classifier import DocumentClassifier
-    from app.infrastructure.routing.processors import default_processors
-    from app.infrastructure.routing.router import ProcessorRouter
-    from app.infrastructure.vault.writer import VaultWriter
-    from app.infrastructure.semantic_chunking import SemanticChunker
-    from app.infrastructure.vector_store import VectorStore
     from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
-    from app.core.config import ModelRoutingSettings
+    from app.infrastructure.semantic_chunking import SemanticChunker
+    from app.infrastructure.vault.writer import VaultWriter
+    from app.infrastructure.vector_store import VectorStore
     from app.pipelines.ingest_workflow import IngestionWorkflow
 
     results: list[FileResult] = []
@@ -837,7 +847,10 @@ def run_phase1() -> list[FileResult]:
                 workflow = IngestionWorkflow(
                     ingestion_service=DocumentIngestionService(),
                     processor=fake_proc,
-                    note_generator=__import__("app.templates.obsidian_note", fromlist=["ObsidianMarkdownGenerator"]).ObsidianMarkdownGenerator(),
+                    note_generator=__import__(
+                        "app.templates.obsidian_note",
+                        fromlist=["ObsidianMarkdownGenerator"],
+                    ).ObsidianMarkdownGenerator(),
                     writer=writer,
                     chunker=chunker,
                     embedding_service=embedding_svc,
@@ -897,13 +910,13 @@ def run_phase1() -> list[FileResult]:
 
 def run_phase2() -> list[FileResult]:
     """Run representative files through real Ollama."""
+    from app.core.config import ModelRoutingSettings, OllamaSettings
     from app.infrastructure.ingestion import DocumentIngestionService
-    from app.infrastructure.llm import OllamaClient
-    from app.infrastructure.vault.writer import VaultWriter
-    from app.infrastructure.semantic_chunking import SemanticChunker
-    from app.infrastructure.vector_store import VectorStore
     from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
-    from app.core.config import OllamaSettings, ModelRoutingSettings
+    from app.infrastructure.llm import OllamaClient
+    from app.infrastructure.semantic_chunking import SemanticChunker
+    from app.infrastructure.vault.writer import VaultWriter
+    from app.infrastructure.vector_store import VectorStore
     from app.pipelines.ingest_workflow import IngestionWorkflow
     from app.templates.obsidian_note import ObsidianMarkdownGenerator
 
@@ -929,7 +942,8 @@ def run_phase2() -> list[FileResult]:
         vault_root.mkdir()
         graph_path = tmp / "knowledge_graph.json"
 
-        embedding_svc = FakeEmbeddingService()  # Use fake for embeddings (nomic may not be available)
+        # Use fake for embeddings (nomic may not be available)
+        embedding_svc = FakeEmbeddingService()
         vector_store = VectorStore()
         chunker = SemanticChunker()
         kg_builder = KnowledgeGraphBuilder()
@@ -1017,7 +1031,9 @@ def generate_report(
 
     lines.append("# LLM Wiki — Complete End-to-End Verification Report")
     lines.append(f"\n**Generated:** {ts}")
-    lines.append(f"**Phase 1 files:** {len(phase1_results)} | **Phase 2 files:** {len(phase2_results)}")
+    lines.append(
+        f"**Phase 1 files:** {len(phase1_results)} | **Phase 2 files:** {len(phase2_results)}"
+    )
 
     # ── Overall completion ──
     all_results = phase1_results + phase2_results
@@ -1029,8 +1045,8 @@ def generate_report(
     overall_pct = (pass_count / total_files * 100) if total_files else 0
 
     lines.append("\n## Overall Completion")
-    lines.append(f"\n| Metric | Value |")
-    lines.append(f"|--------|-------|")
+    lines.append("\n| Metric | Value |")
+    lines.append("|--------|-------|")
     lines.append(f"| Total files tested | {total_files} |")
     lines.append(f"| PASS | {pass_count} |")
     lines.append(f"| PARTIAL | {partial_count} |")
@@ -1069,8 +1085,8 @@ def generate_report(
     m3_rate = _feature_pass_rate(m3_features, all_results)
     m4_rate = _feature_pass_rate(m4_features, all_results)
 
-    lines.append(f"\n| Milestone | Features | Pass Rate |")
-    lines.append(f"|-----------|----------|-----------|")
+    lines.append("\n| Milestone | Features | Pass Rate |")
+    lines.append("|-----------|----------|-----------|")
     lines.append(f"| M3: Document Intelligence | 17 features | {m3_rate:.1f}% |")
     lines.append(f"| M4: Knowledge Engine | 6 features | {m4_rate:.1f}% |")
 
@@ -1081,7 +1097,12 @@ def generate_report(
     lines.append("\n| Category | File | Size | Source Type | Features | Status | Time |")
     lines.append("|----------|------|------|-------------|----------|--------|------|")
     for r in phase1_results:
-        status_icon = {"PASS": "PASS", "PARTIAL": "PARTIAL", "ERROR": "ERROR", "FAIL": "FAIL"}.get(r.status, "?")
+        status_icon = {
+            "PASS": "PASS",
+            "PARTIAL": "PARTIAL",
+            "ERROR": "ERROR",
+            "FAIL": "FAIL",
+        }.get(r.status, "?")
         lines.append(
             f"| {r.category} | {r.filename} | {r.file_size}B | {r.source_type} "
             f"| {r.passed}/{r.total} | {status_icon} | {r.elapsed_s}s |"
@@ -1092,7 +1113,12 @@ def generate_report(
         lines.append("\n| Category | File | Size | Source Type | Features | Status | Time |")
         lines.append("|----------|------|------|-------------|----------|--------|------|")
         for r in phase2_results:
-            status_icon = {"PASS": "PASS", "PARTIAL": "PARTIAL", "ERROR": "ERROR", "FAIL": "FAIL"}.get(r.status, "?")
+            status_icon = {
+            "PASS": "PASS",
+            "PARTIAL": "PARTIAL",
+            "ERROR": "ERROR",
+            "FAIL": "FAIL",
+        }.get(r.status, "?")
             lines.append(
                 f"| {r.category} | {r.filename} | {r.file_size}B | {r.source_type} "
                 f"| {r.passed}/{r.total} | {status_icon} | {r.elapsed_s}s |"
@@ -1122,7 +1148,11 @@ def generate_report(
             f for r in all_results for f in r.features if f.feature == fname
         ]
         if not all(f.passed for f in feature_results):
-            failing = [r.category for r in all_results if any(f.feature == fname and not f.passed for f in r.features)]
+            failing = [
+                r.category
+                for r in all_results
+                if any(f.feature == fname and not f.passed for f in r.features)
+            ]
             missing.append((fname, failing))
     if missing:
         for fname, cats in missing:
@@ -1136,9 +1166,9 @@ def generate_report(
     if errors:
         for r in errors:
             lines.append(f"\n### {r.category}")
-            lines.append(f"```")
+            lines.append("```")
             lines.append(r.error[:500])
-            lines.append(f"```")
+            lines.append("```")
     else:
         lines.append("- No errors")
 
@@ -1157,12 +1187,23 @@ def generate_report(
     lines.append("\n## Recommendations")
     lines.append("")
     if error_count:
-        lines.append(f"1. **Fix {error_count} error(s):** Review error details above and fix root causes")
+        lines.append(
+            f"1. **Fix {error_count} error(s):** Review error details above and fix root causes"
+        )
     if partial_count:
-        lines.append(f"2. **Investigate {partial_count} partial result(s):** Some features may be missing for specific file types")
+        lines.append(
+            f"2. **Investigate {partial_count} partial result(s):** "
+            "Some features may be missing for specific file types"
+        )
     if not p2_times:
-        lines.append("3. **Run Phase 2 with real Ollama:** Start Ollama server and re-run for AI quality verification")
-    lines.append(f"4. **Current test suite:** 386 unit tests all passing — E2E verification confirms pipeline integrity")
+        lines.append(
+            "3. **Run Phase 2 with real Ollama:** Start Ollama server and re-run "
+            "for AI quality verification"
+        )
+    lines.append(
+        "4. **Current test suite:** 386 unit tests all passing — E2E verification "
+        "confirms pipeline integrity"
+    )
 
     return "\n".join(lines)
 

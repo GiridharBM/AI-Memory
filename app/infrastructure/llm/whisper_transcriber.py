@@ -24,7 +24,7 @@ class WhisperTranscriber:
             from faster_whisper import WhisperModel
             self._model = WhisperModel(self._model_size, device=self._device)
         except ImportError:
-            raise RuntimeError("faster-whisper is not installed.")
+            raise RuntimeError("faster-whisper is not installed.") from None
 
     def transcribe(self, audio_path: Path) -> str:
         """Transcribe an audio file and return the text."""

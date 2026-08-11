@@ -15,9 +15,8 @@ from pathlib import Path
 
 from app.application.ai_processor import DocumentAIProcessor
 from app.core.config import ModelRoutingSettings, OllamaSettings
-from app.domain.documents import DocumentMetadata, SourceDocument
-from app.infrastructure.llm import OllamaClient
 from app.infrastructure.ingestion import DocumentIngestionService
+from app.infrastructure.llm import OllamaClient
 from app.infrastructure.routing.classifier import DocumentClassifier
 from app.infrastructure.routing.processor_impls import get_processor_by_name
 from app.infrastructure.routing.processors import default_processors
@@ -143,8 +142,10 @@ def _html(p):
 def _xml(p):
     (p / "data.xml").write_text(
         '<?xml version="1.0"?>\n<catalog>\n'
-        '  <book id="1"><title>Design Patterns</title><author>GoF</author><year>1994</year></book>\n'
-        '  <book id="2"><title>Clean Code</title><author>Robert Martin</author><year>2008</year></book>\n'
+        '  <book id="1"><title>Design Patterns</title><author>GoF</author>'
+        '<year>1994</year></book>\n'
+        '  <book id="2"><title>Clean Code</title><author>Robert Martin</author>'
+        '<year>2008</year></book>\n'
         '</catalog>', encoding="utf-8")
     return p / "data.xml"
 
@@ -155,7 +156,8 @@ def _sqlite(p):
     c.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)")
     c.execute("INSERT INTO users VALUES (1, 'Alice', 'alice@example.com')")
     c.execute("INSERT INTO users VALUES (2, 'Bob', 'bob@example.com')")
-    conn.commit(); conn.close()
+    conn.commit()
+    conn.close()
     return path
 
 def _zip(p):
@@ -203,7 +205,9 @@ def _ipynb(p):
          "source": ["df = pd.read_csv('data.csv')\ndf.describe()"],
          "outputs": [{"text": "output", "output_type": "stream", "name": "stdout"}],
          "execution_count": 1},
-    ], "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}},
+    ], "metadata": {
+         "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}
+     },
      "nbformat": 4, "nbformat_minor": 5}
     (p / "analysis.ipynb").write_text(j.dumps(nb), encoding="utf-8")
     return p / "analysis.ipynb"
@@ -262,7 +266,8 @@ def run():
     results = {}
     with tempfile.TemporaryDirectory(prefix="intel_") as td:
         tmp = Path(td)
-        notes_dir = tmp / "notes"; notes_dir.mkdir()
+        notes_dir = tmp / "notes"
+        notes_dir.mkdir()
 
         ollama = OllamaClient(OllamaSettings(timeout_seconds=300))
         if not ollama.is_available():
@@ -279,14 +284,16 @@ def run():
 
         for i, (name, creator) in enumerate(SAMPLES, 1):
             print(f"\n[{i}/{len(SAMPLES)}] {name}...", end=" ", flush=True)
-            cat_dir = tmp / f"s_{name}"; cat_dir.mkdir(exist_ok=True)
+            cat_dir = tmp / f"s_{name}"
+            cat_dir.mkdir(exist_ok=True)
             t0 = time.time()
             try:
                 src = creator(cat_dir)
                 ing = svc.ingest(src)
                 if not ing.succeeded or not ing.document:
                     results[name] = {"status": "FAIL", "stage": "ingest"}
-                    print("FAIL (ingest)"); continue
+                    print("FAIL (ingest)")
+                    continue
                 doc = ing.document
 
                 cls = classifier.classify(doc)
@@ -355,7 +362,6 @@ def run():
                 print(f"OK ({elapsed:.1f}s) [{result['sections']}] {result['status']}")
 
             except Exception as e:
-                import traceback
                 results[name] = {"status": "ERROR", "error": str(e)}
                 print(f"ERROR: {e}")
 

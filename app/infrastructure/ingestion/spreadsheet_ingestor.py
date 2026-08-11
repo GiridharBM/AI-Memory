@@ -55,6 +55,6 @@ class SpreadsheetIngestor(BaseIngestor):
         except ImportError:
             raise IngestionError(
                 "openpyxl is required for spreadsheet ingestion. Install with: pip install openpyxl"
-            )
+            ) from None
         except Exception as exc:
             raise IngestionError(f"Unable to read spreadsheet file '{path}'.") from exc

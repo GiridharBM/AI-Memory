@@ -90,10 +90,14 @@ class ObsidianMarkdownGenerator:
         toc_entries.extend(["Key Concepts", "Definitions", "Important Entities", "Related Topics"])
 
         if analysis.suggested_related_notes:
-            sections.extend(["## Suggested Related Notes", "", _suggested_related_notes_section(analysis), ""])
+            sections.extend(
+                ["## Suggested Related Notes", "", _suggested_related_notes_section(analysis), ""]
+            )
             toc_entries.append("Suggested Related Notes")
         if analysis.suggested_backlinks:
-            sections.extend(["## Suggested Backlinks", "", _suggested_backlinks_section(analysis), ""])
+            sections.extend(
+                ["## Suggested Backlinks", "", _suggested_backlinks_section(analysis), ""]
+            )
             toc_entries.append("Suggested Backlinks")
         if analysis.questions_and_answers:
             sections.extend(["## Frequently Asked Questions", "", _qa_section(analysis), ""])

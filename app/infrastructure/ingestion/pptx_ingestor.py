@@ -51,6 +51,6 @@ class PptxIngestor(BaseIngestor):
         except ImportError:
             raise IngestionError(
                 "python-pptx is required for PPTX ingestion. Install with: pip install python-pptx"
-            )
+            ) from None
         except Exception as exc:
             raise IngestionError(f"Unable to read PPTX file '{path}'.") from exc

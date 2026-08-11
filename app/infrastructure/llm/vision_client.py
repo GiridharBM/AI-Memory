@@ -48,7 +48,10 @@ class OllamaVisionClient:
         image_path: Path,
         *,
         model: str | None = None,
-        prompt: str = "Extract all text from this image. Return only the extracted text, nothing else.",
+        prompt: str = (
+            "Extract all text from this image. "
+            "Return only the extracted text, nothing else."
+        ),
     ) -> str:
         """Send an image to a vision model and return the extracted text."""
         image_b64 = base64.b64encode(image_path.read_bytes()).decode()
@@ -63,7 +66,10 @@ class OllamaVisionClient:
         image_bytes: bytes,
         *,
         model: str | None = None,
-        prompt: str = "Extract all text from this image. Return only the extracted text, nothing else.",
+        prompt: str = (
+            "Extract all text from this image. "
+            "Return only the extracted text, nothing else."
+        ),
     ) -> str:
         """Send raw image bytes to a vision model."""
         image_b64 = base64.b64encode(image_bytes).decode()
