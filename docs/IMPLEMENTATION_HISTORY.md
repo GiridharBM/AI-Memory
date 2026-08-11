@@ -1,6 +1,6 @@
 # Implementation History
 
-Chronological record of how LLM-Wiki / Personal AI Memory (PAM) was built, milestone by milestone. Per-task granularity is preserved in `docs/archive/` (original phase/milestone/review files). Completion evidence: `PHASE_6_FINAL_APPROVAL.md`.
+Chronological record of how LLM-Wiki / Personal AI Memory (PAM) was built, milestone by milestone. Per-task granularity is preserved in `docs/archive/` (original phase/milestone/review files). Completion evidence: `PHASE_6_FINAL_APPROVAL.md`; current state: `PROJECT_STATUS.md`.
 
 ## Timeline
 
@@ -18,6 +18,7 @@ Chronological record of how LLM-Wiki / Personal AI Memory (PAM) was built, miles
 | v0.10.0 | 2026-08-08 | **Phase 4 — Knowledge Graph** | EntityExtractor, RelationshipDetector, DocumentGraphBuilder, JSON persistence, query layer, graph docs in notes |
 | v0.11.0 | 2026-08-09 | **Phase 5 — Hybrid Retrieval** | SearchService facade, BM25 (k1=1.5, b=0.75), RRF (k=60), filters, `pam search` |
 | v0.12.0 | 2026-08-09 | **Phase 6 — Hardening & Validation** | Failure isolation, performance optimization, security/config audit, E2E validation → **APPROVED** |
+| v1.0.0 | 2026-08-11 | **RAG Question Answering / V1.0.0 finalization** | `pam ask`: hybrid retrieval → grounded prompt → Ollama → answer + `[SOURCE N]` citations (`qa_workflow.py`, `prompts/qa.py`); canonical version 1.0.0 set → **Stable Local MVP, frozen** |
 
 ## Per-milestone summaries
 
@@ -46,6 +47,9 @@ Combined dense (cosine) and sparse (BM25) signals via RRF, added the `pam search
 ### Phase 6 — Production Hardening & Final Validation (v0.12.0)
 Final hardening: failure isolation (mypy/scoped clean-up, ruff clean-up of new code), performance optimization (verified ingest + search latency), security & config audit, and end-to-end validation (unit + integration + E2E). Closed with the Phase 6 final approval.
 
+### RAG Question Answering & V1.0.0 Finalization (v1.0.0)
+Added the RAG use case: `pam ask` performs hybrid retrieval over the knowledge base, assembles a bounded grounded context (`qa_workflow.py`), and asks the local Ollama model to answer with `[SOURCE N]` citations (`prompts/qa.py`). This shipped the previously deferred "RAG context retrieval" roadmap row and established **V1.0.0 as the Stable Local MVP**, frozen after finalization (canonical version set, active docs synchronized). See `PROJECT_STATUS.md`.
+
 ## Remediation history
 
 | Issue | Remediation | Resolved |
@@ -65,4 +69,4 @@ Final hardening: failure isolation (mypy/scoped clean-up, ruff clean-up of new c
 
 ## Engineering reviews & approvals
 
-Each phase ended with an engineering review (`ENGINEERING_REVIEW_*`) and/or milestone/phase approval (`PHASE_*_MILESTONE_*`, `PHASE_*_FINAL_APPROVAL`), all preserved in `docs/archive/`. The final, authoritative approval is `PHASE_6_FINAL_APPROVAL.md` (kept in `docs/`).
+Each phase ended with an engineering review (`ENGINEERING_REVIEW_*`) and/or milestone/phase approval (`PHASE_*_MILESTONE_*`, `PHASE_*_FINAL_APPROVAL`), all preserved in `docs/archive/`. The Phase-6 approval is `PHASE_6_FINAL_APPROVAL.md` (kept in `docs/`); the current V1.0.0 state is `PROJECT_STATUS.md`.

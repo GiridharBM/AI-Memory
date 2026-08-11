@@ -15,7 +15,7 @@ from rich.json import JSON as RichJSON
 from rich.panel import Panel
 from rich.table import Table
 
-from app.application import AIProcessingError
+from app.application import AIProcessingError, QAAnswer, QAError, QAWorkflow
 from app.core.config import ConfigurationError, Settings, load_settings
 from app.core.logging import get_logger, setup_logging
 from app.infrastructure.llm import OllamaClient, OllamaClientError
@@ -410,6 +410,55 @@ def search(
     _print_search_results(query, hits)
 
 
+@cli.command("ask")
+def ask(
+    question: Annotated[str, typer.Argument(help="Question to answer.")],
+    top_k: Annotated[
+        int,
+        typer.Option("--top-k", min=1, help="Number of retrieved context sources."),
+    ] = 5,
+    min_score: Annotated[
+        float,
+        typer.Option("--min-score", help="Minimum retrieval score."),
+    ] = 0.0,
+    filter_json: Annotated[
+        str | None,
+        typer.Option("--filter", help="JSON object of exact-match metadata filters."),
+    ] = None,
+) -> None:
+    """Answer a question grounded in the knowledge base (RAG)."""
+
+    settings = _load_configured_settings()
+    setup_logging(settings)
+
+    question = question.strip()
+    if not question:
+        console.print(
+            Panel("Question must not be empty.", title="Ask", border_style="red"),
+        )
+        raise typer.Exit(1)
+
+    filters = _parse_search_filters(filter_json, None)
+    if filters is None:
+        raise typer.Exit(1)
+
+    try:
+        workflow = QAWorkflow.create_default(settings)
+        result = workflow.ask(
+            question, top_k=top_k, min_score=min_score, filter=filters or None,
+        )
+    except QAError as exc:
+        logger.exception("Question answering failed.")
+        console.print(Panel(str(exc), title="Ask failed", border_style="red"))
+        raise typer.Exit(1) from exc
+    except Exception as exc:
+        logger.exception("Question answering failed.")
+        console.print(Panel(str(exc), title="Ask failed", border_style="red"))
+        raise typer.Exit(1) from exc
+
+    _print_qa_answer(question, result)
+
+
 def main() -> None:
     """Run the CLI application."""
 
@@ -455,6 +504,24 @@ def _print_search_results(query: str, hits: list[SearchHit]) -> None:
             f"{hit.score:.4f}",
             hit.source,
             hit.source_type,
+            " ".join(hit.text.split())[:200],
+        )
+    console.print(table)
+
+
+def _print_qa_answer(question: str, result: QAAnswer) -> None:
+    console.print(Panel(result.answer, title=f"Answer: {question}", border_style="green"))
+    if not result.sources:
+        console.print("No sources retrieved.")
+        return
+    table = Table(title="Sources", show_header=True, header_style="bold")
+    table.add_column("Score", justify="right")
+    table.add_column("Source")
+    table.add_column("Snippet", overflow="fold")
+    for hit in result.sources:
+        table.add_row(
+            f"{hit.score:.4f}",
+            hit.source,
             " ".join(hit.text.split())[:200],
         )
     console.print(table)

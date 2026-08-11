@@ -1,6 +1,22 @@
 # Testing and Verification
 
-Verification evidence for LLM-Wiki / Personal AI Memory (PAM). The authoritative completion evidence is `PHASE_6_FINAL_APPROVAL.md`; per-phase verification records are preserved in `docs/archive/`.
+Verification evidence for LLM-Wiki / Personal AI Memory (PAM). The Phase-6 completion evidence is `PHASE_6_FINAL_APPROVAL.md`; per-phase verification records are preserved in `docs/archive/`. **Current V1.0.0 state:** `PROJECT_STATUS.md`.
+
+## Final V1.0.0 gate (2026-08-11, re-run at finalization)
+
+| Suite | Result |
+|-------|--------|
+| **Unit tests** | **1375 passed / 57 deselected / 0 failed** |
+| **Test files** | 56 unit + 16 integration (collected) |
+| **Coverage** | **89.80%** (7176 statements, 732 missed) — floor is 80% |
+| **Ruff** | No new findings in V1.0.0-changed files; repo-wide `ruff check .` has 59 **pre-existing** findings (test line-lengths/unused imports + B904 in optional-dep ingestors) |
+| **Mypy** | No new findings; 5 **pre-existing** environment/stub errors (fitz, docx, pptx, faster-whisper, numpy on Python 3.11 target) |
+| **`git diff --check`** | Clean (only LF→CRLF line-ending warnings) |
+| **Live `pam status`** | ✅ Configuration loaded, Inbox ready, Ollama **Connected** (qwen3:8b), Vault connected |
+| **Live `pam search`** | ✅ Returns ranked hybrid results against the real vector store |
+| **Live `pam ask`** | ✅ Returns grounded answer with Sources table (top-k retrieval → Ollama → `[SOURCE N]`) |
+
+This document's table below is the historical Phase-6 gate record.
 
 ## Final state (v0.12.0, Phase 6 approval)
 

@@ -1,6 +1,14 @@
 # Release Notes
 
-Version history for **LLM-Wiki / Personal AI Memory (PAM)**, current version **v0.12.0** (project complete). Individual milestone release notes are preserved in `docs/archive/release_notes/`.
+Version history for **LLM-Wiki / Personal AI Memory (PAM)**, current version **V1.0.0** (Stable Local MVP, frozen). Individual milestone release notes are preserved in `docs/archive/release_notes/`.
+
+## v1.0.0 — 2026-08-11 · RAG Question Answering (V1.0.0 finalization)
+- **V1.0.0 — Stable Local MVP, frozen.** Canonical release version set in `pyproject.toml`; all active documentation synchronized.
+- `pam ask`: retrieval-grounded question answering over the knowledge base — hybrid retrieval (dense + BM25/RRF) → grounded system prompt → local Ollama → answer with `[SOURCE N]` citations.
+- `QAWorkflow` + `QAAnswer`/`QAError` (`app/application/qa_workflow.py`), `QA_SYSTEM_PROMPT` (`app/prompts/qa.py`), bounded context assembly (`MAX_CONTEXT_CHUNKS=8`, `MAX_CONTEXT_CHARS=12_000`).
+- Answers are grounded only in retrieved notes; the model refuses when context is insufficient.
+- Final gate: **1375 tests / 57 deselected / 0 failed; coverage 89.80%** (floor 80); 56 unit + 16 integration files; ruff/mypy clean on changed files; `pam status` / `pam search` / `pam ask` verified live against local Ollama.
+- Status determined by code audit — see `docs/PROJECT_STATUS.md`.
 
 ## v0.12.0 — 2026-08-09 · Production Hardening & Final Validation
 - **PROJECT COMPLETE.** Phase 6 delivered failure isolation, performance optimization, security/config audit, and end-to-end validation.

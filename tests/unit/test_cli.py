@@ -290,6 +290,85 @@ def test_cli_search_handles_service_failure(monkeypatch: pytest.MonkeyPatch) -> 
     assert "Search failed" in result.output
 
 
+def test_cli_ask_displays_answer_and_sources(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeQAWorkflow:
+        last: tuple[object, ...] | None = None
+
+        @classmethod
+        def create_default(
+            cls, settings: object, *, model: object | None = None
+        ) -> FakeQAWorkflow:
+            return cls()
+
+        def ask(
+            self,
+            question: str,
+            *,
+            top_k: int = 5,
+            min_score: float = 0.0,
+            filter: object | None = None,
+        ) -> SimpleNamespace:
+            type(self).last = (question, top_k, min_score, filter)
+            return SimpleNamespace(
+                answer="AI stands for artificial intelligence.",
+                sources=[
+                    SimpleNamespace(
+                        score=0.5,
+                        source="ai.md",
+                        source_type="markdown",
+                        text="AI is artificial intelligence.",
+                    )
+                ],
+                model="qwen3:8b",
+            )
+
+    monkeypatch.setattr(entry, "QAWorkflow", FakeQAWorkflow)
+
+    result = runner.invoke(entry.cli, ["ask", "What is AI?", "--top-k", "3"])
+
+    assert result.exit_code == 0
+    assert "Answer: What is AI?" in result.output
+    assert "AI stands for artificial intelligence." in result.output
+    assert "Sources" in result.output
+    assert "ai.md" in result.output
+    assert FakeQAWorkflow.last == ("What is AI?", 3, 0.0, None)
+
+
+def test_cli_ask_empty_question_exits_one() -> None:
+    result = runner.invoke(entry.cli, ["ask", "   "])
+    assert result.exit_code == 1
+    assert "must not be empty" in result.output
+
+
+def test_cli_ask_reports_generation_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeQAWorkflow:
+        @classmethod
+        def create_default(
+            cls, settings: object, *, model: object | None = None
+        ) -> FakeQAWorkflow:
+            return cls()
+
+        def ask(
+            self,
+            question: str,
+            *,
+            top_k: int = 5,
+            min_score: float = 0.0,
+            filter: object | None = None,
+        ) -> SimpleNamespace:
+            raise entry.QAError(
+                "Unable to generate an answer because the Ollama server is unavailable."
+            )
+
+    monkeypatch.setattr(entry, "QAWorkflow", FakeQAWorkflow)
+
+    result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert result.exit_code == 1
+    assert "Ask failed" in result.output
+    assert "Ollama server is unavailable" in result.output
+
+
 def _workflow_result(tmp_path: Path) -> SimpleNamespace:
     generated_at = datetime(2026, 7, 8, tzinfo=UTC)
     document = SourceDocument(

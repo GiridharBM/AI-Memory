@@ -2,7 +2,7 @@
 
 This directory is the consolidated documentation for **LLM-Wiki / Personal AI Memory (PAM)** — a local-first, offline AI system that turns documents, code, audio, images, and web content into a connected Obsidian knowledge base with semantic and hybrid search.
 
-**Project status:** ✅ **COMPLETE** — v0.12.0, approved at Phase 6 (`PHASE_6_FINAL_APPROVAL.md`). No further phases are planned.
+**Project status:** ✅ **COMPLETE** — **V1.0.0** (Stable Local MVP, frozen). Six roadmap phases plus RAG question answering (`pam ask`) are delivered and verified against the code. See [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) for the authoritative status and [`PHASE_6_FINAL_APPROVAL.md`](./PHASE_6_FINAL_APPROVAL.md) for the Phase-6 approval record.
 
 ---
 
@@ -10,6 +10,7 @@ This directory is the consolidated documentation for **LLM-Wiki / Personal AI Me
 
 | Document | What it is | Start here if you want to… |
 |----------|------------|----------------------------|
+| [**PROJECT_STATUS.md**](./PROJECT_STATUS.md) | Authoritative V1.0.0 status: feature matrix, file-type support, RAG architecture, V1 DoD, V2 roadmap, classified known bugs | Know the real state of the project |
 | [**FINAL_PROJECT_REPORT.md**](./FINAL_PROJECT_REPORT.md) | One clean end-to-end report of the whole project | Understand the project in 10 minutes |
 | [**architecture.md**](./architecture.md) | Authoritative system architecture | Understand how the system is built |
 | [**IMPLEMENTATION_SPECIFICATION.md**](./IMPLEMENTATION_SPECIFICATION.md) | Technical contracts and data schemas | Build on or modify the pipeline |
@@ -38,7 +39,7 @@ app/            Application source (cli, core, domain, infrastructure, pipelines
                 prompts, queue, templates, watcher)
 config/         YAML configuration (default / development / production)
 docs/           This documentation
-tests/          Unit (56 files) and integration (18 files) tests
+tests/          Unit (56 files) and integration (16 files) tests
 vault/          Generated Obsidian vault
 README.md       Project-level README (usage, install, CLI)
 requirements.txt / pyproject.toml
@@ -46,8 +47,9 @@ requirements.txt / pyproject.toml
 
 ## Quick facts
 
-- **Version:** 0.12.0 (pre-1.0, maturity ≈ 80%)
+- **Version:** 1.0.0 (Stable Local MVP; see `PROJECT_STATUS.md` §1 for how this was determined)
 - **Runtime:** Python 3.11+ (tested on 3.14), Ollama, local-first
-- **Final suite:** 1359 tests passing (coverage 90.04% was measured at the Phase 6 gate — not re-measured after cleanup)
+- **Suite:** 1375 tests passing / 57 deselected / 0 failed; coverage **89.80%** (floor 80); 56 unit + 16 integration files
 - **Search:** hybrid (dense cosine + BM25) fused with RRF (k=60), via `pam search`
-- **Completion evidence:** `PHASE_6_FINAL_APPROVAL.md`
+- **Ask:** RAG question answering with `[SOURCE N]` citations, via `pam ask`
+- **Completion evidence:** `PROJECT_STATUS.md` (current state) + `PHASE_6_FINAL_APPROVAL.md` (Phase-6 record)

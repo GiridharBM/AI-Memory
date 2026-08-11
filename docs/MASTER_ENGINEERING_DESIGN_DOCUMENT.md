@@ -2,7 +2,7 @@
 
 > **Project:** Personal AI Memory System (PAM) / LLM-Wiki
 >
-> **Version:** 0.12.0
+> **Version:** 1.0.0
 >
 > **Classification:** Internal — Single Source of Truth
 >
@@ -11,6 +11,7 @@
 > **Date:** 2026-08-09
 >
 > **Version history:**
+> - **1.0.0 (2026-08-11)** — V1.0.0 finalization: canonical version set to `1.0.0` in `pyproject.toml`; RAG question answering (`pam ask`) shipped: `app/application/qa_workflow.py` (`QAWorkflow`, `QAAnswer`, `QAError`, `build_context`, `MAX_CONTEXT_CHUNKS=8`, `MAX_CONTEXT_CHARS=12_000`), `app/prompts/qa.py` (`QA_SYSTEM_PROMPT`, `build_qa_user_prompt`), `pam ask` CLI. Final gate: 1375 tests, 89.80% coverage. See `docs/PROJECT_STATUS.md` for the authoritative V1.0.0 status (the figures below are the Phase-6 record).
 > - **0.12.0 (2026-08-09)** — Phase 6 (Production Hardening & Final Validation, P6-101..P6-106) implemented and verified: performance benchmark (P6-102, 20k-document corpus, 352 ms/query), failure isolation — child attachment failures no longer abort the parent item and a manifest save failure keeps the item DONE (P6-103, +2 tests); security/configuration audit (P6-104) — 34 personal runtime files untracked from git (`.gitignore` extended to `data/inbox|processed|failed|manifests/*`, `.gitkeep` whitelist preserved), `PyMuPDF`/`openpyxl` added to `requirements.txt`, production/development config separation locked by test; independent end-to-end validation (P6-105) — 15 flows × 10 dimensions verified by 25 independent checks against the live application; final project approval (P6-106). Suite: 1398 tests, 90.04% coverage. No new features; no architectural changes; Phase 6 evaluation-tooling roadmap rows (§5 Phase 6) deferred to backlog — the executed Phase 6 delivered hardening + validation instead.
 > - **0.11.0 (2026-08-09)** — Phase 5 (Hybrid Retrieval, P5-101..P5-105) implemented: deterministic Okapi-BM25 sparse index (`app/infrastructure/bm25.py`, `k1=1.5`, `b=0.75`, stdlib-only, P5-101/102); reciprocal rank fusion `_rrf_fuse` (k=60) replacing the weighted-sum hybrid (P5-102); scoring verification locking the roadmap 4.1 success criterion (P5-103); `SearchService` facade (`create_default` + `search(query, *, top_k=5, filter=None, min_score=0.0)`) and `pam search` CLI (P5-104); retrieval optimization — precomputed entry norms, version-keyed BM25 cache (`store.version`), deterministic `(-score, entry.id)` ordering, additive `start_char`/`end_char` on `VectorEntry`, exact-match metadata filtering, and embedder/BM25 failure fallback (P5-105). §7.6 Retrieval Module Current Implementation/Interfaces rewritten; Phase 4 roadmap §4.1/§4.2/§4.7 rows marked delivered, §4.5 marked partial (exact-match shipped, `$in` deferred); §4.3/§4.4/§4.6 deferred. Phase 5 adds no dependencies.
 > - **0.10.0 (2026-08-08)** — Phase 4 (Document Knowledge Graph, P4-101..P4-105) implemented: validated `Entity`/`Relationship` domain models (`app/domain/entity_relationship.py`, P4-101); deterministic regex `EntityExtractor` (P4-102); co-occurrence `RelationshipDetector` (P4-103); `DocumentGraphBuilder` mapping entities/relationships onto the existing in-memory `KnowledgeGraph` with `find_relationships` + `graph_to_dict` (P4-104); query layer (`get_entity`, `related_entities`, `nodes_by_source`, `query_graph`, `graph_from_dict`) consuming the pipeline's `metadata.extra["knowledge_graph"]` artifact (P4-105). Phase 4 ships no graph storage/retrieval and no graph DB; additive `EntitySettings`/`RelationshipSettings`/`GraphSettings` toggles (R-4 rollback). §7.7 Knowledge Graph Module Current Implementation added; Phase 5 §5.2 roadmap Graph Query row marked delivered (P4-105 `query_graph`).
@@ -47,7 +48,7 @@
 
 Personal AI Memory System (PAM) is a **local-first, offline-capable** Obsidian knowledge-base builder that processes documents through an AI pipeline powered by Ollama. It ingests 100+ file types across 20+ categories, extracts structured knowledge via local LLMs, and generates interconnected Obsidian notes with YAML frontmatter, wiki-links, semantic chunking, embeddings, vector search, and a knowledge graph.
 
-**Current version:** 0.12.0 (pre-1.0). Maturity: ~80%.
+**Current version:** 1.0.0 (Stable Local MVP). Maturity: ready for personal/local use. See `docs/PROJECT_STATUS.md` for the authoritative status.
 
 ## 1.2 Overall Architecture
 

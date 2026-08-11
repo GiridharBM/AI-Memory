@@ -8,8 +8,8 @@
 ![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge)
 ![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-v0.12.0-blue?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-1359%20Passing-success?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-1375%20Passing-success?style=for-the-badge)
 
 [Overview](#-overview) •
 [Features](#-features) •
@@ -22,6 +22,16 @@
 [License](#-license)
 
 </div>
+
+---
+
+## 📌 Project Status
+
+> **Project Status: V1.0.0 — Stable Local MVP**
+>
+> The V1 release provides a complete local document ingestion, processing, embedding, hybrid retrieval, and grounded question-answering pipeline using Ollama. V1 is considered **complete and frozen**. Future enhancements are tracked under the V2 roadmap.
+>
+> Verified against the code: **1375 passing tests / 57 deselected / 0 failed**, **89.80% coverage** (floor 80), and `pam status` / `pam search` / `pam ask` verified live against a local Ollama. See [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md) for the authoritative audit.
 
 ---
 
@@ -58,24 +68,26 @@ Building a personal knowledge base by hand is slow and fragile. Notes end up sca
 - Modular, swappable prompt system
 
 ### 📄 Document Ingestion
-The classifier recognizes **90+ file extensions** across the kinds below:
-- **Documents:** PDF, DOCX, ODT, RTF, EPUB, TeX
+The classifier recognizes **90+ file extensions** across the kinds below. All extensions are *classified and routed*; not every one has a fully working parser end-to-end. The complete, code-verified support matrix is in **[`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md#3-supported-file-types)**. The working core set:
+- **Documents:** PDF (text layer; scanned PDFs via OCR), Markdown, TXT
 - **Code:** Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP, Swift, Kotlin, and 20+ more
 - **Notebooks:** Jupyter (.ipynb)
-- **Spreadsheets:** CSV, TSV, XLS, XLSX, ODS
-- **Presentations:** PPTX, PPT, ODP
-- **Images:** PNG, JPG, GIF, WebP, BMP, TIFF, HEIC, SVG
-- **Diagrams:** DrawIO, Visio, Mermaid (.mmd)
-- **Audio:** MP3, WAV, M4A, FLAC, OGG, AAC
-- **Video:** MP4, MKV, MOV, AVI, WebM
-- **Archives:** ZIP, TAR, GZ, 7Z, RAR
-- **Emails:** EML
+- **Spreadsheets:** CSV, TSV, XLSX (`.xls`/`.ods` are not readable)
+- **Presentations:** PPTX (requires `python-pptx`, not in `requirements.txt`; `.ppt`/`.odp` not readable)
+- **Images:** PNG, JPG, GIF, WebP, BMP, TIFF, HEIC, SVG (searchable after vision OCR)
+- **Diagrams:** DrawIO (labels only), Mermaid (.mmd)
+- **Audio:** MP3, WAV, M4A, FLAC, OGG, AAC (needs a Whisper backend)
+- **Video:** MP4, MKV, MOV, AVI, WebM (metadata only — no extraction path)
+- **Archives:** ZIP, TAR, GZ (file listings only; 7Z/RAR not implemented)
+- **Emails:** EML (with attachments)
 - **Databases:** SQLite, DB
 - **Research:** BibTeX (.bib), RIS
-- **Web:** HTML, XML, JSON, RSS
+- **Web:** HTML, XML, JSON, RSS (raw text)
 - **Config:** TOML, INI, CFG, YAML, ENV
 - **Text:** TXT, Markdown, Log files
 - **URLs:** GitHub READMEs, YouTube transcripts
+
+> ⚠️ **Honesty note:** `.epub`, `.rtf`, `.odt`, `.xls`, `.ods`, `.ppt`, `.odp`, `.vsdx`, `.7z`, `.rar` are advertised but do **not** work end-to-end today. `pam watch` only auto-picks up the 53 `PROCESSABLE_EXTENSIONS` (Markdown, TXT, PDF, CSV, XLSX, code, images, audio, video).
 
 ### 🧠 Knowledge Extraction
 Automatically extracts 21 fields:
@@ -133,18 +145,18 @@ Automatically extracts 21 fields:
 
 ## 🚀 Release Status
 
-**Version:** `v0.12.0`  **Status:** 🟢 Stable · Released · **PROJECT COMPLETE** (Phase 6 final approval)
+**Version:** `1.0.0`  **Status:** 🟢 Stable Local MVP — complete core RAG pipeline, verified against the code (see `docs/PROJECT_STATUS.md`)
 
 | Delivered | Future Vision |
 |---|---|
-| Local-first architecture | RAG-based context retrieval |
-| Ollama integration | External vector DB (Chroma/Qdrant) |
-| PDF / Markdown / TXT ingestion | REST API for search |
-| 90+ file extension support | Web UI |
-| GitHub README ingestion | Multi-user support |
-| YouTube transcript ingestion | |
-| Markdown generation & vault management | |
-| CLI interface, logging, config management | |
+| Local-first architecture | Cross-encoder re-ranking |
+| Ollama integration | External vector DB (Chroma/Qdrant/FAISS) |
+| PDF / Markdown / TXT ingestion | Query rewriting & parent-child retrieval |
+| Watcher-supported ingestion (53 extensions) | PDF-embedded image understanding |
+| GitHub README ingestion | REST API for search |
+| YouTube transcript ingestion | Web UI |
+| Markdown generation & vault management | Multi-user support |
+| CLI interface, logging, config management | Evaluation tooling & hallucination detection |
 | Automatic folder watching (`pam watch`) | |
 | Background watcher service | |
 | Processing queue with recovery | |
@@ -158,8 +170,8 @@ Automatically extracts 21 fields:
 | Hybrid search (RRF) with metadata filters | |
 | Knowledge graph with persistence | |
 | Cross-document linking | |
-| Placeholder note creation | |
-| Comprehensive testing (1359 tests) | |
+| **RAG question answering (`pam ask`)** — retrieval-grounded answers with sources | |
+| Comprehensive testing (1375 tests) | |
 
 ---
 
@@ -175,29 +187,50 @@ Completed and independently approved across six phases:
 | **4 — Knowledge graph** | Entity extraction, co-occurrence relationship detection, per-document graph with JSON persistence | ✅ |
 | **5 — Hybrid retrieval** (P5-101..105) | Dense cosine + BM25 fused by RRF (k=60), `SearchService` facade, `pam search` with top-k/source-type/min-score/metadata filters | ✅ |
 | **6 — Hardening & final validation** (P6-101..106) | Performance benchmark, failure isolation, security/config audit, E2E validation, final approval | ✅ **APPROVED** |
+| **7 — RAG question answering (v1.0.0)** | `pam ask` — hybrid retrieval → grounded prompt → Ollama → answer + sources (`qa_workflow.py`, `prompts/qa.py`) | ✅ |
 
 ---
 
 ## 🧪 Final Verification
 
-Measured against the live repository at release (see `docs/PHASE_6_FINAL_APPROVAL.md`):
+Measured against the live repository at the V1.0.0 audit (see `docs/PROJECT_STATUS.md`):
 
 | Gate | Result |
 |------|--------|
-| Unit + regression suite | **1359 passed** / 57 deselected / 0 failed |
+| Unit + regression suite | **1375 passed** / 57 deselected / 0 failed |
 | Code coverage | **89.80%** (floor 80) |
 | Integration suite | 85 passed / 1 skipped / 1 environmental (live-Ollama) |
 | End-to-end validation | **25/25 PASS** |
 | Ingest performance | 20,000 × 384-dim vectors in ~271 ms |
 | Search performance | ~190 ms per query |
-| Lint / type / deps | ruff 0 new findings · mypy clean (scoped) · `pip check` clean |
-| Secrets scan | Working tree and git history clean |
+| Lint / type / deps | ruff clean on changed files · mypy clean (scoped, pre-existing env notes) · CI workflow present |
+
+---
+
+## 🏅 Verified V1.0.0 Achievements
+
+Factual engineering metrics (audited against the code — see `docs/PROJECT_STATUS.md`):
+
+- **V1.0.0 stable local MVP** — complete, frozen, and verified end-to-end
+- **1375 passing tests** / 57 deselected / 0 failed; **89.80% coverage** (floor 80)
+- **End-to-end RAG pipeline** — ingestion → parsing → OCR (where supported) → chunking → embeddings → vector store → hybrid retrieval → grounded answer → source citations
+- **Hybrid retrieval** — dense cosine (`nomic-embed-text`) + BM25 fused by reciprocal rank fusion (RRF k=60), with metadata/source-type/min-score/top-k filters
+- **RAG question answering** — `pam ask` with grounded, refusal-capable answers and `[SOURCE N]` citations
+- **OCR where supported** — scanned-PDF auto-detection, vision model with optional Tesseract fallback
+- **Local Ollama inference** — embeddings and LLM inference never leave the machine
+- **CLI-based search and QA** — `pam search`, `pam ask`, `pam status`, `pam ingest`, `pam watch`
+- **Automated quality gates** — CI workflow (ruff, mypy, pytest + coverage), ruff/mypy clean on changed files
 
 ---
 
 ## ⚠️ Known Limitations
 
 - **In-memory vector store & graph** — persisted to JSON on disk, not an external database. Large-scale deployments are future vision (Chroma/FAISS/Qdrant, Neo4j).
+- **File-type gaps** — `.epub`, `.rtf`, `.odt`, `.xls`, `.ods`, `.ppt`, `.odp`, `.vsdx`, `.7z`, `.rar` are advertised but broken or unimplemented end-to-end (details in `docs/PROJECT_STATUS.md` §3, §11).
+- **PDF-embedded images** — stored as metadata but never OCR'd/understood; only standalone image files are vision-OCR'd. Tables are extracted to Markdown and searchable as raw text (no structured query).
+- **No re-ranking** — retrieved chunks are scored by hybrid (dense+BM25/RRF) search; a cross-encoder re-ranker is V2 work.
+- **Single chunking strategy** — the heading-aware semantic chunker (2000 chars / 200 overlap) is hardcoded; no per-document strategy selection.
+- **Answer citations are requested, not verified** — `pam ask` prompts for `[SOURCE N]` citations but does not post-verify them.
 - **Live-Ollama smoke test** — `tests/integration/smoke_test.py` requires a running `llama3.1:8b` and asserts all 21 note sections while the template intentionally emits only populated sections. It is skipped by default and is an environmental, not a code, issue.
 - **Tesseract OCR fallback** — optional CPU-only path; scanned documents are OCR'd by the local vision model when it is absent.
 - **Ollama required** — all AI inference (analysis, embeddings, OCR) runs locally through Ollama; it must be installed and running.
@@ -291,7 +324,7 @@ pam doctor
 
 Expected output:
 ```text
-1359 passed
+1375 passed
 
 ✔ Configuration loaded
 ✔ Ollama available
@@ -399,6 +432,7 @@ pam doctor            # Full health check
 pam config             # View current configuration
 pam config --json     # View configuration as JSON
 pam search "query"    # Search the knowledge base (hybrid semantic + keyword)
+pam ask "question"    # RAG question answering with cited sources (v1.0.0)
 pam watch              # Start automatic folder watching and processing
 ```
 
@@ -437,6 +471,19 @@ pam search "graph" --filter '{"language":"en"}'   # exact-match metadata filters
 ```
 
 An empty query exits with a usage error.
+
+### 💬 Ask Questions (RAG)
+
+`pam ask` (v1.0.0) answers questions from the knowledge base — hybrid retrieval → grounded prompt → local Ollama → answer with `[SOURCE N]` citations:
+
+```bash
+pam ask "what is attention in transformers?"   # top 5 context chunks by default
+pam ask "why do we chunk?" --top-k 8           # more context chunks
+pam ask "list the models" --source-type code   # restrict retrieval to a source type
+pam ask "who wrote this?" --model qwen3:8b     # override the Ollama model
+```
+
+The answer is grounded only in retrieved notes — if the context can't support the question, the model says so instead of guessing. See `docs/PROJECT_STATUS.md` §7 for the full RAG flow.
 
 ---
 
@@ -679,8 +726,8 @@ AI-Memory/
 ├── docs/                  # Engineering + release documentation
 ├── scripts/
 ├── tests/
-│   ├── integration/       # 17 integration test files
-│   └── unit/              # 55 unit test files
+│   ├── integration/       # 16 integration test files
+│   └── unit/              # 56 unit test files
 ├── vault/                 # Generated Obsidian vault
 ├── LICENSE
 ├── README.md
@@ -706,7 +753,7 @@ AI-Memory/
 | `docs/` | Project documentation |
 
 ### Design Principles
-Clean Architecture · SOLID Principles · Modular Components · Type Safety · Local-first Design · Offline AI · Extensibility · Production-ready Code · Comprehensive Testing
+Clean Architecture · SOLID Principles · Modular Components · Type Safety · Local-first Design · Offline AI · Extensibility · Tested Code · Comprehensive Testing
 
 ---
 
@@ -861,7 +908,7 @@ Before processing, every file is hashed with **SHA-256**. If the hash already ex
 # Install development dependencies
 python -m pip install -e ".[dev]"
 
-# Run the full unit + regression suite (default; 1359 tests)
+# Run the full unit + regression suite (default; 1375 tests)
 python -m pytest
 
 # Run integration tests (live Ollama required; environment-dependent tests may fail)
@@ -883,7 +930,7 @@ mypy app
 
 ### Test Suite
 
-- **1359 passing tests** (57 deselected — integration/live tests requiring Ollama, Tesseract, or network)
+- **1375 passing tests** (57 deselected — integration/live tests requiring Ollama, Tesseract, or network)
 - Tests cover: ingestion, classification, routing, processing, AI analysis, markdown generation, knowledge engine, vector store, knowledge graph, semantic chunking, hybrid search, watcher, queue, CLI, configuration, security, and more
 - External model behavior is mocked for deterministic tests
 - Run `python -m pytest` to execute the full suite
@@ -931,20 +978,26 @@ mypy app
 
 AI Memory has evolved from a manual document processor into an automated, local-first AI Memory System — one where knowledge capture happens continuously in the background instead of through one-off commands.
 
-Version 3 and 4 foundations are already in place: **semantic memory** (local embeddings, semantic + hybrid search over the in-memory vector store), and a **knowledge graph** (entity/relationship extraction with JSON persistence). Future versions build on this with external vector databases, **retrieval-augmented generation (RAG)**, and an agent layer — all while staying local-first and offline by design.
+Version 3 and 4 foundations are already in place: **semantic memory** (local embeddings, semantic + hybrid search over the in-memory vector store), a **knowledge graph** (entity/relationship extraction with JSON persistence), and **RAG question answering** (`pam ask`, v1.0.0). Future versions build on this with external vector databases, re-ranking, and an agent layer — all while staying local-first and offline by design.
 
 ---
 
 ## 🗺️ Roadmap
 
-### ✅ Delivered — project complete
-All six phases are complete and approved (`v0.1.0` → `v0.12.0`), including semantic memory, hybrid search, and the knowledge graph. See `docs/DEVELOPMENT_ROADMAP.md` for the phase-by-phase record and `docs/PHASE_6_FINAL_APPROVAL.md` for the final approval.
+### ✅ Delivered — V1.0.0 (stable MVP, frozen)
+All six roadmap phases plus the RAG QA phase are complete: `v0.1.0` → `v0.12.0` → **V1.0.0** (semantic memory, hybrid search, knowledge graph, and grounded `pam ask` QA). See `docs/DEVELOPMENT_ROADMAP.md` for the phase-by-phase record, `docs/PHASE_6_FINAL_APPROVAL.md` for the Phase-6 approval, and `docs/PROJECT_STATUS.md` for the current V1.0.0 state.
 
-### 🔮 Future vision (not implemented)
+### 🔮 Future vision (V2, not implemented)
+- Cross-encoder re-ranking of retrieved chunks
 - External vector DB — ChromaDB / FAISS / Qdrant
-- RAG & context retrieval over retrieved chunks
+- PDF-embedded image understanding; structured table querying
+- Multi-strategy / per-document chunking selection
+- Query rewriting & parent-child retrieval
 - Neo4j / NetworkX for large-scale graph storage
-- REST API, web UI, multi-user support
+- REST API, web UI, multi-user architecture
+- Advanced evaluation framework (retrieval/hallucination metrics)
+- Production deployment, Docker, monitoring
+- Large-scale distributed ingestion
 - Autonomous AI agent (Personal Tutor, Research Assistant, Daily Knowledge Summaries)
 
 ---
