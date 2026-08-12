@@ -105,7 +105,7 @@ def test_worker_processes_txt_updates_vault_manifest_and_moves_file(tmp_path: Pa
     assert queue.is_empty()
     assert not source.exists()
     assert (settings.processing.processed_path / "plain.txt").exists()
-    assert (settings.paths.vault_root / "Notes" / "Plain.md").exists()
+    assert (settings.paths.vault_root / "Notes" / "plain.md").exists()
     assert ManifestManager(settings.manifest.path, project_root=tmp_path).count() == 1
 
 
