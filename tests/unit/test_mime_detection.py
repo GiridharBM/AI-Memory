@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import logging
 import os
 import sys
@@ -22,6 +23,15 @@ def no_magic(monkeypatch: pytest.MonkeyPatch) -> None:
     """Guarantee python-magic is unavailable and reset the warn-once flag."""
     monkeypatch.delitem(sys.modules, "magic", raising=False)
     monkeypatch.setattr(mime, "_MAGIC_MISSING_WARNED", False)
+
+    real_import = builtins.__import__
+
+    def _block_magic_import(name: str, *args: object, **kwargs: object):
+        if name == "magic":
+            raise ImportError("simulated missing python-magic")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", _block_magic_import)
 
 
 def _write(tmp_path: Path, name: str, content: bytes) -> Path:

@@ -19,10 +19,13 @@ def test_load_settings_resolves_default_paths() -> None:
     assert settings.paths.vault_root == settings.paths.project_root / "vault"
 
 
-def test_environment_variables_override_yaml(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_environment_variables_override_yaml(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    custom_vault = tmp_path / "custom_vault"
     monkeypatch.setenv("PAM_OLLAMA__MODEL", "test-model")
     monkeypatch.setenv("PAM_LOGGING__LEVEL", "ERROR")
-    monkeypatch.setenv("PAM_PATHS__VAULT_ROOT", "D:\\TestVault")
+    monkeypatch.setenv("PAM_PATHS__VAULT_ROOT", str(custom_vault))
     monkeypatch.setenv("PAM_WATCHER__ENABLED", "false")
     monkeypatch.setenv("PAM_WATCHER__INTERVAL_SECONDS", "2")
     monkeypatch.setenv("PAM_WATCHER__RECURSIVE", "false")
@@ -31,7 +34,7 @@ def test_environment_variables_override_yaml(monkeypatch: pytest.MonkeyPatch) ->
 
     assert settings.ollama.model == "test-model"
     assert settings.logging.level == "ERROR"
-    assert settings.paths.vault_root == Path("D:\\TestVault")
+    assert settings.paths.vault_root == custom_vault
     assert settings.watcher.enabled is False
     assert settings.watcher.interval_seconds == 2
     assert settings.watcher.recursive is False

@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
@@ -23,7 +24,7 @@ from app.core.config import (
     WatcherSettings,
 )
 from app.queue import QueueItem, QueueManager
-from app.watcher.service import WatchService, _InboxCreatedHandler
+from app.watcher.service import WatchService, _InboxCreatedHandler, _wait_for_stable_file
 
 
 class FakeObserver:
@@ -265,6 +266,45 @@ def test_handler_enqueues_markdown_file(tmp_path: Path) -> None:
     event.src_path = str(md_file)
     handler.on_created(event)
     stats.record_detection.assert_called_once()
+    assert qm.size() == 1
+
+
+def test_wait_for_stable_file_retries_until_size_is_stable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "note.md"
+    target.write_text("# Test", encoding="utf-8")
+
+    sizes = iter([1, 2, 2])
+
+    monkeypatch.setattr("app.watcher.service.time.sleep", lambda *_: None)
+    monkeypatch.setattr(Path, "stat", lambda self: SimpleNamespace(st_size=next(sizes)))
+
+    assert _wait_for_stable_file(target, delay=0.1, checks=2) is True
+
+
+def test_handler_waits_for_stable_file_before_enqueue(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    qm = QueueManager()
+    stats = MagicMock()
+    handler = _InboxCreatedHandler(
+        supported_extensions={".md"},
+        queue_manager=qm,
+        queue_state_store=MagicMock(),
+        stats=stats,
+    )
+    md_file = tmp_path / "note.md"
+    md_file.write_text("# Test", encoding="utf-8")
+    monkeypatch.setattr("app.watcher.service._wait_for_stable_file", lambda *args, **kwargs: True)
+
+    event = MagicMock()
+    event.is_directory = False
+    event.src_path = str(md_file)
+    handler.on_created(event)
+
     assert qm.size() == 1
 
 

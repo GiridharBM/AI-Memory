@@ -26,6 +26,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev,intelligence]"
 
+      - name: Provision NLTK punkt_tab data
+        run: |
+          python -m nltk.downloader punkt_tab
+
       - name: Lint with ruff
         run: |
           ruff check app/ tests/

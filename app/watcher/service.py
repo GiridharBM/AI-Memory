@@ -20,6 +20,31 @@ from app.watcher.scanner import should_watch_file
 logger = get_logger(__name__)
 
 
+def _wait_for_stable_file(path: Path, *, delay: float = 0.5, checks: int = 2) -> bool:
+    """Return true once the file size has remained unchanged through consecutive polls."""
+    if not path.exists():
+        return False
+
+    try:
+        stable_size = path.stat().st_size
+    except OSError:
+        return False
+
+    for _ in range(max(1, checks)):
+        time.sleep(delay)
+        try:
+            current_size = path.stat().st_size
+        except OSError:
+            return False
+
+        if current_size != stable_size:
+            stable_size = current_size
+            continue
+        return True
+
+    return False
+
+
 class WatchService:
     """Monitor the inbox directory and report new Markdown files."""
 
@@ -189,6 +214,10 @@ class _InboxCreatedHandler(FileSystemEventHandler):
         path = Path(event.src_path)
         if not should_watch_file(path, self.supported_extensions):
             logger.info("Skipping unsupported file: %s", path.name)
+            return
+
+        if not _wait_for_stable_file(path):
+            logger.info("File not stable yet; delaying queue: %s", path.name)
             return
 
         queue_item = QueueItem(

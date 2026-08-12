@@ -36,7 +36,7 @@ def detect_mime(path: Path) -> str:
     """
     extension_type = _extension_mime(path)
     if extension_type is not None:
-        return extension_type
+        return _normalize_mime_alias(extension_type)
 
     header = _read_header(path)
     if header is None:
@@ -44,8 +44,15 @@ def detect_mime(path: Path) -> str:
 
     magic_type = _magic_from_header(header)
     if magic_type is not None and magic_type not in {"text/plain", "application/octet-stream"}:
-        return magic_type
-    return _sniff_mime(header)
+        return _normalize_mime_alias(magic_type)
+    return _normalize_mime_alias(_sniff_mime(header))
+
+
+def _normalize_mime_alias(mime_type: str) -> str:
+    """Normalize MIME aliases to PAM's canonical application-level values."""
+    if mime_type == "text/xml":
+        return "application/xml"
+    return mime_type
 
 
 def _extension_mime(path: Path) -> str | None:
