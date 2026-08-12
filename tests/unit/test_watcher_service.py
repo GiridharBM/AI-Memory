@@ -277,9 +277,15 @@ def test_wait_for_stable_file_retries_until_size_is_stable(
     target.write_text("# Test", encoding="utf-8")
 
     sizes = iter([1, 2, 2])
+    real_stat = Path.stat
+
+    def fake_stat(self: Path, *args: object, **kwargs: object) -> Any:
+        if self != target:
+            return real_stat(self, *args, **kwargs)
+        return SimpleNamespace(st_size=next(sizes))
 
     monkeypatch.setattr("app.watcher.service.time.sleep", lambda *_: None)
-    monkeypatch.setattr(Path, "stat", lambda self: SimpleNamespace(st_size=next(sizes)))
+    monkeypatch.setattr(Path, "stat", fake_stat)
 
     assert _wait_for_stable_file(target, delay=0.1, checks=2) is True
 
