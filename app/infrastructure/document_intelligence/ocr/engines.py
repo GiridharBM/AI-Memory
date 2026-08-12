@@ -78,9 +78,11 @@ class VisionOcrEngine:
             png = page.png_bytes
             if preprocess and self._preprocessor is not None:
                 png = self._preprocessor(png)
-            text = self._with_retry(
-                lambda png=png: self._describe(png, prompt=prompt), page_no=page.page_no
-            )
+
+            def describe(png: bytes = png) -> str:
+                return self._describe(png, prompt=prompt)
+
+            text = self._with_retry(describe, page_no=page.page_no)
             pages.append(PageOcrResult(page_no=page.page_no, text=text, confidence=None))
             if not text.strip():
                 logger.warning(

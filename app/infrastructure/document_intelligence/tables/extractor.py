@@ -11,7 +11,7 @@ from __future__ import annotations
 import csv
 import io
 import logging
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, cast, runtime_checkable
 
 from app.domain.document_intelligence import Table, TableCell, TableHeader, TableRow
 from app.domain.documents import SourceDocument
@@ -303,10 +303,13 @@ class PdfTableExtractor:
                 for page_index, page in enumerate(pdf.pages, start=1):
                     found = page.extract_tables()
                     for table_index, raw in enumerate(found, start=1):
+                        # pdfplumber's stub widens cells to list[object]; they
+                        # are str | None at runtime (a subset of object).
+                        cells = cast(list[list[object]], raw)
                         table = _build_table(
                             title=f"Page {page_index} Table {table_index}",
-                            raw_header=raw[0] if raw else [],
-                            raw_rows=raw[1:] if raw else [],
+                            raw_header=cells[0] if cells else [],
+                            raw_rows=cells[1:] if cells else [],
                             source_position=f"page {page_index}",
                             max_rows=self._max_rows,
                             max_cols=self._max_cols,

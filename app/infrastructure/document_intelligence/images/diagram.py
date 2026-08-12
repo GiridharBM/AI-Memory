@@ -9,6 +9,7 @@ callers can fall back to the raw text.
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from xml.etree import ElementTree
 
 _VALID_NODE_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
@@ -89,7 +90,7 @@ class DiagramParser:
 
     supported_suffixes = (".drawio",)
 
-    def parse(self, path) -> str:
+    def parse(self, path: Path) -> str:
         """Return the Mermaid skeleton for ``path``, or ``""`` when unsupported."""
         if path.suffix.lower() not in self.supported_suffixes:
             return ""

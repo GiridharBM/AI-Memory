@@ -98,7 +98,7 @@ class DocumentGraphBuilder:
 
 def _node_metadata(entity: Entity) -> dict[str, str]:
     """Node metadata from entity type/importance (both JSON-safe strings)."""
-    metadata = {"entity_type": entity.entity_type}
+    metadata: dict[str, str] = {"entity_type": entity.entity_type}
     if entity.metadata.importance is not None:
         metadata["importance"] = entity.metadata.importance
     return metadata

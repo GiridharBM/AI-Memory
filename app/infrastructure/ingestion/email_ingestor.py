@@ -6,7 +6,9 @@ import email
 import email.policy
 import shutil
 import tempfile
+from email.message import EmailMessage
 from pathlib import Path
+from typing import cast
 
 from app.core.config import MetadataSettings
 from app.core.logging import get_logger
@@ -100,7 +102,7 @@ class EmailIngestor(BaseIngestor):
         return document
 
     def _attach_extracted_attachments(
-        self, document: SourceDocument, msg: email.message.Message,
+        self, document: SourceDocument, msg: EmailMessage,
     ) -> SourceDocument:
         if not msg.is_multipart():
             return document
@@ -114,7 +116,7 @@ class EmailIngestor(BaseIngestor):
             update={"metadata": document.metadata.model_copy(update={"extra": extra})}
         )
 
-    def _extract_attachments(self, msg: email.message.Message) -> tuple[list[str], list[str]]:
+    def _extract_attachments(self, msg: EmailMessage) -> tuple[list[str], list[str]]:
         temp_dir = Path(tempfile.mkdtemp(prefix="pam_email_attachments_"))
         names: list[str] = []
         paths: list[str] = []
@@ -133,7 +135,10 @@ class EmailIngestor(BaseIngestor):
             filename = _unique_name(filename, names)
             child = temp_dir / filename
             try:
-                child.write_bytes(payload)
+                # Runtime contract: an attachment payload is bytes (decoded
+                # encoded-payload or the nested part's as_bytes); typeshed's
+                # EmailMessage typing is lossy here, so assert the invariant.
+                child.write_bytes(cast(bytes, payload))
             except OSError:
                 logger.warning(
                     "Skipping un-writable email attachment.",

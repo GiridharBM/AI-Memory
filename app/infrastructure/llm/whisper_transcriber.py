@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from app.core.logging import get_logger
 
@@ -15,7 +16,9 @@ class WhisperTranscriber:
     def __init__(self, *, model_size: str = "base", device: str = "cpu") -> None:
         self._model_size = model_size
         self._device = device
-        self._model = None
+        # ponytail: faster-whisper ships no type stubs; Any is the honest
+        # type for the model handle (a Protocol would model untyped internals).
+        self._model: Any = None
 
     def _ensure_model(self) -> None:
         if self._model is not None:

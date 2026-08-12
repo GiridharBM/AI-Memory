@@ -3,17 +3,25 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from app.core.logging import get_logger
 from app.domain.documents import SourceDocument
 from app.domain.processed_document import ProcessedDocument
 
 if TYPE_CHECKING:
+    from app.infrastructure.document_intelligence.images import DiagramParser
     from app.infrastructure.document_intelligence.ocr.base import DocumentOcrService
     from app.infrastructure.document_intelligence.ocr.models import OcrResult
 
 logger = get_logger(__name__)
+
+
+class RoutedDocumentProcessor(Protocol):
+    """Duck-typed contract implemented by every routed document processor."""
+
+    def process(self, document: SourceDocument) -> ProcessedDocument:
+        """Extract/enrich a source document into a processed document."""
 
 # Type aliases for optional dependencies to avoid import cycles at module level
 _OllamaVisionClient = object  # app.infrastructure.llm.vision_client.OllamaVisionClient
@@ -402,10 +410,10 @@ class DiagramProcessor:
     name = "DiagramProcessor"
     supported_kinds = {"diagram"}
 
-    def __init__(self, *, parser: object | None = None) -> None:
+    def __init__(self, *, parser: DiagramParser | None = None) -> None:
         self._parser = parser
 
-    def _parser_impl(self) -> object:
+    def _parser_impl(self) -> DiagramParser:
         if self._parser is None:
             from app.infrastructure.document_intelligence.images import DiagramParser
 
@@ -452,7 +460,7 @@ class DiagramProcessor:
 
 # ── Registry ─────────────────────────────────────────────────────────────────
 
-_ALL_PROCESSORS: list[type] = [
+_ALL_PROCESSORS: list[type[RoutedDocumentProcessor]] = [
     TextProcessor,
     MarkdownProcessor,
     WebProcessor,
@@ -475,10 +483,10 @@ _ALL_PROCESSORS: list[type] = [
     DiagramProcessor,
 ]
 
-_REGISTRY: dict[str, type] = {cls.__name__: cls for cls in _ALL_PROCESSORS}
+_REGISTRY: dict[str, type[RoutedDocumentProcessor]] = {cls.__name__: cls for cls in _ALL_PROCESSORS}
 
 
-def get_processor_by_name(name: str) -> object | None:
+def get_processor_by_name(name: str) -> RoutedDocumentProcessor | None:
     """Return the processor instance for a given name, or None."""
     cls = _REGISTRY.get(name)
     return cls() if cls is not None else None

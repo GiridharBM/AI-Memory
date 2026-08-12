@@ -527,7 +527,7 @@ def _print_qa_answer(question: str, result: QAAnswer) -> None:
     console.print(table)
 
 
-def _run_ingest(source: str | Path, *, expected_source_type: str) -> None:
+def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None:
     settings = _load_configured_settings()
     setup_logging(settings)
 

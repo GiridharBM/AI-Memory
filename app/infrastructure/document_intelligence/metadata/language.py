@@ -93,7 +93,7 @@ def _language_heuristic(text: str) -> tuple[str, float]:
         lang: sum(1 for word in words if word in stops)
         for lang, stops in _STOPWORDS.items()
     }
-    best_lang = max(scores, key=scores.get)
+    best_lang = max(scores, key=scores.__getitem__)
     best = scores[best_lang]
     if best == 0:
         return _DEFAULT_LANGUAGE, 0.0

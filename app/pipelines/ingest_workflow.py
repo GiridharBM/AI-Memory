@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from app.application import AIProcessingResult, DocumentAIProcessor
 from app.core.config import (
@@ -32,11 +33,15 @@ from app.infrastructure.document_intelligence import (
     get_default_structure_analyzer,
     graph_to_dict,
 )
+from app.infrastructure.document_intelligence.entities import EntityExtractor
+from app.infrastructure.document_intelligence.graph.builder import DocumentGraphBuilder
 from app.infrastructure.document_intelligence.ocr import get_default_ocr_service
 from app.infrastructure.document_intelligence.ocr.base import DocumentOcrService
 from app.infrastructure.document_intelligence.ocr.models import OcrResult
+from app.infrastructure.document_intelligence.relationships import RelationshipDetector
 from app.infrastructure.document_intelligence.structure.detector import (
     TEXT_BEARING_KINDS,
+    StructureAnalyzer,
     max_structure_text_bytes,
 )
 from app.infrastructure.document_intelligence.tables import get_table_extractor
@@ -52,6 +57,9 @@ from app.infrastructure.vault import VaultWriter, WikiUpdateResult
 from app.infrastructure.vector_store import VectorStore
 from app.templates import ObsidianMarkdownGenerator
 
+if TYPE_CHECKING:
+    from app.infrastructure.routing.processor_impls import RoutedDocumentProcessor
+
 logger = get_logger(__name__)
 
 
@@ -65,7 +73,14 @@ class DocumentProcessor(Protocol):
 class NoteGenerator(Protocol):
     """Protocol for components that turn analysis into Markdown notes."""
 
-    def generate(self, *, document: SourceDocument, analysis: DocumentAnalysis) -> ObsidianNote:
+    def generate(
+        self,
+        *,
+        document: SourceDocument,
+        analysis: DocumentAnalysis,
+        ocr_confidence: float | None = None,
+        processing_confidence: float | None = None,
+    ) -> ObsidianNote:
         """Generate a Markdown note from a document and analysis."""
 
 
@@ -107,10 +122,10 @@ class IngestionWorkflow:
         ocr_service: DocumentOcrService | None = None,
         note_generator: NoteGenerator,
         writer: NoteWriter,
-        chunker: object | None = None,
-        embedding_service: object | None = None,
-        vector_store: object | None = None,
-        knowledge_graph_builder: object | None = None,
+        chunker: SemanticChunker | None = None,
+        embedding_service: EmbeddingService | None = None,
+        vector_store: VectorStore | None = None,
+        knowledge_graph_builder: KnowledgeGraphBuilder | None = None,
         graph_persistence_path: Path | None = None,
     ) -> None:
         self._ingestion_service = ingestion_service
@@ -119,10 +134,10 @@ class IngestionWorkflow:
         self._vision_client: object | None = None
         self._transcriber: object | None = None
         self._ocr_service = ocr_service
-        self._structure_analyzer: object | None = None
-        self._entity_extractor: object | None = None
-        self._relationship_detector: object | None = None
-        self._document_graph_builder: object | None = None
+        self._structure_analyzer: StructureAnalyzer | None = None
+        self._entity_extractor: EntityExtractor | None = None
+        self._relationship_detector: RelationshipDetector | None = None
+        self._document_graph_builder: DocumentGraphBuilder | None = None
         self._routing = routing or ModelRoutingSettings()
         self._settings = settings
         self._classifier = DocumentClassifier(
@@ -133,6 +148,7 @@ class IngestionWorkflow:
         for proc in default_processors():
             self._router.register(proc)
 
+        self._processor: DocumentProcessor | None
         if processor is not None:
             self._processor = processor
             self._ollama_client = None
@@ -325,6 +341,7 @@ class IngestionWorkflow:
             # processor extracted the text (vision/audio processors use
             # specialized models for extraction, not analysis).
             analysis_model = self._routing.model_for("general_text")
+            assert self._ollama_client is not None
             processor = DocumentAIProcessor(
                 self._ollama_client,
                 model=analysis_model,
@@ -336,13 +353,6 @@ class IngestionWorkflow:
             document,
             ai_result.analysis,
         )
-
-        if cross_links:
-            existing = set(ai_result.analysis.suggested_related_notes)
-            existing.update(ai_result.analysis.suggested_backlinks)
-            for link in cross_links:
-                if link not in existing:
-                    ai_result.analysis.suggested_backlinks.append(link)
 
         ocr_confidence = None
         if ocr_result is not None and ocr_result.confidence is not None:
@@ -496,7 +506,7 @@ class IngestionWorkflow:
             self._settings and self._settings.intelligence.images.preprocess
         )
 
-        _constructors = {
+        _constructors: dict[str, Callable[[], RoutedDocumentProcessor]] = {
             "VisionProcessor": lambda: VisionProcessor(
                 ocr_service=self._ocr_service, language=language,
                 preprocess=images_preprocess,
@@ -513,6 +523,7 @@ class IngestionWorkflow:
         }
 
         factory = _constructors.get(processor_name)
+        processor: RoutedDocumentProcessor | None
         if factory is not None:
             processor = factory()
         else:
@@ -968,6 +979,8 @@ class IngestionWorkflow:
         """Find similar existing chunks and return cross-document link count."""
         from app.infrastructure.search import SemanticSearch
 
+        if self._vector_store is None:
+            return 0
         search = SemanticSearch(self._vector_store)
         link_count = 0
         seen_sources: set[str] = set()

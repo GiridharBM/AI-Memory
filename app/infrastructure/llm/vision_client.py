@@ -30,7 +30,7 @@ class OllamaVisionClient:
             models = self._client.list()
             model_names = []
             for m in (models.models if hasattr(models, "models") else []):
-                name = m.model if hasattr(m, "model") else str(m)
+                name = m.model if isinstance(m.model, str) else str(m)
                 model_names.append(name)
             if not any(self._vision_model in name for name in model_names):
                 logger.warning(

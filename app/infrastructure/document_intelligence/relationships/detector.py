@@ -37,8 +37,9 @@ from collections import defaultdict
 from collections.abc import Sequence
 
 from app.domain.entity_relationship import Entity, Relationship, SourceReference
+from app.domain.knowledge_graph import EdgeType
 
-_RELATIONSHIP_TYPE = "related_to"
+_RELATIONSHIP_TYPE: EdgeType = "related_to"
 
 
 class RelationshipDetector:
