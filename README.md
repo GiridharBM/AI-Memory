@@ -1,503 +1,405 @@
-<div align="center">
+# PAM — Personal AI Memory / LLM-Wiki
 
-# 🧠 AI Memory
+PAM is a local-first AI memory project that ingests documents, indexes them into a searchable knowledge store, and lets you ask grounded questions over the resulting knowledge base using local Ollama models. The V1 release is a stable local MVP for document intake, retrieval, and RAG, not a full production knowledge platform.
 
-**Build your own offline AI-powered second brain using Python, Ollama, and Obsidian.**
+## Overview
 
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge)
-![Obsidian](https://img.shields.io/badge/Obsidian-Knowledge%20Base-7C3AED?style=for-the-badge&logo=obsidian&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-1375%20Passing-success?style=for-the-badge)
+The core problem PAM solves is fragmentation: useful information is spread across notes, PDFs, Markdown files, code, transcripts, spreadsheets, and other local documents. PAM brings those materials into a single local workflow: classify the source, extract or analyze the content, chunk it, embed it, store it, and retrieve it later with semantic and keyword search.
 
-[Overview](#-overview) •
-[Features](#-features) •
-[Installation](#-installation) •
-[Usage](#-cli-usage) •
-[Watching Mode](#-watching-mode) •
-[Architecture](#%EF%B8%8F-project-architecture) •
-[Configuration](#%EF%B8%8F-configuration) •
-[Troubleshooting](#-troubleshooting) •
-[License](#-license)
+The project is intentionally local-first. It uses local filesystem storage, local Ollama inference, and a local Obsidian vault. Instead of sending personal content to an external service, the system keeps the processing loop on the machine where the knowledge lives.
 
-</div>
+## V1 at a glance
 
----
+PAM V1.0.0 is a stable local MVP for document ingestion, retrieval, and grounded question answering.
 
-## 📌 Project Status
+- Version: 1.0.0
+- Runtime: Python 3.11–3.13 (validated in CI), local Ollama, local filesystem storage
+- Scope: document intake, routing, document intelligence, chunking, embeddings, hybrid retrieval, and grounded QA
+- Validation: 1375 passing tests, 89.80% coverage, Ruff and mypy checks in CI
+- Status: V1 is frozen; future enhancements are explicitly deferred and not implemented in this release
 
-> **Project Status: V1.0.0 — Stable Local MVP**
->
-> The V1 release provides a complete local document ingestion, processing, embedding, hybrid retrieval, and grounded question-answering pipeline using Ollama. V1 is considered **complete and frozen**. Future enhancements are tracked under the V2 roadmap.
->
-> Verified against the code: **1375 passing tests / 57 deselected / 0 failed**, **89.80% coverage** (floor 80), and `pam status` / `pam search` / `pam ask` verified live against a local Ollama. See [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md) for the authoritative audit.
+## Key Features
 
----
+The following features are implemented and verified in the repository:
 
-## 📖 Overview
+- Local document ingestion through a CLI and workflow pipeline
+- Routing and classification by document kind
+- PDF text extraction and OCR support for scanned PDFs and images
+- Markdown, TXT, HTML/XML/JSON/RSS, CSV/TSV, XLSX, and code/config file handling in the pipeline
+- Semantic chunking with heading-aware splitting and overlap
+- Embedding generation through Ollama
+- Local vector-store search with JSON persistence
+- BM25 keyword search and hybrid retrieval using reciprocal rank fusion
+- Grounded question answering over the local knowledge base
+- Obsidian note generation and vault writes
+- Watcher and queue support for local inbox processing
+- CI, pytest, Ruff, and mypy validation
 
-**AI Memory** is an automated, local-first personal AI memory system that continuously transforms documents, research papers, GitHub repositories, YouTube transcripts, and personal notes into an interconnected Obsidian knowledge base.
+## Architecture
 
-With Version 2, AI Memory can now **watch folders automatically** — drop a file into the inbox and it's detected, queued, and processed without running a single command. A background watcher service, processing queue, and duplicate detection work together to keep your vault continuously up to date.
+PAM is built as a layered local workflow:
 
-Unlike traditional note-taking apps, AI Memory doesn't just store information — it **analyzes, organizes, summarizes, links, and enriches** your knowledge while keeping everything completely offline.
+1. Source files are added to the project or inbox.
+2. The document classifier determines the likely kind.
+3. A routed processor extracts or analyzes the content.
+4. OCR, table extraction, metadata extraction, and structure analysis run where relevant.
+5. Text is chunked into manageable segments.
+6. Chunks are embedded with Ollama.
+7. Vectors are stored locally and searched with hybrid retrieval.
+8. Query results are assembled into bounded context.
+9. A local LLM answers the question using only the retrieved context.
+10. The generated note or answer is written to the local vault or returned in the CLI.
 
-- Your data never leaves your machine
-- No cloud APIs
-- No subscriptions
-- No vendor lock-in
-- All processing — watching, queuing, and AI inference — runs entirely locally through Ollama
+## How It Works
 
----
+The diagram below reflects the actual V1 implementation currently in the repository: CLI-driven document intake, configuration-backed processing, document intelligence, semantic chunking, local embeddings, and hybrid retrieval before grounded QA.
 
-## 💡 The Problem
+```mermaid
+flowchart LR
+    subgraph CLI[CLI and runtime orchestration]
+        C1[pam CLI\napp/cli/entry.py]
+        C2[Settings / config\napp/core/config.py]
+        C3[Watcher + queue\napp/watcher/service.py\napp/queue/*.py]
+    end
 
-Building a personal knowledge base by hand is slow and fragile. Notes end up scattered across files with no connections, no searchability, and no structure — so the effort spent capturing them rarely pays off later.
+    subgraph INPUT[Inputs]
+        D1[Document / inbox file]
+        D2[GitHub / YouTube / local source]
+    end
 
-**AI Memory fixes this by doing the capture and organization for you.** Drop a document, code file, audio recording, or image into the inbox and it is analyzed, summarized, linked to related content, and written into a connected Obsidian vault — automatically, on your own machine, with no cloud APIs.
+    subgraph INGEST[Ingestion]
+        I1[DocumentIngestionService\napp/infrastructure/ingestion/service.py]
+        I2[Source-specific ingestors\nMarkdown / PDF / Text / CSV / DOCX / image / etc.]
+    end
 
----
+    subgraph INTEL[Document intelligence]
+        R1[DocumentClassifier\napp/infrastructure/routing/classifier.py]
+        R2[ProcessorRouter\napp/infrastructure/routing/router.py]
+        R3[Text extraction / OCR / tables / metadata / structure]
+        R4[KnowledgeGraphBuilder\napp/infrastructure/knowledge_graph.py]
+    end
 
-## ✨ Features
+    subgraph STORAGE[Persistence and storage]
+        S1[VaultWriter\napp/infrastructure/vault]
+        S2[VectorStore\napp/infrastructure/vector_store.py]
+        S3[Manifest + JSON files\nsettings.paths.manifest_root]
+        S4[Knowledge graph JSON / metadata]
+    end
 
-### 🤖 AI Powered
-- Local inference using Ollama
-- Qwen3:8B integration
-- Structured JSON generation with automatic retries and validation
-- Modular, swappable prompt system
+    subgraph RAG[Retrieval and grounding]
+        A1[SemanticChunker\napp/infrastructure/semantic_chunking.py]
+        A2[EmbeddingService\napp/infrastructure/embeddings.py]
+        A3[BM25 + HybridSearch\napp/infrastructure/search.py]
+        A4[SearchService\napp/infrastructure/search.py]
+        A5[QAWorkflow\napp/application/qa_workflow.py]
+        A6[OllamaClient\napp/infrastructure/llm]
+    end
 
-### 📄 Document Ingestion
-The classifier recognizes **90+ file extensions** across the kinds below. All extensions are *classified and routed*; not every one has a fully working parser end-to-end. The complete, code-verified support matrix is in **[`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md#3-supported-file-types)**. The working core set:
-- **Documents:** PDF (text layer; scanned PDFs via OCR), Markdown, TXT
-- **Code:** Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP, Swift, Kotlin, and 20+ more
-- **Notebooks:** Jupyter (.ipynb)
-- **Spreadsheets:** CSV, TSV, XLSX (`.xls`/`.ods` are not readable)
-- **Presentations:** PPTX (requires `python-pptx`, not in `requirements.txt`; `.ppt`/`.odp` not readable)
-- **Images:** PNG, JPG, GIF, WebP, BMP, TIFF, HEIC, SVG (searchable after vision OCR)
-- **Diagrams:** DrawIO (labels only), Mermaid (.mmd)
-- **Audio:** MP3, WAV, M4A, FLAC, OGG, AAC (needs a Whisper backend)
-- **Video:** MP4, MKV, MOV, AVI, WebM (metadata only — no extraction path)
-- **Archives:** ZIP, TAR, GZ (file listings only; 7Z/RAR not implemented)
-- **Emails:** EML (with attachments)
-- **Databases:** SQLite, DB
-- **Research:** BibTeX (.bib), RIS
-- **Web:** HTML, XML, JSON, RSS (raw text)
-- **Config:** TOML, INI, CFG, YAML, ENV
-- **Text:** TXT, Markdown, Log files
-- **URLs:** GitHub READMEs, YouTube transcripts
+    subgraph OUTPUT[Output]
+        O1[Grounded answer + sources]
+        O2[Obsidian note / vault output]
+    end
 
-> ⚠️ **Honesty note:** `.epub`, `.rtf`, `.odt`, `.xls`, `.ods`, `.ppt`, `.odp`, `.vsdx`, `.7z`, `.rar` are advertised but do **not** work end-to-end today. `pam watch` only auto-picks up the 53 `PROCESSABLE_EXTENSIONS` (Markdown, TXT, PDF, CSV, XLSX, code, images, audio, video).
+    D1 --> I1
+    D2 --> I1
+    C1 --> I1
+    C2 --> C1
+    C2 --> I1
+    C3 --> I1
 
-### 🧠 Knowledge Extraction
-Automatically extracts 21 fields:
-- Summaries (short + detailed)
-- Key concepts & definitions
-- Important entities
-- Related topics & references
-- Tags, categories, and suggested titles
-- Reading time & difficulty level
-- Q&A pairs, flashcards, and MCQs
-- Short answer and long answer questions
-- Revision notes
-- Metadata (word count, page count, language)
-- Suggested related notes & backlinks
+    I1 --> I2
+    I2 --> R1
+    R1 --> R2
+    R2 --> R3
+    R3 --> A1
+    R3 --> R4
 
-### 🔗 Knowledge Engine
-- **Semantic chunking** — splits by headings, paragraphs, then sentences
-- **Embedding generation** — Ollama `nomic-embed-text` for vector representations
-- **Vector store** — in-memory with JSON persistence for similarity search
-- **Knowledge graph** — builds entity/concept/definition/topic graphs with JSON persistence
-- **Cross-document linking** — finds related content via vector similarity
-- **Placeholder notes** — auto-creates stub notes for unresolved wiki-links
-- **Semantic search** — cosine similarity over embedded chunks
-- **Hybrid search** — reciprocal rank fusion (RRF, k=60) of semantic (dense) and BM25 (keyword) scores
+    A1 --> A2
+    A2 --> S2
+    S2 --> A3
+    S2 --> A4
+    A3 --> A4
+    A4 --> A5
+    A6 --> A5
+    A5 --> O1
 
-### 📚 Obsidian Integration
-- Markdown generation with YAML frontmatter
-- Automatic wiki links (`[[...]]`)
-- Automatic index generation & vault updates
-- Duplicate protection
-- Preserves your own edits — never overwrites user content
-
-### 🖥️ Developer Friendly
-- Typer-based CLI with a Rich terminal UI
-- YAML-driven configuration
-- Rotating logs
-- Comprehensive test suite
-- Type-safe, clean architecture built on SOLID principles
-
-### ⚙️ Automation & Reliability (New in v2)
-- **Automatic folder watching** — drop files into `data/inbox` and they're picked up automatically
-- **Background watcher service** — runs continuously via `pam watch`
-- **Processing queue** — incoming files are queued and processed in order
-- **Duplicate detection (SHA-256)** — identical files are recognized and skipped
-- **Automatic inbox processing** — no manual `pam ingest` calls required for watched files
-- **Automatic processed & failed folders** — successful and failed files are sorted automatically
-- **Queue recovery** — pending items survive restarts and interruptions
-- **Graceful shutdown** — `Ctrl+C` finishes current work and exits cleanly
-- **Rich CLI progress** — live progress bars for every processing stage
-- **Improved logging** — dedicated log streams for the watcher, queue, and application
-- **Runtime statistics** — visibility into processed, failed, and pending counts
-- **Configuration for watcher and queue** — fully configurable via YAML and environment variables
-
----
-
-## 🚀 Release Status
-
-**Version:** `1.0.0`  **Status:** 🟢 Stable Local MVP — complete core RAG pipeline, verified against the code (see `docs/PROJECT_STATUS.md`)
-
-| Delivered | Future Vision |
-|---|---|
-| Local-first architecture | Cross-encoder re-ranking |
-| Ollama integration | External vector DB (Chroma/Qdrant/FAISS) |
-| PDF / Markdown / TXT ingestion | Query rewriting & parent-child retrieval |
-| Watcher-supported ingestion (53 extensions) | PDF-embedded image understanding |
-| GitHub README ingestion | REST API for search |
-| YouTube transcript ingestion | Web UI |
-| Markdown generation & vault management | Multi-user support |
-| CLI interface, logging, config management | Evaluation tooling & hallucination detection |
-| Automatic folder watching (`pam watch`) | |
-| Background watcher service | |
-| Processing queue with recovery | |
-| SHA-256 duplicate detection | |
-| Automatic processed / failed folders | |
-| Graceful shutdown & queue persistence | |
-| Rich CLI progress reporting | |
-| 21-field document intelligence | |
-| Semantic chunking & embeddings | |
-| Vector store with similarity search | |
-| Hybrid search (RRF) with metadata filters | |
-| Knowledge graph with persistence | |
-| Cross-document linking | |
-| **RAG question answering (`pam ask`)** — retrieval-grounded answers with sources | |
-| Comprehensive testing (1375 tests) | |
-
----
-
-## ✅ Project Phases
-
-Completed and independently approved across six phases:
-
-| Phase | Deliverables | Status |
-|-------|--------------|--------|
-| **1 — Core capture** | Vault, templated notes, Markdown/PDF/TXT ingest, wiki links, duplicate protection | ✅ |
-| **2 — Deep extraction** (M2.1–M2.6) | OCR, images, tables, audio, video, code/notebook structure, email attachments, metadata + language detection | ✅ |
-| **3 — Semantic memory** (M3.1, M3.2) | Embeddings, vector store, hierarchical chunking (heading-aware) | ✅ |
-| **4 — Knowledge graph** | Entity extraction, co-occurrence relationship detection, per-document graph with JSON persistence | ✅ |
-| **5 — Hybrid retrieval** (P5-101..105) | Dense cosine + BM25 fused by RRF (k=60), `SearchService` facade, `pam search` with top-k/source-type/min-score/metadata filters | ✅ |
-| **6 — Hardening & final validation** (P6-101..106) | Performance benchmark, failure isolation, security/config audit, E2E validation, final approval | ✅ **APPROVED** |
-| **7 — RAG question answering (v1.0.0)** | `pam ask` — hybrid retrieval → grounded prompt → Ollama → answer + sources (`qa_workflow.py`, `prompts/qa.py`) | ✅ |
-
----
-
-## 🧪 Final Verification
-
-Measured against the live repository at the V1.0.0 audit (see `docs/PROJECT_STATUS.md`):
-
-| Gate | Result |
-|------|--------|
-| Unit + regression suite | **1375 passed** / 57 deselected / 0 failed |
-| Code coverage | **89.80%** (floor 80) |
-| Integration suite | 85 passed / 1 skipped / 1 environmental (live-Ollama) |
-| End-to-end validation | **25/25 PASS** |
-| Ingest performance | 20,000 × 384-dim vectors in ~271 ms |
-| Search performance | ~190 ms per query |
-| Lint / type / deps | ruff clean on changed files · mypy clean (scoped, pre-existing env notes) · CI workflow present |
-
----
-
-## 🏅 Verified V1.0.0 Achievements
-
-Factual engineering metrics (audited against the code — see `docs/PROJECT_STATUS.md`):
-
-- **V1.0.0 stable local MVP** — complete, frozen, and verified end-to-end
-- **1375 passing tests** / 57 deselected / 0 failed; **89.80% coverage** (floor 80)
-- **End-to-end RAG pipeline** — ingestion → parsing → OCR (where supported) → chunking → embeddings → vector store → hybrid retrieval → grounded answer → source citations
-- **Hybrid retrieval** — dense cosine (`nomic-embed-text`) + BM25 fused by reciprocal rank fusion (RRF k=60), with metadata/source-type/min-score/top-k filters
-- **RAG question answering** — `pam ask` with grounded, refusal-capable answers and `[SOURCE N]` citations
-- **OCR where supported** — scanned-PDF auto-detection, vision model with optional Tesseract fallback
-- **Local Ollama inference** — embeddings and LLM inference never leave the machine
-- **CLI-based search and QA** — `pam search`, `pam ask`, `pam status`, `pam ingest`, `pam watch`
-- **Automated quality gates** — CI workflow (ruff, mypy, pytest + coverage), ruff/mypy clean on changed files
-
----
-
-## ⚠️ Known Limitations
-
-- **In-memory vector store & graph** — persisted to JSON on disk, not an external database. Large-scale deployments are future vision (Chroma/FAISS/Qdrant, Neo4j).
-- **File-type gaps** — `.epub`, `.rtf`, `.odt`, `.xls`, `.ods`, `.ppt`, `.odp`, `.vsdx`, `.7z`, `.rar` are advertised but broken or unimplemented end-to-end (details in `docs/PROJECT_STATUS.md` §3, §11).
-- **PDF-embedded images** — stored as metadata but never OCR'd/understood; only standalone image files are vision-OCR'd. Tables are extracted to Markdown and searchable as raw text (no structured query).
-- **No re-ranking** — retrieved chunks are scored by hybrid (dense+BM25/RRF) search; a cross-encoder re-ranker is V2 work.
-- **Single chunking strategy** — the heading-aware semantic chunker (2000 chars / 200 overlap) is hardcoded; no per-document strategy selection.
-- **Answer citations are requested, not verified** — `pam ask` prompts for `[SOURCE N]` citations but does not post-verify them.
-- **Live-Ollama smoke test** — `tests/integration/smoke_test.py` requires a running `llama3.1:8b` and asserts all 21 note sections while the template intentionally emits only populated sections. It is skipped by default and is an environmental, not a code, issue.
-- **Tesseract OCR fallback** — optional CPU-only path; scanned documents are OCR'd by the local vision model when it is absent.
-- **Ollama required** — all AI inference (analysis, embeddings, OCR) runs locally through Ollama; it must be installed and running.
-- **Backlogged engineering items** — MEDD evaluation tooling (retrieval/chunking quality metrics, hallucination detection) is documented but not built.
-
----
-
-## 🛠️ Technology Stack
-
-| Component | Technology |
-|---|---|
-| Programming Language | Python 3.11+ |
-| Local LLM | Ollama |
-| Default Model | qwen3:8b / llama3.1:8b |
-| Embeddings | nomic-embed-text (Ollama) |
-| CLI | Typer |
-| Terminal UI | Rich |
-| Configuration | YAML |
-| Validation | Pydantic |
-| Folder Watching | Watchdog |
-| Duplicate Detection | SHA-256 Hashing |
-| Vector Store | In-memory + JSON persistence |
-| Knowledge Graph | Custom (JSON persistence) |
-| Progress Reporting | Rich Progress |
-| Testing | Pytest |
-| Linting | Ruff |
-| Type Checking | MyPy |
-| Knowledge Base | Obsidian |
-| Version Control | Git |
-
----
-
-## 📂 Repository
-
-**GitHub:** [github.com/GiridharBM/AI-Memory](https://github.com/GiridharBM/AI-Memory)
-
-```bash
-git clone https://github.com/GiridharBM/AI-Memory.git
-cd AI-Memory
+    R4 --> S4
+    I2 --> S1
+    S1 --> O2
+    R3 --> S3
+    I1 --> S3
 ```
 
----
+The major verified components represented in the diagram exist in the repository and were inspected directly in the current implementation:
 
-## ⚡ Installation
+- CLI entrypoint: `app/cli/entry.py`
+- Settings and runtime config: `app/core/config.py`
+- Watcher and queue: `app/watcher/service.py`, `app/queue/*.py`
+- Ingestion pipeline: `app/infrastructure/ingestion/service.py`, `app/pipelines/ingest_workflow.py`
+- Routing / classification: `app/infrastructure/routing/classifier.py`, `app/infrastructure/routing/router.py`
+- Semantic chunking: `app/infrastructure/semantic_chunking.py`
+- Embedding generation: `app/infrastructure/embeddings.py`
+- Vector storage and hybrid retrieval: `app/infrastructure/vector_store.py`, `app/infrastructure/search.py`
+- Local LLM access: `app/infrastructure/llm`
+- Grounded question answering: `app/application/qa_workflow.py`
+- Knowledge graph builder: `app/infrastructure/knowledge_graph.py`
+- Vault output: `app/infrastructure/vault`
 
-### Requirements
+## Document Intelligence
+
+The repository includes real document intelligence logic for the following verified features:
+
+- Text extraction from Markdown, TXT, PDF, CSV, and other text-oriented sources
+- OCR for scanned PDFs and images via a vision-based OCR engine and Tesseract fallback path
+- Spreadsheet table extraction for XLSX-style workbooks
+- Image metadata and processing hooks for image sources
+- Structure analysis for text-bearing document kinds
+- Relationship and entity extraction in the knowledge graph pipeline
+- Metadata extraction for filename, language, MIME, and document properties
+
+The code does not claim universal document intelligence. The implemented path is a practical local processing pipeline that works for the supported kinds described below.
+
+## Chunking
+
+The V1 chunking implementation is a semantic chunker built around headings and text boundaries.
+
+Verified behavior:
+
+- Heading-aware splitting and overlap
+- Sentence-aware segmentation with tokenizer selection
+- Chunk-size control and overlap tuning through configuration
+- Chunk metadata carry source provenance and position information
+
+This is not a generic full-text chunking framework; it is the project’s real semantic chunking strategy used before embedding.
+
+## Retrieval / RAG
+
+The project includes a real retrieval and grounding pipeline:
+
+- Embeddings are generated through Ollama using an embedding model
+- Dense vector retrieval searches the local vector store
+- BM25 lexical search ranks keyword matches
+- Hybrid retrieval fuses semantic and keyword results using reciprocal rank fusion
+- Context is bounded to a fixed number of chunks and character budget before prompt construction
+- The QA workflow asks the model only after assembling grounded context from retrieved hits
+- Answers are returned with source references from the retrieved results
+
+This is the V1 RAG path for the local knowledge base.
+
+## Local LLM
+
+The project uses local Ollama models for the runtime AI path.
+
+Verified integration points:
+
+- The configuration defines local Ollama host and model settings
+- The embeddings service calls the Ollama embedding endpoint
+- The QA workflow calls the Ollama text-generation endpoint
+- OCR/vision processing can route through local vision-capable models
+
+The system is designed to run locally and does not require sending document content to a remote service.
+
+## Supported Documents
+
+The project classifies and routes many formats, but the repository should be read honestly: some formats are recognized by the classifier and routed, while the verified working runtime path is narrower.
+
+| Category | Verified formats in code and runtime path |
+| --- | --- |
+| Text and markup | Markdown, TXT, HTML, XML, JSON, RSS |
+| PDF and scanned docs | PDF, scanned PDF via OCR |
+| Data | CSV, TSV, XLSX-style spreadsheet tables |
+| Code and config | Python, JavaScript, TypeScript, Java, C/C++, Go, Rust, Ruby, PHP, Swift, Kotlin, shell, SQL, TOML, INI, CFG, YAML, ENV |
+| Notebooks | Jupyter notebooks |
+| Images | PNG, JPG, JPEG, GIF, WebP, BMP, TIFF, HEIC, SVG |
+| Audio | MP3, WAV, M4A, FLAC, OGG, AAC |
+| Video | MP4, MKV, MOV, AVI, WebM |
+| Documents | DOCX, ODT, RTF, PPTX, PPT, ODP, EPUB, LaTeX |
+| Research | BibTeX, RIS |
+| Email and archives | EML, ZIP, TAR, GZ |
+| Databases | SQLite, DB |
+
+Important note: this table reflects file kinds present in the codebase and the routing system. Some entries are recognized by the classifier and some are supported by specific processors. The project does not claim complete production parity across every listed format.
+
+## Installation
+
+Requirements:
+
 - Python 3.11+
 - Git
 - Ollama
 - Obsidian
-- Windows, macOS, or Linux
+- A local filesystem for the project and vault
 
-> **Optional — offline OCR fallback (scanned documents):** scanned PDFs/images are OCR'd by the local vision model by default. To enable the CPU-only Tesseract fallback, install [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (add `tesseract` to PATH or set `intelligence.ocr.tesseract_cmd` in `config/default.yaml`) and run `uv pip install pytesseract pillow`. `pam doctor` reports whether the fallback is available.
+Install steps:
 
-> **Image intelligence (optional):** photos and screenshots gain EXIF/metadata enrichment and `.drawio` files render as Mermaid when the `intelligence` extra is installed (`uv pip install -e ".[intelligence]"`). Set `intelligence.images.preprocess: true` to enable the shared deskew → denoise → CLAHE preprocessing before vision OCR (dimension/size guards default to `[8192, 8192]` / 20 MB per `intelligence.images.max_dimensions` / `max_bytes`). Toggles `intelligence.images.exif_enabled` / `diagram_enabled` restore plain passthrough behavior.
+1. Clone the repository.
+2. Create a virtual environment.
+3. Install dependencies from the project config.
+4. Confirm the local Ollama endpoint is reachable.
+5. Pull the required models if needed.
 
-### 1. Clone the repository
+Example:
+
 ```bash
-git clone https://github.com/GiridharBM/AI-Memory.git
-cd AI-Memory
-```
-
-### 2. Create a virtual environment
-
-**Windows (PowerShell)**
-```powershell
+git clone <repository-url>
+cd LLM-Wiki
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-**macOS/Linux**
-```bash
-python3 -m venv .venv
 source .venv/bin/activate
-```
-
-### 3. Install dependencies
-```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install -e ".[dev]"
 ```
 
-> Version 2 adds **Watchdog** for folder watching. It's included in `requirements.txt`, so no separate install step is needed — the standard install above covers it.
+The project also defines a CLI entry point named pam through the packaging configuration.
 
-### 4. Verify installation
+## Usage
+
+The CLI commands implemented in the repository are:
+
 ```bash
-python -m pytest
+pam --help
+pam status
 pam doctor
-```
-
-Expected output:
-```text
-1375 passed
-
-✔ Configuration loaded
-✔ Ollama available
-✔ Vault available
-✔ Inbox available
-```
-
----
-
-## 🤖 Ollama Setup
-
-1. Install Ollama from [ollama.com](https://ollama.com)
-2. Pull the required models:
-   ```bash
-   ollama pull qwen3:8b
-   ollama pull llama3.1:8b
-   ollama pull nomic-embed-text
-   ```
-3. Verify installation:
-   ```bash
-   ollama list
-   ```
-   Expected:
-   ```text
-   qwen3:8b
-   llama3.1:8b
-   nomic-embed-text
-   ```
-4. Start Ollama (if not already running):
-   ```bash
-   ollama serve
-   ```
-
-**Defaults**
-
-| Setting | Value |
-|---|---|
-| Endpoint | `http://localhost:11434` |
-| LLM Model | `qwen3:8b` or `llama3.1:8b` |
-| Embedding Model | `nomic-embed-text` |
-
-Override with environment variables:
-```bash
-PAM_OLLAMA__HOST=http://localhost:11434
-PAM_OLLAMA__MODEL=qwen3:8b
-```
-
-### Models used
-
-Model selection is per-task (`models:` block in `config/default.yaml`):
-
-| Role | Default model |
-|---|---|
-| General text analysis | `qwen3:8b` |
-| Programming / code structure | `qwen2.5-coder:7b` |
-| Vision / OCR / handwriting | `qwen2.5vl:latest` |
-| Audio transcription | `faster-whisper` |
-| Embeddings | `nomic-embed-text` |
-
----
-
-## 📚 Obsidian Setup
-
-AI Memory generates Markdown files directly into an Obsidian vault. By default, the vault lives at `./vault`.
-
-**Option 1 — Recommended:** Open the project's `vault/` folder directly as an Obsidian vault via `File → Open Folder as Vault`, and select `AI-Memory/vault`.
-
-**Option 2:** Point AI Memory at your existing vault using an environment variable:
-```bash
-PAM_PATHS__VAULT_ROOT=D:\Obsidian\PersonalAIWiki
-```
-or edit `config/default.yaml`:
-```yaml
-paths:
-  vault_root: D:/Obsidian/PersonalAIWiki
-```
-
-### Generated wiki structure
-```text
-vault/
-├── Notes/
-├── index.md
-├── overview.md
-└── log.md
-```
-
-### Managed sections
-
-AI-generated content is wrapped in managed markers:
-```markdown
-<!-- PAM:BEGIN MANAGED -->
-Generated AI content
-<!-- PAM:END MANAGED -->
-```
-Everything outside these markers is preserved, so you can freely edit your notes without AI overwriting your work.
-
----
-
-## 💻 CLI Usage
-
-```bash
-pam --help           # General help
-pam status            # Configuration, vault, watcher, queue, and Ollama status
-pam doctor            # Full health check
-pam config             # View current configuration
-pam config --json     # View configuration as JSON
-pam search "query"    # Search the knowledge base (hybrid semantic + keyword)
-pam ask "question"    # RAG question answering with cited sources (v1.0.0)
-pam watch              # Start automatic folder watching and processing
-```
-
-### 📥 Ingest Documents
-
-| Type | Command |
-|---|---|
-| Markdown | `pam ingest markdown path/to/file.md` |
-| PDF | `pam ingest pdf path/to/file.pdf` |
-| TXT | `pam ingest txt path/to/file.txt` |
-| GitHub repo | `pam ingest github https://github.com/owner/repository` |
-| YouTube | `pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID` |
-
-Examples:
-```bash
-pam ingest markdown data/inbox/notes.md
-pam ingest pdf data/inbox/ai-paper.pdf
-pam ingest github https://github.com/ollama/ollama
+pam config
+pam config --json
+pam watch
+pam search "query"
+pam ask "question"
+pam ingest markdown path/to/file.md
+pam ingest pdf path/to/file.pdf
+pam ingest txt path/to/file.txt
+pam ingest github https://github.com/owner/repository
 pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
-> If a YouTube transcript is unavailable, AI Memory exits gracefully with an informative message.
-
-`pam status` shows watcher, queue, manifest, Ollama, and vault health. `pam config` prints the resolved watcher, queue, manifest, and processing settings.
-
-### 🔍 Search
-
-`pam search` runs **hybrid retrieval** — reciprocal rank fusion (RRF, k=60) of semantic (dense) and BM25 (keyword) scores over embedded chunks:
+Examples:
 
 ```bash
-pam search "transformers attention"          # top 5 results
-pam search "transformer" --top-k 10          # more results
-pam search "python" --source-type code       # restrict to a source type
-pam search "memory" --min-score 0.5          # require a minimum score
-pam search "graph" --filter '{"language":"en"}'   # exact-match metadata filters
+pam status
+pam doctor
+pam search "transformers attention"
+pam ask "what is attention in transformers?"
+pam ingest markdown notes/idea.md
+pam ingest pdf papers/guide.pdf
 ```
 
-An empty query exits with a usage error.
+## Example Workflow
 
-### 💬 Ask Questions (RAG)
+Document
+→ ingestion
+→ classification and routing
+→ OCR / extraction / metadata / table processing as needed
+→ semantic chunking
+→ embeddings
+→ vector store + BM25 index
+→ hybrid retrieval
+→ grounded local LLM answer
 
-`pam ask` (v1.0.0) answers questions from the knowledge base — hybrid retrieval → grounded prompt → local Ollama → answer with `[SOURCE N]` citations:
+## Testing
 
-```bash
-pam ask "what is attention in transformers?"   # top 5 context chunks by default
-pam ask "why do we chunk?" --top-k 8           # more context chunks
-pam ask "list the models" --source-type code   # restrict retrieval to a source type
-pam ask "who wrote this?" --model qwen3:8b     # override the Ollama model
-```
+The project includes a real automated test suite and CI checks.
 
-The answer is grounded only in retrieved notes — if the context can't support the question, the model says so instead of guessing. See `docs/PROJECT_STATUS.md` §7 for the full RAG flow.
+Verified status:
 
----
+- 1377 tests passed
+- 57 deselected
+- Python 3.11, 3.12, and 3.13 CI passing
+- Ruff passing
+- Mypy passing
+- Coverage approximately 89%
 
-## 🔍 Watching Mode
+The project is configured to run pytest with the default non-integration subset and includes CI automation for linting, typing, and tests.
 
-Version 2 introduces fully automatic processing. Run:
+## V1.0.0
 
-```bash
-pam watch
-```
+V1.0.0 is the frozen, locally stable MVP release for PAM / LLM-Wiki. It is a working local document memory and retrieval system built around:
 
-This starts a background watcher that continuously monitors `data/inbox` for files matching `watcher.supported_extensions` (Markdown, TXT, PDF, CSV, XLSX, code, images, audio, video). No manual `pam ingest` command is required — the watcher, queue, and pipeline handle everything.
+- ingestion
+- routing and classification
+- OCR and metadata extraction where applicable
+- semantic chunking
+- embeddings and retrieval
+- grounded QA over the local knowledge base
+- Obsidian-based notes and vault output
+
+The release tag remains frozen and should be treated as the V1 baseline.
+
+## Limitations
+
+This project is honest about what it does and does not do.
+
+- It is a local MVP, not a full production SaaS platform
+- It depends on a working local Ollama runtime
+- It stores vectors and graph data in local persisted JSON structures rather than a production external database
+- Some file types are recognized by the classifier but not fully supported end-to-end
+- It does not include a full evaluation framework, re-ranking pipeline, or external vector database layer
+- OCR, table extraction, and knowledge extraction are feature-specific, not universal
+
+## V2 Roadmap
+
+Future V2 work is explicitly separate from V1 functionality. High-level areas include:
+
+- external vector database support
+- stronger retrieval evaluation and benchmarking
+- reranking and query expansion
+- more robust multimodal document understanding
+- broader document coverage and deeper extraction workflows
+- web or API interfaces
+- richer agentic automation
+
+These are roadmap items, not existing V1 features.
+
+## Project Structure
 
 ```text
+app/
+  application/
+  cli/
+  core/
+  domain/
+  infrastructure/
+  pipelines/
+  prompts/
+  queue/
+  templates/
+  watcher/
+config/
+data/
+requirements.txt
+pyproject.toml
+README.md
+LICENSE
+vault/
+```
+
+Key areas:
+
+- app/cli: CLI entry point and commands
+- app/pipelines: ingestion workflow orchestration
+- app/infrastructure: routing, OCR, embeddings, vector store, search, chunking
+- app/domain: models and domain logic
+- app/watcher: inbox monitoring and queueing
+- app/queue: asynchronous processing state and worker logic
+- app/templates: note generation
+
+## Local Workspace Notes
+
+Generated runtime files such as Obsidian state, vault output, local caches, and scratch/debug artifacts are not part of the V1 application source. They may appear in a local working tree during normal use, but they are workspace-local and should not be treated as product code or release assets.
+
+## Engineering Highlights
+
+- Typed Python across the core runtime and project structure
+- Modular ingestion and router-based processor design
+- Local-first architecture with no remote dependency required for core workflows
+- Document intelligence and OCR path architecture
+- CI validation with pytest, Ruff, and mypy
+- Cross-platform compatibility work for local runtime behavior
+- Maintainable separation between ingestion, retrieval, generation, and vault output layers
+
+## License
+
+The repository license is MIT, as defined in the project files.
+
 data/inbox -> watcher -> queue -> duplicate check -> ingestion -> vault -> manifest
 ```
 

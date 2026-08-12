@@ -48,7 +48,7 @@ requirements.txt / pyproject.toml
 ## Quick facts
 
 - **Version:** 1.0.0 (Stable Local MVP; see `PROJECT_STATUS.md` §1 for how this was determined)
-- **Runtime:** Python 3.11+ (tested on 3.14), Ollama, local-first
+- **Runtime:** Python 3.11–3.13 (validated in CI), Ollama, local-first
 - **Suite:** 1375 tests passing / 57 deselected / 0 failed; coverage **89.80%** (floor 80); 56 unit + 16 integration files
 - **Search:** hybrid (dense cosine + BM25) fused with RRF (k=60), via `pam search`
 - **Ask:** RAG question answering with `[SOURCE N]` citations, via `pam ask`
