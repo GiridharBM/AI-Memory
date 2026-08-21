@@ -21,12 +21,19 @@ class SearchHit:
     ``parent_section`` is the roadmap 4.6 parent-section context slot; it stays
     ``None`` until parent-child retrieval is implemented (chunks already carry
     ``parent_heading``/``heading_path`` in ``metadata``).
+
+    ``cosine_score`` and ``bm25_score`` carry the raw per-leg retrieval scores
+    that RRF fuses into ``score``.  They default to 0.0 so existing callers
+    that construct SearchHit without them continue to work.
     """
 
     text: str
     source: str
     score: float
     entry_id: str
+    cosine_score: float = 0.0
+    bm25_score: float = 0.0
+    rerank_score: float = 0.0
     parent_section: str | None = None
     source_type: str = ""
     chunk_index: int = 0
@@ -51,19 +58,40 @@ def _to_hit(result: SearchResult) -> SearchHit:
     )
 
 
-def _rrf_fuse(*ranked_lists: list[str], k: int = 60) -> list[tuple[str, float]]:
+def _rrf_fuse(
+    *ranked_lists: list[str],
+    k: int = 60,
+    score_maps: tuple[dict[str, float], ...] | None = None,
+) -> list[tuple[str, float, float, float]]:
     """Reciprocal rank fusion (roadmap 4.2).
 
     Each argument is a list of entry ids in descending rank order. A doc
     present in multiple lists accumulates ``1/(k + rank)`` per list; ids in no
     list score zero and are excluded. Ties resolve by id, so the output is
     deterministic regardless of input order.
+
+    When *score_maps* is provided it must have one ``{entry_id: raw_score}``
+    dict per ranked list.  The returned tuples carry the per-leg raw scores
+    as ``(entry_id, rrf_score, leg0_score, leg1_score)`` so callers can use
+    them for abstention gating without re-querying the individual engines.
     """
     scores: dict[str, float] = {}
-    for ranked in ranked_lists:
+    leg_scores: dict[str, tuple[float, float]] = {}
+    for list_idx, ranked in enumerate(ranked_lists):
         for rank, entry_id in enumerate(ranked, start=1):
             scores[entry_id] = scores.get(entry_id, 0.0) + 1.0 / (k + rank)
-    return sorted(scores.items(), key=lambda item: (-item[1], item[0]))
+            if score_maps and list_idx < len(score_maps):
+                raw = score_maps[list_idx].get(entry_id, 0.0)
+                prev = leg_scores.get(entry_id, (0.0, 0.0))
+                if list_idx == 0:
+                    leg_scores[entry_id] = (raw, prev[1])
+                else:
+                    leg_scores[entry_id] = (prev[0], raw)
+    result = []
+    for entry_id, rrf_score in sorted(scores.items(), key=lambda item: (-item[1], item[0])):
+        leg0, leg1 = leg_scores.get(entry_id, (0.0, 0.0))
+        result.append((entry_id, rrf_score, leg0, leg1))
+    return result
 
 
 def _hit_matches_filter(hit: SearchHit, filters: dict[str, object]) -> bool:
@@ -181,17 +209,23 @@ class HybridSearch:
         else:
             fused_ids = []
 
+        vector_score_map = {r.entry.id: r.score for r in dense}
+        bm25_score_map = {ids[i]: score for i, (doc_idx, score) in enumerate(lexical) if doc_idx < len(ids)}
+
         fused = _rrf_fuse(
             [r.entry.id for r in dense],
             fused_ids,
             k=self._rrf_k,
+            score_maps=(vector_score_map, bm25_score_map),
         )
 
         hits: list[SearchHit] = []
-        for entry_id, score in fused:
+        for entry_id, score, cosine_score, bm25_score in fused:
             entry = self._store.get(entry_id)
             assert entry is not None
             hit = _to_hit(SearchResult(entry=entry, score=score))
+            hit.cosine_score = cosine_score
+            hit.bm25_score = bm25_score
             if hit.score >= min_score:
                 hits.append(hit)
         return hits[:top_k]

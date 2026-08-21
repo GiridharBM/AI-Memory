@@ -174,6 +174,14 @@ intelligence:
     max_code_chars: 100000        # str-length cap; oversized code truncated with logged warning (frozen §4.6)
     include_docstrings: true      # contract-only this milestone (C-5) - no code reads it
 
+reranker:
+  enabled: false
+  model: "cross-encoder/ms-marco-MiniLM-L-12-v2"
+  top_n: 20
+  device: "cpu"
+  timeout_seconds: 5.0
+  min_score: 0.0
+
 chunking:
   sentence_tokenizer: "auto"     # auto ⇒ nltk when available, stdlib heuristic fallback; "heuristic" ⇒ deterministic stdlib; "nltk" ⇒ force nltk
   heading_size_step: 0           # P3-205: shrink chunk budget by this many chars per heading level below 1 (0 ⇒ fixed sizing)

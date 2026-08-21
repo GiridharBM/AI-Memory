@@ -403,6 +403,25 @@ class CodeSettings(BaseModel):
     include_docstrings: bool = True
 
 
+class RerankerSettings(BaseModel):
+    """Settings for the cross-encoder reranker (Phase 3C).
+
+    The reranker is an enhancement, not a requirement.  When ``enabled=false``
+    or when the model is unavailable, the system falls back to RRF ordering
+    (Phase 3B behavior).  The ``min_score`` field is the gate threshold for
+    cross-encoder relevance scores (a different score space than cosine).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    model: str = "cross-encoder/ms-marco-MiniLM-L-12-v2"
+    top_n: int = Field(default=20, ge=1)
+    device: str = "cpu"
+    timeout_seconds: float = Field(default=5.0, gt=0)
+    min_score: float = Field(default=0.0, ge=0.0)
+
+
 class ChunkingSettings(BaseModel):
     """Settings for the semantic chunker (P3-105, P3-205).
 
@@ -462,6 +481,7 @@ class Settings(BaseSettings):
     processing: ProcessingSettings = Field(default_factory=ProcessingSettings)
     models: ModelRoutingSettings = Field(default_factory=ModelRoutingSettings)
     intelligence: IntelligenceSettings = Field(default_factory=IntelligenceSettings)
+    reranker: RerankerSettings = Field(default_factory=RerankerSettings)
     chunking: ChunkingSettings = Field(default_factory=ChunkingSettings)
 
 
