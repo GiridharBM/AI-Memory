@@ -1,0 +1,492 @@
+{
+  "_frozen": true,
+  "_frozen_reason": "Phase 3B frozen reference — original 50-query evaluation dataset. DO NOT MODIFY.",
+  "_frozen_date": "2026-08-21",
+  "_frozen_commit": "6a603d8",
+  "metadata": {
+    "version": "1.0",
+    "created": "2026-08-19",
+    "description": "PAM V1 retrieval evaluation dataset. 50 queries against 12 documents in the existing vector store (101 chunks total).",
+    "vector_store_path": "data/manifests/vector_store.json",
+    "total_documents": 12,
+    "total_chunks": 101,
+    "categories": {
+      "factoid": "Single-fact questions answerable from one document",
+      "comparison": "Questions requiring information from multiple documents",
+      "negative": "Questions with no answer in the corpus",
+      "cross_document": "Questions requiring synthesis across documents",
+      "tricky": "Questions where the answer is partial or requires careful reading"
+    },
+    "difficulty_scale": "easy, medium, hard",
+    "source_documents": {
+      "neural_networks": "But what is a neural network  Deep learning chapter 1.md",
+      "daa_assignment": "DAA assignment-4.pdf",
+      "jharkhand_protest": "Jharkhand job exam stir Protest enters 21st day.md",
+      "gpt56_demo": "Meet _GPT-5.6 2.md",
+      "openhands": "OpenHands An Open Platform for AI Software Developers.md",
+      "utthunga": "Our Organization.md",
+      "pcb_design": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "leetcode": "What I Learned From LeetCode.md",
+      "tihan": "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+      "b_md": "b.md",
+      "pam_smoke_test": "pam_smoke_test.txt",
+      "sigmamusicart": "sigmamusicart-song-english-edm-296526.mp3"
+    }
+  },
+  "queries": [
+    {
+      "id": "q001",
+      "query": "When was Utthunga founded?",
+      "expected_sources": ["utthunga"],
+      "expected_evidence": "Utthunga, founded in 2007",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q002",
+      "query": "How many engineers does Utthunga have?",
+      "expected_sources": ["utthunga"],
+      "expected_evidence": "1,200+ engineers",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q003",
+      "query": "How many global offices does Utthunga operate?",
+      "expected_sources": ["utthunga"],
+      "expected_evidence": "8 global offices",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q004",
+      "query": "What ISO certifications does Utthunga hold?",
+      "expected_sources": ["utthunga"],
+      "expected_evidence": "ISO 9001:2015 and ISO 27001:2013",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q005",
+      "query": "What are Utthunga's core values?",
+      "expected_sources": ["utthunga"],
+      "expected_evidence": "Innovation with Purpose, Integrity and Ownership, Relentless Learning, Respect and Care, One Team",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q006",
+      "query": "What industries does Utthunga serve?",
+      "expected_sources": ["utthunga"],
+      "expected_evidence": "Energy, Chemicals, Metals, Mining, Pharmaceuticals, Power, and Utilities",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q007",
+      "query": "What is OpenHands' license type?",
+      "expected_sources": ["openhands"],
+      "expected_evidence": "MIT license",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q008",
+      "query": "How many contributors does OpenHands have?",
+      "expected_sources": ["openhands"],
+      "expected_evidence": "2.1K contributions from more than 188 contributors",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q009",
+      "query": "What was OpenHands previously called?",
+      "expected_sources": ["openhands"],
+      "expected_evidence": "formerly known as OpenDevin",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q010",
+      "query": "What benchmarks does OpenHands evaluate on?",
+      "expected_sources": ["openhands"],
+      "expected_evidence": "SWE-BENCH and WEBARENA",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q011",
+      "query": "What type of game does GPT-5.6 build in the demo?",
+      "expected_sources": ["gpt56_demo"],
+      "expected_evidence": "celestial-themed card game",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q012",
+      "query": "What tool does GPT-5.6 use for game development in the demo?",
+      "expected_sources": ["gpt56_demo"],
+      "expected_evidence": "Codex",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q013",
+      "query": "What capabilities does GPT-5.6 demonstrate in the demo besides code generation?",
+      "expected_sources": ["gpt56_demo"],
+      "expected_evidence": "art generation, soundtrack creation, tool calling, subagents, Max Reasoning",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q014",
+      "query": "What is the IP2312 chip used for in the PCB design guide?",
+      "expected_sources": ["pcb_design"],
+      "expected_evidence": "3A lithium battery charger",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q015",
+      "query": "What EDA tool is recommended in the PCB design guide?",
+      "expected_sources": ["pcb_design"],
+      "expected_evidence": "EasyEDA",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q016",
+      "query": "What is the IP2312 an upgrade from according to the PCB guide?",
+      "expected_sources": ["pcb_design"],
+      "expected_evidence": "TP4056",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q017",
+      "query": "What are the key steps in PCB design according to the guide?",
+      "expected_sources": ["pcb_design"],
+      "expected_evidence": "schematic creation, optimized layout, trace routing, ground planes, component placement, trace width selection, thermal management",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q018",
+      "query": "What is the DAA assignment about?",
+      "expected_sources": ["daa_assignment"],
+      "expected_evidence": "Design and Analysis of Algorithm, Assignment 4, by Giridhar BM ENG24CT0040",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q019",
+      "query": "What topics does the neural network video cover?",
+      "expected_sources": ["neural_networks"],
+      "expected_evidence": "neurons, layers, weights, biases, activation functions, sigmoid, ReLU, linear algebra, handwritten digit recognition",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q020",
+      "query": "What are the three types of layers in a neural network discussed in the video?",
+      "expected_sources": ["neural_networks"],
+      "expected_evidence": "input, hidden, and output layers",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q021",
+      "query": "What is TiHAN at IIT Hyderabad?",
+      "expected_sources": ["tihan"],
+      "expected_evidence": "India's first autonomous navigation testbed",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q022",
+      "query": "What is the main argument of the LeetCode article?",
+      "expected_sources": ["leetcode"],
+      "expected_evidence": "LeetCode is useful for developer interviews but has a time sink aspect; critiques algorithmic interview culture",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q023",
+      "query": "What book does the LeetCode article reference for learning computer science?",
+      "expected_sources": ["leetcode"],
+      "expected_evidence": "Knuth's The Art of Computer Programming",
+      "category": "factoid",
+      "difficulty": "hard",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q024",
+      "query": "What is the sigmamusicart song about?",
+      "expected_sources": ["sigmamusicart"],
+      "expected_evidence": "longing, emotional pain, seeking love and comfort",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q025",
+      "query": "What is the Jharkhand protest about?",
+      "expected_sources": ["jharkhand_protest"],
+      "expected_evidence": "job exam stir, students plan Tiranga Yatra on August 15",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q026",
+      "query": "What was the Jharkhand protest on its 21st day?",
+      "expected_sources": ["jharkhand_protest"],
+      "expected_evidence": "Protestors criticised Ranchi district administration for an FIR lodged over violence during August 10 march",
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q027",
+      "query": "Which documents discuss artificial intelligence topics?",
+      "expected_sources": ["openhands", "gpt56_demo", "neural_networks"],
+      "expected_evidence": "OpenHands (AI agents), GPT-5.6 (AI game dev), Neural Networks (deep learning)",
+      "category": "comparison",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q028",
+      "query": "Which documents mention the MIT license?",
+      "expected_sources": ["openhands"],
+      "expected_evidence": "OpenHands is released under the MIT license",
+      "category": "comparison",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q029",
+      "query": "Compare the number of contributors to OpenHands versus the number of Utthunga engineers.",
+      "expected_sources": ["openhands", "utthunga"],
+      "expected_evidence": "OpenHands: 188+ contributors; Utthunga: 1,200+ engineers",
+      "category": "comparison",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q030",
+      "query": "Which documents are about electronics or hardware design?",
+      "expected_sources": ["pcb_design"],
+      "expected_evidence": "PCB Board Design guide",
+      "category": "comparison",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q031",
+      "query": "What programming-related topics are covered across all documents?",
+      "expected_sources": ["leetcode", "daa_assignment", "openhands", "gpt56_demo"],
+      "expected_evidence": "LeetCode (coding interviews), DAA (algorithms), OpenHands (AI agents), GPT-5.6 (code generation)",
+      "category": "comparison",
+      "difficulty": "hard",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q032",
+      "query": "What is the capital of France?",
+      "expected_sources": [],
+      "expected_evidence": null,
+      "category": "negative",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q033",
+      "query": "How does PAM handle email attachments?",
+      "expected_sources": [],
+      "expected_evidence": null,
+      "category": "negative",
+      "difficulty": "medium",
+      "ground_truth_reliable": false,
+      "notes": "PAM docs discuss email attachment handling but those docs are not in the vector store"
+    },
+    {
+      "id": "q034",
+      "query": "What is the latest version of Python?",
+      "expected_sources": [],
+      "expected_evidence": null,
+      "category": "negative",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q035",
+      "query": "Tell me about quantum computing applications in medicine.",
+      "expected_sources": [],
+      "expected_evidence": null,
+      "category": "negative",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q036",
+      "query": "What Docker configuration does PAM use?",
+      "expected_sources": [],
+      "expected_evidence": null,
+      "category": "negative",
+      "difficulty": "medium",
+      "ground_truth_reliable": false,
+      "notes": "PAM does not use Docker; this is documented in PAM docs but those are not in the vector store"
+    },
+    {
+      "id": "q037",
+      "query": "Summarize all engineering-related topics in the knowledge base.",
+      "expected_sources": ["utthunga", "pcb_design", "daa_assignment"],
+      "expected_evidence": "Utthunga (engineering services), PCB (electronics design), DAA (algorithm design)",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q038",
+      "query": "What are all the AI-related tools and platforms mentioned across the documents?",
+      "expected_sources": ["openhands", "gpt56_demo", "neural_networks"],
+      "expected_evidence": "OpenHands (AI agent platform), GPT-5.6/Codex (AI code generation), Neural networks (deep learning)",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q039",
+      "query": "Which documents discuss education or learning?",
+      "expected_sources": ["leetcode", "neural_networks", "pcb_design"],
+      "expected_evidence": "LeetCode (learning to code), Neural Networks (educational video), PCB (beginner guide)",
+      "category": "cross_document",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q040",
+      "query": "What content in the knowledge base was created by Giridhar BM?",
+      "expected_sources": ["daa_assignment"],
+      "expected_evidence": "DAA Assignment 4 by Giridhar BM ENG24CT0040",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q041",
+      "query": "Does the knowledge base contain information about mobile app development?",
+      "expected_sources": [],
+      "expected_evidence": null,
+      "category": "negative",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q042",
+      "query": "What is the relationship between weights and biases in neural networks?",
+      "expected_sources": ["neural_networks"],
+      "expected_evidence": "weights and biases are parameters that neurons hold; used in activation functions",
+      "category": "tricky",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q043",
+      "query": "What are the limitations of LeetCode according to the article?",
+      "expected_sources": ["leetcode"],
+      "expected_evidence": "time sink, algorithmic interview culture critique, but useful when approached with awareness",
+      "category": "tricky",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q044",
+      "query": "Is the PCB design guide for advanced or beginner designers?",
+      "expected_sources": ["pcb_design"],
+      "expected_evidence": "step-by-step approach to designing a compact 3A IP2312 lithium battery charger PCB for beginners",
+      "category": "tricky",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q045",
+      "query": "What topics are NOT covered in the knowledge base?",
+      "expected_sources": [],
+      "expected_evidence": null,
+      "category": "negative",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "notes": "Valid negative query - tests if system properly handles absence of information"
+    },
+    {
+      "id": "q046",
+      "query": "What is the maximum charging current of the IP2312 battery charger?",
+      "expected_sources": ["pcb_design"],
+      "expected_evidence": "3A",
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q047",
+      "query": "How many tasks does OpenHands evaluate across in its benchmark?",
+      "expected_sources": ["openhands"],
+      "expected_evidence": "15 challenging tasks",
+      "category": "factoid",
+      "difficulty": "hard",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q048",
+      "query": "What type of content does the neural network video use to explain concepts?",
+      "expected_sources": ["neural_networks"],
+      "expected_evidence": "handwritten digit recognition example",
+      "category": "tricky",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q049",
+      "query": "What is the main theme of the sigmamusicart song?",
+      "expected_sources": ["sigmamusicart"],
+      "expected_evidence": "emotional vulnerability, yearning for love, cyclical longing",
+      "category": "tricky",
+      "difficulty": "medium",
+      "ground_truth_reliable": true
+    },
+    {
+      "id": "q050",
+      "query": "How many questions does the DAA assignment contain?",
+      "expected_sources": ["daa_assignment"],
+      "expected_evidence": "at least 1 question visible in first chunk (greedy approach failure analysis)",
+      "category": "tricky",
+      "difficulty": "hard",
+      "ground_truth_reliable": false,
+      "notes": "Only first chunk is visible; actual question count depends on full document content"
+    }
+  ]
+}

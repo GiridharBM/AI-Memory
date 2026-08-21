@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "total_queries": 160,
+    "positive_queries": 123,
+    "negative_queries": 37,
+    "categories": {
+      "factoid": 87,
+      "comparison": 16,
+      "negative": 37,
+      "cross_document": 11,
+      "tricky": 9
+    }
+  },
+  "issues": [],
+  "warnings": [
+    {
+      "type": "unreliable_ground_truth",
+      "id": "q033",
+      "query": "How does PAM handle email attachments?",
+      "notes": "PAM docs discuss email attachment handling but those docs are not in the vector store"
+    },
+    {
+      "type": "unreliable_ground_truth",
+      "id": "q036",
+      "query": "What Docker configuration does PAM use?",
+      "notes": "PAM does not use Docker; this is documented in PAM docs but those are not in the vector store"
+    },
+    {
+      "type": "unreliable_ground_truth",
+      "id": "q050",
+      "query": "How many questions does the DAA assignment contain?",
+      "notes": "Only first chunk is visible; actual question count depends on full document content"
+    }
+  ],
+  "issue_count": 0,
+  "warning_count": 3,
+  "passed": true
+}

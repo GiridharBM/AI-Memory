@@ -98,9 +98,8 @@ def compute_metrics(
         retrieved_sources = [hit["source"] for hit in r["hits"]]
 
         if not expected:
-            # Negative query: check if system returns results (it always does for semantic search)
-            # A perfect system would return nothing or low-score results
-            mrr_scores.append(1.0)  # Negative queries are always "correct" for MRR (no expected source to miss)
+            # Negative query: excluded from MRR (no relevant document to rank).
+            # Abstention quality is measured separately via FPR/FNR metrics.
             continue
 
         # Check if any expected source appears in top-K
@@ -151,6 +150,7 @@ def compute_metrics(
         )
 
     metrics["mrr"] = sum(mrr_scores) / len(mrr_scores) if mrr_scores else 0
+    metrics["mrr_positive_only"] = metrics["mrr"]  # MRR is now positive-only by design
 
     # Per-category breakdown
     categories = {}
@@ -167,8 +167,7 @@ def compute_metrics(
                 break
         if found:
             categories[cat]["hits_5"] += 1
-        elif not r["expected_sources"]:
-            categories[cat]["mrr"].append(1.0)  # Correct negative
+        # Negative queries excluded from per-category MRR (same as aggregate MRR)
 
     metrics["per_category"] = {}
     for cat, data in categories.items():
@@ -435,7 +434,7 @@ def run_evaluation(
             f"Recall@{k}:  {metrics[f'recall@{k}']:.3f}  |  "
             f"Precision@{k}: {metrics[f'precision@{k}']:.3f}"
         )
-    print(f"  MRR:             {metrics['mrr']:.3f}")
+    print(f"  MRR (pos-only):   {metrics['mrr']:.3f}")
 
     abst = metrics.get("abstention", {})
     if abst.get("gate_enabled"):
