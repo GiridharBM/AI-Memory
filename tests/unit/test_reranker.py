@@ -246,14 +246,15 @@ class TestAbstentionGateReranker:
         # Reranker active, rerank_score above min_rerank_score, BM25 evidence exists
         assert result.abstain is False
 
-    def test_reranker_inactive_bm25_only_accepted(self) -> None:
+    def test_reranker_inactive_bm25_below_cosine_threshold_rejected(self) -> None:
         gate = AbstentionGate(min_cosine=0.25, min_rerank_score=0.0)
         hits = [_hit(cosine_score=0.0, bm25_score=3.0)]
 
         result = gate.evaluate(hits)
 
-        # Phase 3B: BM25-only is accepted
-        assert result.abstain is False
+        # Phase 3E: cosine below threshold is rejected regardless of BM25 score
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
 
     def test_empty_hits_always_abstain(self) -> None:
         gate = AbstentionGate(min_cosine=0.25, min_rerank_score=0.5)

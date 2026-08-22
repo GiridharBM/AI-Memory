@@ -70,8 +70,8 @@ class AbstentionGate:
        c. Low rerank_score AND no raw evidence → abstain.
     3. Reranker-inactive path (``rerank_score == 0``, Phase 3B fallback):
        a. No evidence from either leg (both raw scores are 0.0) → abstain.
-       b. Top-1 cosine similarity below *min_cosine* AND no BM25 evidence
-          → abstain.  BM25-only results (cosine=0.0, bm25>0) pass.
+       b. Top-1 cosine similarity below *min_cosine* → abstain.
+          BM25 is a retrieval signal, not an acceptance override.
     """
 
     def __init__(
@@ -103,10 +103,10 @@ class AbstentionGate:
                 f"low_rerank_no_evidence (rerank={top.rerank_score:.4f})",
             )
 
-        # Reranker-inactive path: fall back to Phase 3B cosine + BM25 logic
+        # Reranker-inactive path: cosine is the primary gate signal
         if top.cosine_score == 0.0 and top.bm25_score == 0.0:
             return AbstentionResult(True, "no_evidence")
-        if top.cosine_score < self._min_cosine and top.bm25_score == 0.0:
+        if top.cosine_score < self._min_cosine:
             return AbstentionResult(
                 True,
                 f"cosine_below_threshold ({top.cosine_score:.4f} < {self._min_cosine})",

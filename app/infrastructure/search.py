@@ -249,10 +249,13 @@ class SearchService:
         self,
         store: VectorStore,
         embed: Callable[[str], list[float] | None],
+        *,
+        hyde: "HyDETransform | None" = None,
     ) -> None:
         self._store = store
         self._embed = embed
         self._hybrid = HybridSearch(store)
+        self._hyde = hyde
 
     @classmethod
     def create_default(
@@ -281,7 +284,26 @@ class SearchService:
                 return embeddings.embed(query).embedding
 
             embed = _embed
-        return cls(store, embed=embed)
+        hyde = None
+        if getattr(settings, "hyde", None) and settings.hyde.enabled:
+            from app.infrastructure.hyde import HyDETransform
+            from app.infrastructure.llm import OllamaClient, OllamaRequest
+
+            ollama = OllamaClient(settings.ollama)
+
+            def _hyde_generate(system_prompt: str, user_prompt: str) -> str | None:
+                try:
+                    req = OllamaRequest(
+                        prompt=user_prompt,
+                        system_prompt=system_prompt,
+                    )
+                    resp = ollama.generate_text(req)
+                    return resp.response
+                except Exception:
+                    return None
+
+            hyde = HyDETransform(_hyde_generate, max_length=settings.hyde.max_length)
+        return cls(store, embed=embed, hyde=hyde)
 
     def search(
         self,
@@ -293,7 +315,12 @@ class SearchService:
     ) -> list[SearchHit]:
         if not query or not query.strip():
             return []
-        embedding = self._embed_query(query)
+        embed_text = query
+        if self._hyde is not None:
+            hyde_text = self._hyde.transform(query)
+            if hyde_text:
+                embed_text = hyde_text
+        embedding = self._embed_query(embed_text)
         hits = self._hybrid.search(query, embedding, top_k=top_k, min_score=min_score)
         if filter:
             hits = [h for h in hits if _hit_matches_filter(h, filter)]

@@ -182,6 +182,11 @@ reranker:
   timeout_seconds: 5.0
   min_score: 0.0
 
+hyde:
+  enabled: false
+  max_length: 500
+  timeout_seconds: 30.0
+
 chunking:
   sentence_tokenizer: "auto"     # auto ⇒ nltk when available, stdlib heuristic fallback; "heuristic" ⇒ deterministic stdlib; "nltk" ⇒ force nltk
   heading_size_step: 0           # P3-205: shrink chunk budget by this many chars per heading level below 1 (0 ⇒ fixed sizing)

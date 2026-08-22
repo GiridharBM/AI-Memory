@@ -5,11 +5,14 @@ from __future__ import annotations
 import pytest
 
 from app.application.qa_workflow import (
+    ABSTENTION_MESSAGE,
     MAX_CONTEXT_CHARS,
     MAX_CONTEXT_CHUNKS,
     QAAnswer,
     QAError,
     QAWorkflow,
+    AbstentionGate,
+    AbstentionResult,
     build_context,
 )
 from app.infrastructure.llm import OllamaClientError, OllamaRequest, OllamaTextResponse
@@ -52,12 +55,21 @@ class FakeOllamaClient:
         return self.response
 
 
-def _hit(text: str = "Python is a programming language.", *, source: str = "doc.md") -> SearchHit:
+def _hit(
+    text: str = "Python is a programming language.",
+    *,
+    source: str = "doc.md",
+    score: float = 0.5,
+    cosine_score: float = 0.5,
+    bm25_score: float = 0.5,
+) -> SearchHit:
     return SearchHit(
         text=text,
         source=source,
-        score=0.5,
+        score=score,
         entry_id="doc.md::chunk_0",
+        cosine_score=cosine_score,
+        bm25_score=bm25_score,
         source_type="markdown",
         metadata={"heading": "Intro"},
     )
@@ -157,9 +169,9 @@ def test_ask_handles_empty_retrieval_safely() -> None:
 
     result = workflow.ask("What is Python?")
 
-    assert result.answer == "No relevant context was retrieved."
+    assert result.answer == ABSTENTION_MESSAGE
     assert result.sources == []
-    assert "No relevant context" in client.requests[0].prompt
+    assert not client.requests  # LLM not invoked when gate abstains on empty hits
 
 
 def test_ask_wraps_ollama_failure() -> None:
@@ -188,3 +200,156 @@ def test_build_context_preserves_ranking() -> None:
     context = build_context(hits)
 
     assert context.index("first.md") < context.index("second.md")
+
+
+# ── Abstention gate tests ──────────────────────────────────────────────
+
+
+class TestAbstentionGate:
+    """Unit tests for the retrieval-confidence abstention gate."""
+
+    def test_strong_relevant_retrieval_accepted(self) -> None:
+        gate = AbstentionGate(min_cosine=0.25)
+        hits = [_hit(cosine_score=0.6, bm25_score=2.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is False
+        assert result.reason is None
+
+    def test_weak_retrieval_rejected(self) -> None:
+        gate = AbstentionGate(min_cosine=0.25)
+        hits = [_hit(cosine_score=0.1, bm25_score=0.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
+
+    def test_negative_query_no_results_rejected(self) -> None:
+        gate = AbstentionGate(min_cosine=0.25)
+
+        result = gate.evaluate([])
+
+        assert result.abstain is True
+        assert result.reason == "no_results"
+
+    def test_borderline_score_deterministic(self) -> None:
+        gate = AbstentionGate(min_cosine=0.25)
+        hits_exact = [_hit(cosine_score=0.25, bm25_score=0.0)]
+        hits_below = [_hit(cosine_score=0.2499, bm25_score=0.0)]
+
+        assert gate.evaluate(hits_exact).abstain is False
+        assert gate.evaluate(hits_below).abstain is True
+
+    def test_accepted_query_context_built_normally(self) -> None:
+        hits = [_hit(cosine_score=0.6, bm25_score=2.0, text="Guido wrote CPython.")]
+        search = FakeSearchService(hits)
+        client = FakeOllamaClient(_response("Python is a language."))
+        workflow = QAWorkflow(search, client, min_cosine=0.25)
+
+        result = workflow.ask("What is Python?")
+
+        assert result.answer == "Python is a language."
+        assert result.sources == hits
+        assert client.requests  # LLM was invoked
+
+    def test_rejected_query_llm_not_invoked(self) -> None:
+        hits = [_hit(cosine_score=0.1, bm25_score=0.0)]
+        search = FakeSearchService(hits)
+        client = FakeOllamaClient(_response("This should not be called."))
+        workflow = QAWorkflow(search, client, min_cosine=0.25)
+
+        result = workflow.ask("What is quantum computing?")
+
+        assert result.answer == ABSTENTION_MESSAGE
+        assert result.sources == []
+        assert result.model == ""
+        assert not client.requests  # LLM was NOT invoked
+
+    def test_existing_behavior_unchanged_when_gate_accepts(self) -> None:
+        hits = [_hit(cosine_score=0.6, bm25_score=2.0)]
+        search = FakeSearchService(hits)
+        client = FakeOllamaClient(_response("Python is a language."))
+        workflow = QAWorkflow(search, client, min_cosine=0.25)
+
+        result = workflow.ask("What is Python?", top_k=3, filter={"heading": "Intro"})
+
+        assert search.last["top_k"] == 3
+        assert search.last["filter"] == {"heading": "Intro"}
+        assert result.answer == "Python is a language."
+        assert "[SOURCE 1]" in client.requests[0].prompt
+
+    def test_bm25_below_cosine_threshold_rejected(self) -> None:
+        gate = AbstentionGate(min_cosine=0.25)
+        hits = [_hit(cosine_score=0.0, bm25_score=3.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
+
+    def test_no_evidence_both_scores_zero_rejected(self) -> None:
+        gate = AbstentionGate(min_cosine=0.25)
+        hits = [_hit(cosine_score=0.0, bm25_score=0.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is True
+        assert result.reason == "no_evidence"
+
+    def test_bm25_only_with_zero_cosine_above_threshold_accepted(self) -> None:
+        gate = AbstentionGate(min_cosine=0.0)
+        hits = [_hit(cosine_score=0.0, bm25_score=3.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is False
+
+    # ── BM25 override regression tests (Phase 3E) ───────────────────
+
+    def test_bm25_override_rejected_cosine_below_threshold(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45)
+        hits = [_hit(cosine_score=0.30, bm25_score=5.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
+
+    def test_bm25_override_rejected_even_with_strong_bm25(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45)
+        hits = [_hit(cosine_score=0.40, bm25_score=10.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is True
+
+    def test_cosine_above_threshold_accepted_with_zero_bm25(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45)
+        hits = [_hit(cosine_score=0.60, bm25_score=0.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is False
+
+    def test_cosine_above_threshold_accepted_with_bm25(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45)
+        hits = [_hit(cosine_score=0.60, bm25_score=3.0)]
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is False
+
+    def test_no_results_always_abstains(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45)
+        result = gate.evaluate([])
+        assert result.abstain is True
+        assert result.reason == "no_results"
+
+    def test_both_zero_scores_abstains(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45)
+        hits = [_hit(cosine_score=0.0, bm25_score=0.0)]
+        result = gate.evaluate(hits)
+        assert result.abstain is True
+        assert result.reason == "no_evidence"

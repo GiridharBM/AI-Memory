@@ -422,6 +422,21 @@ class RerankerSettings(BaseModel):
     min_score: float = Field(default=0.0, ge=0.0)
 
 
+class HydeSettings(BaseModel):
+    """Settings for Hypothetical Document Embedding (HyDE, Phase 3E).
+
+    When ``enabled=true``, queries are transformed into hypothetical answer
+    paragraphs before embedding, while the original query text is used for
+    BM25.  If the LLM call fails, the original query embedding is used.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    max_length: int = Field(default=500, ge=50)
+    timeout_seconds: float = Field(default=30.0, gt=0)
+
+
 class ChunkingSettings(BaseModel):
     """Settings for the semantic chunker (P3-105, P3-205).
 
@@ -482,6 +497,7 @@ class Settings(BaseSettings):
     models: ModelRoutingSettings = Field(default_factory=ModelRoutingSettings)
     intelligence: IntelligenceSettings = Field(default_factory=IntelligenceSettings)
     reranker: RerankerSettings = Field(default_factory=RerankerSettings)
+    hyde: HydeSettings = Field(default_factory=HydeSettings)
     chunking: ChunkingSettings = Field(default_factory=ChunkingSettings)
 
 
