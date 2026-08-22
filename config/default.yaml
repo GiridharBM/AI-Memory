@@ -180,7 +180,7 @@ reranker:
   top_n: 20
   device: "cpu"
   timeout_seconds: 5.0
-  min_score: 0.0
+  min_score: 0.125   # Phase 3F experimental — NOT final calibrated threshold
 
 hyde:
   enabled: false

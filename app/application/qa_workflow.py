@@ -49,7 +49,7 @@ class AbstentionGate:
 
     Uses the raw per-leg scores (cosine similarity, BM25) that RRF fuses
     into ``SearchHit.score``.  When a cross-encoder reranker is active, its
-    score (``rerank_score``) serves as the primary relevance signal.
+    score (``rerank_score``) serves as a SECONDARY ABSTENTION signal.
 
     Score semantics:
     - ``rerank_score``: cross-encoder relevance score [0.0, 1.0].
@@ -62,13 +62,10 @@ class AbstentionGate:
     Signals (checked in order):
     1. No results at all → abstain.
     2. Reranker-active path (``rerank_score > 0``):
-       a. High rerank_score (>= *min_rerank_score*) → accept.
-       b. Low rerank_score BUT cosine OR BM25 evidence exists → accept
-          (reranker may under-score documents that are genuinely relevant
-          to the query; raw retrieval evidence overrides a low reranker
-          score when the reranker is not confident).
-       c. Low rerank_score AND no raw evidence → abstain.
-    3. Reranker-inactive path (``rerank_score == 0``, Phase 3B fallback):
+       a. cosine >= min_cosine AND rerank_score >= min_rerank_score → accept.
+       b. Any threshold below minimum → abstain (AND gate).
+       BM25 does NOT bypass either threshold.
+    3. Reranker-inactive path (``rerank_score == 0``, Phase 3B/3E fallback):
        a. No evidence from either leg (both raw scores are 0.0) → abstain.
        b. Top-1 cosine similarity below *min_cosine* → abstain.
           BM25 is a retrieval signal, not an acceptance override.
@@ -89,19 +86,25 @@ class AbstentionGate:
 
         # Reranker-active path: rerank_score > 0 means the reranker ran
         if top.rerank_score > 0.0:
-            # High reranker confidence → accept
-            if self._min_rerank_score > 0.0 and top.rerank_score >= self._min_rerank_score:
-                return AbstentionResult(False)
-            # Low reranker confidence BUT raw evidence exists → accept
-            # (reranker may under-score genuinely relevant documents;
-            #  raw retrieval evidence overrides when the reranker is uncertain)
-            if top.cosine_score > 0.0 or top.bm25_score > 0.0:
-                return AbstentionResult(False)
-            # Low reranker confidence AND no raw evidence → abstain
-            return AbstentionResult(
-                True,
-                f"low_rerank_no_evidence (rerank={top.rerank_score:.4f})",
+            # AND gate: both cosine and reranker must pass
+            cosine_ok = top.cosine_score >= self._min_cosine
+            rerank_ok = (
+                self._min_rerank_score <= 0.0
+                or top.rerank_score >= self._min_rerank_score
             )
+            if cosine_ok and rerank_ok:
+                return AbstentionResult(False)
+            # One or both thresholds failed → abstain
+            reasons = []
+            if not cosine_ok:
+                reasons.append(
+                    f"cosine_below_threshold ({top.cosine_score:.4f} < {self._min_cosine})"
+                )
+            if not rerank_ok:
+                reasons.append(
+                    f"rerank_below_threshold ({top.rerank_score:.4f} < {self._min_rerank_score})"
+                )
+            return AbstentionResult(True, " AND ".join(reasons))
 
         # Reranker-inactive path: cosine is the primary gate signal
         if top.cosine_score == 0.0 and top.bm25_score == 0.0:

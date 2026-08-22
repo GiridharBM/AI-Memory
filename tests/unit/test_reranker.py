@@ -194,8 +194,9 @@ class TestAbstentionGateReranker:
 
         result = gate.evaluate(hits)
 
-        # Low reranker score BUT raw evidence exists → accept (dual gate)
-        assert result.abstain is False
+        # Phase 3F AND gate: cosine passes but rerank=0.3 < min_rerank_score=0.5 → abstain
+        assert result.abstain is True
+        assert "rerank_below_threshold" in result.reason
 
     def test_reranker_active_below_threshold_no_evidence_rejected(self) -> None:
         gate = AbstentionGate(min_cosine=0.25, min_rerank_score=0.5)
@@ -204,19 +205,21 @@ class TestAbstentionGateReranker:
 
         result = gate.evaluate(hits)
 
-        # Low reranker score AND no raw evidence → abstain
+        # Phase 3F AND gate: both fail → abstain
         assert result.abstain is True
-        assert "low_rerank_no_evidence" in result.reason
+        assert "cosine_below_threshold" in result.reason
+        assert "rerank_below_threshold" in result.reason
 
-    def test_reranker_active_high_score_no_raw_evidence_still_accepted(self) -> None:
+    def test_reranker_active_high_score_no_raw_evidence_abstains(self) -> None:
         gate = AbstentionGate(min_cosine=0.25, min_rerank_score=0.5)
         hits = [_hit(cosine_score=0.0, bm25_score=0.0)]
         hits[0].rerank_score = 0.8
 
         result = gate.evaluate(hits)
 
-        # High reranker score → accept even without raw evidence
-        assert result.abstain is False
+        # Phase 3F AND gate: reranker passes but cosine=0.0 < min_cosine → abstain
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
 
     def test_reranker_inactive_falls_back_to_cosine(self) -> None:
         gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.0)
@@ -236,15 +239,16 @@ class TestAbstentionGateReranker:
         assert result.abstain is True
         assert "cosine_below_threshold" in result.reason
 
-    def test_reranker_active_bm25_only_accepted(self) -> None:
+    def test_reranker_active_bm25_only_rejected(self) -> None:
         gate = AbstentionGate(min_cosine=0.25, min_rerank_score=0.5)
         hits = [_hit(cosine_score=0.0, bm25_score=3.0)]
         hits[0].rerank_score = 0.8
 
         result = gate.evaluate(hits)
 
-        # Reranker active, rerank_score above min_rerank_score, BM25 evidence exists
-        assert result.abstain is False
+        # Phase 3F AND gate: cosine=0.0 < min_cosine → abstain (BM25 cannot bypass)
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
 
     def test_reranker_inactive_bm25_below_cosine_threshold_rejected(self) -> None:
         gate = AbstentionGate(min_cosine=0.25, min_rerank_score=0.0)
@@ -273,6 +277,92 @@ class TestAbstentionGateReranker:
 
         # rerank_score > 0 means reranker-active path, min_rerank_score=0 means no threshold
         assert result.abstain is False
+
+    # ── Phase 3F AND-gate regression tests ──────────────────────────────
+
+    def test_3f_reranker_disabled_cosine_pass_accept(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.6, bm25_score=2.0)]
+        # rerank_score=0.0 → reranker-inactive path → cosine gate only
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is False
+
+    def test_3f_reranker_disabled_cosine_fail_bm25_positive_abstain(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.3, bm25_score=5.0)]
+        # rerank_score=0.0 → reranker-inactive path → cosine gate rejects
+
+        result = gate.evaluate(hits)
+
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
+
+    def test_3f_reranker_enabled_cosine_fail_rerank_pass_abstain(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.3, bm25_score=5.0)]
+        hits[0].rerank_score = 0.8
+
+        result = gate.evaluate(hits)
+
+        # AND gate: rerank passes but cosine fails → abstain
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
+
+    def test_3f_reranker_enabled_cosine_pass_rerank_fail_abstain(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.6, bm25_score=2.0)]
+        hits[0].rerank_score = 0.05
+
+        result = gate.evaluate(hits)
+
+        # AND gate: cosine passes but rerank fails → abstain
+        assert result.abstain is True
+        assert "rerank_below_threshold" in result.reason
+
+    def test_3f_reranker_enabled_cosine_pass_rerank_pass_accept(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.6, bm25_score=2.0)]
+        hits[0].rerank_score = 0.8
+
+        result = gate.evaluate(hits)
+
+        # AND gate: both pass → accept
+        assert result.abstain is False
+
+    def test_3f_reranker_enabled_cosine_fail_rerank_fail_abstain(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.2, bm25_score=1.0)]
+        hits[0].rerank_score = 0.05
+
+        result = gate.evaluate(hits)
+
+        # AND gate: both fail → abstain
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
+        assert "rerank_below_threshold" in result.reason
+
+    def test_3f_reranker_unavailable_fallback_cosine_gate(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.6, bm25_score=2.0)]
+        hits[0].rerank_score = 0.0  # reranker failed/unavailable
+
+        result = gate.evaluate(hits)
+
+        # reranker-inactive path → cosine gate only → accept
+        assert result.abstain is False
+
+    def test_3f_bm25_never_bypasses_combined_gate(self) -> None:
+        gate = AbstentionGate(min_cosine=0.45, min_rerank_score=0.125)
+        hits = [_hit(cosine_score=0.3, bm25_score=100.0)]
+        hits[0].rerank_score = 0.9
+
+        result = gate.evaluate(hits)
+
+        # BM25 is strong but cosine fails → abstain (BM25 never bypasses)
+        assert result.abstain is True
+        assert "cosine_below_threshold" in result.reason
 
 
 # ── QAWorkflow integration tests ─────────────────────────────────────────
