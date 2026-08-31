@@ -155,11 +155,18 @@ class QueueWorker:
             digest = self.manifest_manager.hash_for_path(item.path)
             logger.info("SHA256 calculated.", extra={"path": str(item.path), "sha256": digest})
 
-            if self.manifest_manager.contains_hash(digest):
+            if self.manifest_manager.contains_successful_hash(digest):
                 logger.info(
                     "Duplicate detected, skipping.",
                     extra={"path": str(item.path), "sha256": digest},
                 )
+                self.manifest_manager.add_processed_file(
+                    path=item.path,
+                    sha256=digest,
+                    extension=item.extension,
+                    status="skipped_duplicate",
+                )
+                self._try_save_manifest(item)
                 item.status = QueueStatus.DONE
                 self.stats.record_duplicate()
                 return True
@@ -184,9 +191,46 @@ class QueueWorker:
                 OllamaClientError,
                 OSError,
                 ValueError,
-            ):
+            ) as exc:
                 logger.exception("File processing failed.", extra={"path": str(item.path)})
+                self.manifest_manager.add_failed_file(
+                    path=item.path,
+                    sha256=digest,
+                    extension=item.extension,
+                    error_reason=f"{exc.__class__.__name__}: {exc}",
+                )
+                self._try_save_manifest(item)
                 self._fail_item(item)
+                return True
+
+            embedded = getattr(result, "embedding_succeeded", True)
+            indexed = getattr(result, "indexing_succeeded", True)
+            if not (embedded and indexed):
+                reason = getattr(result, "engine_error", None) or "unknown engine failure"
+                logger.warning(
+                    "Note written but not indexed; marking FAILED for retry.",
+                    extra={
+                        "path": str(item.path),
+                        "sha256": digest,
+                        "reason": reason,
+                    },
+                )
+                try:
+                    self._move_to_failed(item.path)
+                except OSError:
+                    logger.exception(
+                        "Unable to move failed file.",
+                        extra={"path": str(item.path)},
+                    )
+                self.manifest_manager.add_failed_file(
+                    path=item.path,
+                    sha256=digest,
+                    extension=item.extension,
+                    error_reason=f"EMBEDDING/INDEXING FAILURE: {reason}",
+                )
+                self._try_save_manifest(item)
+                item.status = QueueStatus.FAILED
+                self.stats.record_failed()
                 return True
 
             self._advance(progress, task, "Writing Markdown...")
@@ -201,19 +245,11 @@ class QueueWorker:
                 sha256=digest,
                 extension=item.extension,
                 generated_note=result.note.filename,
+                chunks_stored=getattr(result, "chunks_stored", 0),
+                embedding_succeeded=embedded,
+                indexing_succeeded=indexed,
             )
-            try:
-                self.manifest_manager.save()
-            except OSError:
-                # The file already moved to processed/ and its note is written.
-                # A disk failure here must not strand the item as FAILED; keep
-                # the in-memory record so dedup still works this session. The
-                # stale disk manifest only means a later restart may re-process
-                # the file, which is idempotent (same note path, updated=False).
-                logger.exception(
-                    "Manifest save failed; keeping in-memory record.",
-                    extra={"path": str(item.path), "sha256": digest},
-                )
+            self._try_save_manifest(item)
             logger.info("Manifest updated.", extra={"path": str(item.path), "sha256": digest})
             self._advance(progress, task, "Finished")
 
@@ -254,6 +290,20 @@ class QueueWorker:
             return source_path
 
         return self._move_file(source_path, destination_root)
+
+    def _try_save_manifest(self, item: QueueItem) -> None:
+        """Persist the ledger, tolerating a disk failure.
+
+        The in-memory record stays so dedup keeps working this session; a stale
+        disk manifest only means an idempotent re-process after restart.
+        """
+        try:
+            self.manifest_manager.save()
+        except OSError:
+            logger.exception(
+                "Manifest save failed; keeping in-memory record.",
+                extra={"path": str(item.path)},
+            )
 
     def _fail_item(self, item: QueueItem) -> None:
         """Record a failed item without allowing cleanup failures to kill the worker."""

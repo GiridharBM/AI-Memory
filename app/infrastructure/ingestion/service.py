@@ -45,6 +45,38 @@ from app.infrastructure.ingestion.youtube_transcript_ingestor import YouTubeTran
 
 logger = get_logger(__name__)
 
+_SECRET_EXTENSIONS = frozenset({".pem", ".key", ".ppk", ".p12", ".pfx"})
+_SECRET_BASENAMES = frozenset(
+    {"credentials", "credential", "secret", "secrets", "passwd", "shadow", "htpasswd"}
+)
+
+
+def is_secret_bearing(source: SourceReference) -> bool:
+    """Return whether a file source is an obvious secret-bearing file.
+
+    Remote (URL) sources always pass; the guard targets local secret files.
+    Blocking happens before any reading/processing, so secret contents never
+    enter memory, logs, vectors, or the knowledge graph.
+    """
+    if not isinstance(source, Path):
+        return False
+    name = source.name
+    if name == ".env" or name.startswith(".env."):
+        return True
+    if source.suffix.lower() in _SECRET_EXTENSIONS:
+        return True
+    if name.lower().replace(" ", "") in _SECRET_BASENAMES:
+        return True
+    if name.lower() in {f"{base}.txt" for base in _SECRET_BASENAMES}:
+        return True
+    return False
+
+
+class BlockedSourceError(IngestionError):
+    """Raised when a source file is blocked by the secret-ingestion guard."""
+
+
+
 
 class DocumentIngestionService:
     """Select and run the appropriate ingestor for a source document."""
@@ -155,6 +187,11 @@ class DocumentIngestionService:
             if not source.is_file():
                 raise IngestionError(f"Source path '{source}' is not a file.")
             self._enforce_size_limit(source)
+            if is_secret_bearing(source):
+                raise BlockedSourceError(
+                    f"Source '{source}' is blocked: it appears to be a secret-bearing "
+                    f"or credential file and cannot be ingested."
+                )
 
         source = self._run_pre_hooks(source)
         ingestor = self._select_ingestor(source)

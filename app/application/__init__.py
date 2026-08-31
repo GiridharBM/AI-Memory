@@ -1,7 +1,7 @@
 """Application use cases and orchestration services."""
 
 from app.application.ai_processor import AIProcessingError, AIProcessingResult, DocumentAIProcessor
-from app.application.qa_workflow import QAAnswer, QAError, QAWorkflow
+from app.application.qa_workflow import QAAnswer, QAError, QATimeoutError, QAWorkflow
 
 __all__ = [
     "AIProcessingError",
@@ -9,5 +9,6 @@ __all__ = [
     "DocumentAIProcessor",
     "QAAnswer",
     "QAError",
+    "QATimeoutError",
     "QAWorkflow",
 ]

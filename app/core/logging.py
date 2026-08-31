@@ -162,7 +162,10 @@ def _build_console_handler(
     logging_settings: LoggingSettings,
     debug_mode: bool,
 ) -> logging.Handler:
-    console = Console(no_color=not logging_settings.use_colors)
+    # Logs (and any exception tracebacks they carry) go to stderr so that
+    # stdout stays reserved for user-facing CLI output: diagnostics must never
+    # leak raw Python tracebacks into the command output (Phase 6B contract).
+    console = Console(stderr=True, no_color=not logging_settings.use_colors)
     rich_handler = RichHandler(
         console=console,
         show_time=True,

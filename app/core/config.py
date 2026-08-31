@@ -437,6 +437,37 @@ class HydeSettings(BaseModel):
     timeout_seconds: float = Field(default=30.0, gt=0)
 
 
+class AnswerabilitySettings(BaseModel):
+    """Settings for the post-retrieval answerability gate (Phase 3G-B).
+
+    When ``enabled=false`` (default), the gate is inactive and the system
+    behaves byte-identically to the frozen Phase 3E baseline.  When
+    ``enabled=true``, retrieved evidence is verified via a structured LLM
+    call before the QA generation step.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    model: str | None = None  # None ⇒ use ollama.model (default qwen3:8b)
+    timeout_seconds: float = Field(default=10.0, gt=0)
+    max_evidence_chunks: int = Field(default=5, ge=1)
+
+
+class QaSettings(BaseModel):
+    """Settings for the RAG question-answering generation step (Phase 6A).
+
+    ``timeout_seconds`` bounds the QA generation LLM call so a hung model
+    surfaces as a clear timeout error instead of blocking the CLI forever.  It
+    applies only to the QA generation client; retrieval, embedding, and the
+    answerability gate keep their own timeouts.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    timeout_seconds: int = Field(default=120, ge=1)
+
+
 class ChunkingSettings(BaseModel):
     """Settings for the semantic chunker (P3-105, P3-205).
 
@@ -498,6 +529,8 @@ class Settings(BaseSettings):
     intelligence: IntelligenceSettings = Field(default_factory=IntelligenceSettings)
     reranker: RerankerSettings = Field(default_factory=RerankerSettings)
     hyde: HydeSettings = Field(default_factory=HydeSettings)
+    answerability: AnswerabilitySettings = Field(default_factory=AnswerabilitySettings)
+    qa: QaSettings = Field(default_factory=QaSettings)
     chunking: ChunkingSettings = Field(default_factory=ChunkingSettings)
 
 

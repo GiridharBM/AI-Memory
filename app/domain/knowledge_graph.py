@@ -63,6 +63,34 @@ class KnowledgeGraph:
         )
         return False
 
+    def remove_source(self, source: str) -> tuple[int, int]:
+        """Remove nodes created by ``source`` and their incident edges.
+
+        Returns ``(nodes_removed, edges_removed)``.  Node ownership is
+        best-effort: a node persisted by ``source`` (its ``source`` field)
+        whose label is shared with another source is still attributed to the
+        last writer via ``add_node``'s overwrite-on-id semantics, so removing
+        it here only reflects what the last ingest of ``source`` contributed.
+        Unrelated sources are left untouched.
+        """
+        removed_ids = {
+            nid for nid, node in self.nodes.items() if node.source == source
+        }
+        if not removed_ids:
+            return 0, 0
+        if not source:
+            return 0, 0
+        self.nodes = {
+            nid: node for nid, node in self.nodes.items() if nid not in removed_ids
+        }
+        before = len(self.edges)
+        self.edges = [
+            edge
+            for edge in self.edges
+            if edge.source_id not in removed_ids and edge.target_id not in removed_ids
+        ]
+        return len(removed_ids), before - len(self.edges)
+
     def neighbors(self, node_id: str) -> list[tuple[KnowledgeNode, KnowledgeEdge]]:
         results: list[tuple[KnowledgeNode, KnowledgeEdge]] = []
         for edge in self.edges:

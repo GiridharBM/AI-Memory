@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import sys
 from importlib.util import find_spec
@@ -19,8 +20,10 @@ from app.application import AIProcessingError, QAAnswer, QAError, QAWorkflow
 from app.core.config import ConfigurationError, Settings, load_settings
 from app.core.logging import get_logger, setup_logging
 from app.infrastructure.llm import OllamaClient, OllamaClientError
+from app.domain.knowledge_graph import KnowledgeGraph
 from app.infrastructure.search import SearchHit, SearchService
 from app.infrastructure.state.manifest import ManifestManager
+from app.infrastructure.vector_store import VectorStore
 from app.pipelines import IngestionWorkflow, IngestionWorkflowError
 from app.queue import QueueStateStore
 from app.watcher import WatchService
@@ -40,6 +43,16 @@ PdfPathArgument = Annotated[
     Path,
     typer.Argument(
         help="Path to a PDF file.",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        resolve_path=True,
+    ),
+]
+FilePathArgument = Annotated[
+    Path,
+    typer.Argument(
+        help="Path to any supported file (auto-detected by content).",
         exists=True,
         file_okay=True,
         dir_okay=False,
@@ -80,6 +93,18 @@ ConfigJsonOption = Annotated[
     bool,
     typer.Option("--json", help="Print raw JSON configuration."),
 ]
+
+
+@ingest_cli.command("file")
+def ingest_file(path: FilePathArgument) -> None:
+    """Ingest any supported file (auto-detected by content).
+
+    This is the generic ingest entry point: type is auto-detected by the
+    ingestion service, so the same command works for PDFs, Markdown, plain
+    text, spreadsheets, images, audio, video, and more.
+    """
+
+    _run_ingest(path, expected_source_type=None)
 
 
 @ingest_cli.command("pdf")
@@ -128,15 +153,31 @@ def status() -> None:
 
     vault_root = settings.paths.vault_root
     notes_root = vault_root / "Notes"
-    note_count = len(list(notes_root.glob("*.md"))) if notes_root.exists() else 0
-    manifest_entries = ManifestManager(
+    real_notes, placeholder_notes, other_notes = _note_counts(notes_root)
+    manifest = ManifestManager(
         settings.manifest.path,
         project_root=settings.paths.project_root,
         enabled=settings.manifest.enabled,
-    ).count()
+    )
+    manifest_entries = manifest.count()
+    processed_count = sum(
+        1 for entry in manifest.list_entries() if entry.status == "processed"
+    )
+    skipped_count = sum(
+        1 for entry in manifest.list_entries() if entry.status == "skipped_duplicate"
+    )
+    failed_count = sum(
+        1 for entry in manifest.list_entries() if entry.status == "failed"
+    )
+    retryable_count = sum(
+        1 for entry in manifest.list_entries() if entry.status == "failed"
+    )
+    last_ingest = _last_ingestion(manifest)
     pending_queue_items = len(QueueStateStore(settings.queue.state_path).load())
     ollama_status = _ollama_status(settings)
     vault_status = "Connected" if _is_writable_directory(vault_root) else "Not writable"
+    indexed_chunks = _indexed_chunks(settings)
+    indexed_sources = _indexed_sources(settings)
 
     table = Table(title="AI Memory Status", show_header=True, header_style="bold")
     table.add_column("Area")
@@ -151,15 +192,84 @@ def status() -> None:
     table.add_row("Queue", _healthy("Enabled" if settings.queue.enabled else "Disabled"), "")
     table.add_row("Items waiting", _healthy(str(pending_queue_items)), "")
     table.add_row("Manifest entries", _healthy(str(manifest_entries)), "")
-    table.add_row("Processed today", _healthy("0"), "Runtime counter resets on restart")
-    table.add_row("Skipped duplicates", _healthy("0"), "Runtime counter resets on restart")
-    table.add_row("Failed today", _healthy("0"), "Runtime counter resets on restart")
+    table.add_row("Sources indexed", _healthy(str(indexed_sources)), "Vector store")
+    table.add_row("Indexed chunks", _status_style(indexed_chunks), "Vector store")
+    table.add_row("Successful ingests", _healthy(str(processed_count)), "Durable ledger")
+    table.add_row("Skipped duplicates", _healthy(str(skipped_count)), "Durable ledger")
+    table.add_row("Failed", _status_style(str(failed_count)), "Durable ledger")
+    table.add_row("Retryable pending", _status_style(str(retryable_count)), "Failed entries")
+    table.add_row("Last ingestion", _healthy(last_ingest if last_ingest else "never"), "")
     table.add_row("Ollama", _status_style(ollama_status), str(settings.ollama.host))
     table.add_row("Model", settings.ollama.model, "")
     table.add_row("Vault", _status_style(vault_status), str(vault_root))
-    table.add_row("Generated notes", _healthy(str(note_count)), "")
+    table.add_row("Real generated notes", _healthy(str(real_notes)), "")
+    table.add_row("Placeholder notes", _status_style(_placeholder_style(placeholder_notes)), "")
+    if other_notes:
+        table.add_row("User/other notes", str(other_notes), "")
     table.add_row("Logs", _healthy("Ready"), str(settings.paths.log_root))
     console.print(table)
+
+@cli.command("remove")
+def remove_source(source: Annotated[str, typer.Argument(help="Source path or URL to remove.")]) -> None:
+    """Remove one source from the index (vectors, KG, and ledger).
+
+    Identifies the source deterministically, removes only its vector chunks,
+    knowledge-graph nodes/edges, and manifest entries. Never deletes vault
+    notes (which may hold user-written content) and provides no 'remove
+    everything' operation. BM25 state is rebuilt automatically on next use.
+    """
+    settings = _load_configured_settings()
+    setup_logging(settings)
+    project_root = settings.paths.project_root
+    targets = _source_forms(source, project_root)
+
+    store_path = settings.paths.manifest_root / "vector_store.json"
+    store = VectorStore(persistence_path=store_path)
+    removed_chunks = 0
+    for target in targets:
+        removed_chunks += store.remove_by_source(target)
+    store.save()
+
+    graph_path = settings.paths.manifest_root / "knowledge_graph.json"
+    kg = KnowledgeGraph.load(graph_path) if graph_path.exists() else KnowledgeGraph()
+    removed_nodes = removed_edges = 0
+    for target in targets:
+        nodes, edges = kg.remove_source(target)
+        removed_nodes += nodes
+        removed_edges += edges
+    kg.save(graph_path)
+
+    manifest = ManifestManager(
+        settings.manifest.path,
+        project_root=project_root,
+        enabled=settings.manifest.enabled,
+    )
+    removed_ledger = 0
+    for entry in manifest.list_entries():
+        if _manifest_entry_matches(entry.original_path, entry.original_filename, entry.sha256, targets):
+            manifest.remove_entry(sha256=entry.sha256)
+            removed_ledger += 1
+    manifest.save()
+
+    table = Table(title="Source Removed", show_header=True, header_style="bold")
+    table.add_column("Item")
+    table.add_column("Count")
+    table.add_row("Source", source)
+    table.add_row("Vector chunks removed", str(removed_chunks))
+    table.add_row("KG nodes removed", str(removed_nodes))
+    table.add_row("KG edges removed", str(removed_edges))
+    table.add_row("Ledger entries removed", str(removed_ledger))
+    console.print(table)
+    logger.info(
+        "Removed source from index.",
+        extra={
+            "source": source,
+            "chunks": removed_chunks,
+            "nodes": removed_nodes,
+            "edges": removed_edges,
+            "ledger": removed_ledger,
+        },
+    )
 
 @cli.command("doctor")
 def doctor() -> None:
@@ -510,21 +620,79 @@ def _print_search_results(query: str, hits: list[SearchHit]) -> None:
 
 
 def _print_qa_answer(question: str, result: QAAnswer) -> None:
-    console.print(Panel(result.answer, title=f"Answer: {question}", border_style="green"))
-    if not result.sources:
-        console.print("No sources retrieved.")
-        return
-    table = Table(title="Sources", show_header=True, header_style="bold")
-    table.add_column("Score", justify="right")
-    table.add_column("Source")
-    table.add_column("Snippet", overflow="fold")
-    for hit in result.sources:
-        table.add_row(
-            f"{hit.score:.4f}",
-            hit.source,
-            " ".join(hit.text.split())[:200],
+    outcome = getattr(result, "outcome", "answered")
+
+    if outcome == "abstained":
+        console.print(
+            Panel(result.answer, title="Insufficient evidence", border_style="yellow"),
         )
-    console.print(table)
+        reason = getattr(result, "abstention_reason", None)
+        if reason:
+            console.print(f"[yellow]Abstention reason: {reason}[/yellow]")
+        return
+
+    console.print(Panel(result.answer, title=f"Answer: {question}", border_style="green"))
+
+    citations = getattr(result, "citations", None)
+    invalid = getattr(result, "invalid_citations", None)
+    duplicates = getattr(result, "duplicate_citations", 0)
+
+    if citations:
+        console.print("[green]ANSWERED — SOURCES VERIFIED[/green]")
+        table = Table(title="Sources", show_header=True, header_style="bold")
+        table.add_column("#", justify="right")
+        table.add_column("Document")
+        table.add_column("Section")
+        table.add_column("Type")
+        table.add_column("Score", justify="right")
+        table.add_column("Snippet", overflow="fold")
+        for citation in citations:
+            hit = citation.hit
+            section = (
+                hit.metadata.get("heading") if hit.metadata else None
+            ) or (
+                hit.metadata.get("parent_heading") if hit.metadata else None
+            ) or "—"
+            table.add_row(
+                str(citation.number),
+                Path(hit.source).name or hit.source,
+                str(section),
+                hit.source_type or "—",
+                f"{hit.score:.4f}",
+                " ".join(hit.text.split())[:200],
+            )
+        console.print(table)
+    elif result.sources:
+        console.print("[yellow]ANSWERED — NO CITATIONS PROVIDED[/yellow]")
+        table = Table(title="Sources", show_header=True, header_style="bold")
+        table.add_column("Score", justify="right")
+        table.add_column("Source")
+        table.add_column("Snippet", overflow="fold")
+        for hit in result.sources:
+            table.add_row(
+                f"{hit.score:.4f}",
+                hit.source,
+                " ".join(hit.text.split())[:200],
+            )
+        console.print(table)
+    else:
+        console.print("No sources retrieved.")
+
+    if duplicates:
+        console.print(
+            f"[yellow]Note: {duplicates} repeated citation(s) were deduplicated.[/yellow]"
+        )
+    if invalid:
+        numbers = ", ".join(f"[SOURCE {n}]" for n in invalid)
+        console.print(
+            Panel(
+                f"Answer cited {numbers}, which is not among the retrieved "
+                "sources. No fabricated source was created and no citation "
+                "was renumbered.",
+                title="Invalid citations",
+                border_style="yellow",
+            ),
+        )
 
 
 def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None:
@@ -533,13 +701,82 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
 
     console.print(Panel.fit("Starting ingestion", title="Personal AI Memory"))
 
+    # The processed-files manifest doubles as the durable ingestion ledger
+    # (Phase 6A): every attempt records processed / skipped_duplicate / failed.
+    manifest = ManifestManager(
+        settings.manifest.path,
+        project_root=settings.paths.project_root,
+        enabled=settings.manifest.enabled,
+    )
+    ledger_path = Path(source)
+    is_file = isinstance(source, Path)
+    digest = manifest.hash_for_path(source) if is_file else None
+
+    if digest is not None and manifest.contains_successful_hash(digest):
+        manifest.add_processed_file(
+            path=ledger_path,
+            sha256=digest,
+            extension=ledger_path.suffix,
+            status="skipped_duplicate",
+        )
+        _try_save_ledger(manifest)
+        console.print(
+            Panel.fit(
+                "This file was already processed successfully (identical content); skipping.",
+                title="Ingest skipped (duplicate)",
+            ),
+        )
+        return
+    if digest is None and manifest.contains_path(ledger_path):
+        manifest.add_processed_file(
+            path=ledger_path,
+            sha256="",
+            extension=ledger_path.suffix,
+            status="skipped_duplicate",
+        )
+        _try_save_ledger(manifest)
+        console.print(
+            Panel.fit(
+                "This source was already recorded; skipping.",
+                title="Ingest skipped (duplicate)",
+            ),
+        )
+        return
+
     try:
         workflow = IngestionWorkflow.create_default(settings)
         result = workflow.run(source, expected_source_type=expected_source_type)
     except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError) as exc:
+        manifest.add_failed_file(
+            path=ledger_path,
+            sha256=digest or "",
+            extension=ledger_path.suffix,
+            error_reason=f"{exc.__class__.__name__}: {exc}",
+        )
+        _try_save_ledger(manifest)
         logger.exception("Ingestion pipeline failed.")
         console.print(Panel(str(exc), title="Processing failed", border_style="red"))
         raise typer.Exit(1) from exc
+
+    embedded = getattr(result, "embedding_succeeded", True)
+    indexed = getattr(result, "indexing_succeeded", True)
+    fully_indexed = embedded and indexed
+    manifest.add_processed_file(
+        path=ledger_path,
+        sha256=digest or "",
+        extension=ledger_path.suffix,
+        generated_note=result.note.filename,
+        chunks_stored=getattr(result, "chunks_stored", 0),
+        embedding_succeeded=embedded,
+        indexing_succeeded=indexed,
+        status="processed" if fully_indexed else "failed",
+        error_reason=(
+            None
+            if fully_indexed
+            else getattr(result, "engine_error", None) or "unknown engine failure"
+        ),
+    )
+    _try_save_ledger(manifest)
 
     _print_ingest_success(
         source_type=result.document.source_type,
@@ -548,7 +785,17 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         created=result.write_result.created,
         updated=result.write_result.updated,
         attempts=result.ai_result.attempts,
+        chunks_stored=getattr(result, "chunks_stored", 0),
+        indexed=fully_indexed,
     )
+
+
+def _try_save_ledger(manifest: ManifestManager) -> None:
+    """Persist the ledger, tolerating a disk failure."""
+    try:
+        manifest.save()
+    except OSError:
+        logger.exception("Ledger save failed; keeping in-memory record.")
 
 
 def _print_ingest_success(
@@ -559,6 +806,8 @@ def _print_ingest_success(
     created: bool,
     updated: bool,
     attempts: int,
+    chunks_stored: int = 0,
+    indexed: bool = True,
 ) -> None:
     table = Table(title="Ingestion Complete", show_header=True, header_style="bold green")
     table.add_column("Item")
@@ -569,6 +818,8 @@ def _print_ingest_success(
     table.add_row("Created", _yes_no(created))
     table.add_row("Updated", _yes_no(updated))
     table.add_row("AI attempts", str(attempts))
+    table.add_row("Chunks indexed", str(chunks_stored))
+    table.add_row("Indexed", _yes_no(indexed))
     console.print(table)
 
 
@@ -615,6 +866,96 @@ def _ollama_status(settings: Settings) -> str:
         return "Unavailable"
 
 
+def _indexed_chunks(settings: Settings) -> str:
+    """Return the number of entries in the persisted vector store.
+
+    Reports ``unavailable`` when the store cannot be read, rather than
+    fabricating a zero.  The store is written as ``{"entries": [...]}`` by
+    ``VectorStore.save``; reading it here is presentation-only and never
+    modifies retrieval state.
+    """
+    store_path = settings.paths.manifest_root / "vector_store.json"
+    if not store_path.exists():
+        return "0"
+    try:
+        data = json.loads(store_path.read_text(encoding="utf-8"))
+        entries = data.get("entries", []) if isinstance(data, dict) else []
+    except (json.JSONDecodeError, OSError):
+        return "unavailable"
+    return str(len(entries)) if isinstance(entries, list) else "unavailable"
+
+
+def _indexed_sources(settings: Settings) -> str:
+    """Return the number of distinct sources in the persisted vector store."""
+    store_path = settings.paths.manifest_root / "vector_store.json"
+    if not store_path.exists():
+        return "0"
+    try:
+        data = json.loads(store_path.read_text(encoding="utf-8"))
+        entries = data.get("entries", []) if isinstance(data, dict) else []
+    except (json.JSONDecodeError, OSError):
+        return "unavailable"
+    if not isinstance(entries, list):
+        return "unavailable"
+    return str(len({entry.get("source", "") for entry in entries if isinstance(entry, dict)}))
+
+
+def _note_counts(notes_root: Path) -> tuple[int, int, int]:
+    """Classify vault notes into (real generated, placeholder, user/other).
+
+    Placeholder stubs are auto-created notes with ``source_type: placeholder``
+    (see ``WikiManager.create_placeholder``) and must not be reported as real
+    notes.  Real generated notes carry a ``source`` frontmatter; anything else
+    is a user/other note.
+    """
+    real = placeholder = other = 0
+    if not notes_root.exists():
+        return 0, 0, 0
+    for path in notes_root.glob("*.md"):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            other += 1
+            continue
+        source_type = _frontmatter_value(text, "source_type")
+        has_source = _frontmatter_value(text, "source") is not None
+        if source_type == "placeholder":
+            placeholder += 1
+        elif has_source:
+            real += 1
+        else:
+            other += 1
+    return real, placeholder, other
+
+
+def _last_ingestion(manifest: ManifestManager) -> str | None:
+    """Return the most recent successful ingestion timestamp, if any."""
+    latest: str | None = None
+    for entry in manifest.list_entries():
+        if entry.status not in {"processed", "skipped_duplicate"}:
+            continue
+        if latest is None or entry.processed_at > latest:
+            latest = entry.processed_at
+    return latest
+
+
+def _placeholder_style(count: int) -> str:
+    return f"[yellow]{count}[/yellow]" if count else str(count)
+
+
+def _frontmatter_value(text: str, key: str) -> str | None:
+    match = re.match(r"\A---\n(?P<frontmatter>.*?)\n---\n?", text, re.DOTALL)
+    if match is None:
+        return None
+    pattern = re.compile(
+        rf"^{re.escape(key)}:\s*[\"']?(?P<value>.+?)[\"']?\s*$", re.MULTILINE
+    )
+    value_match = pattern.search(match.group("frontmatter"))
+    if value_match is None:
+        return None
+    return value_match.group("value").strip()
+
+
 def _is_writable_directory(path: Path) -> bool:
     ok, _details = _check_writable_directory(path)
     return ok
@@ -659,3 +1000,54 @@ def _display_path(path: Path, project_root: Path) -> str:
         return str(path.relative_to(project_root))
     except ValueError:
         return str(path)
+
+
+def _source_forms(source: str, project_root: Path) -> set[str]:
+    """Candidate source identifiers for a delete target.
+
+    Ingestion canonicalizes ``document.source`` to the absolute resolved path
+    for files and keeps the URL string verbatim for remote sources.  The
+    manifest records the project-relative path.  Returning all forms lets a
+    single ``pam remove`` argument (absolute path, relative path, or URL)
+    deterministically match every subsystem's ownership key.
+    """
+    forms = {source}
+    if "://" in source:
+        return forms
+    path = Path(source).expanduser()
+    try:
+        resolved = path.resolve()
+    except OSError:
+        return forms
+    forms.add(str(resolved))
+    try:
+        forms.add(str(resolved.relative_to(project_root)))
+    except ValueError:
+        pass
+    try:
+        forms.add(str(path.relative_to(project_root)))
+    except ValueError:
+        pass
+    return forms
+
+
+def _manifest_entry_matches(
+    original_path: str,
+    original_filename: str,
+    sha256: str,
+    targets: set[str],
+) -> bool:
+    """Return whether a manifest entry belongs to a delete target."""
+    if not sha256 and not original_path and not original_filename:
+        return False
+    if original_path in targets:
+        return True
+    if original_filename in targets:
+        return True
+    try:
+        if str(Path(original_path).resolve()) in targets:
+            return True
+    except OSError:
+        pass
+    return Path(original_filename).name in targets
+

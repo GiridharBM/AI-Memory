@@ -96,6 +96,31 @@ class IngestionWorkflowError(RuntimeError):
 
 
 @dataclass(slots=True)
+class KnowledgeEngineResult:
+    """Outcome of the chunk → embed → store knowledge-engine steps.
+
+    ``embedding_succeeded`` / ``indexing_succeeded`` are True vacuously when no
+    chunks were produced (an empty text produces no store writes, which is a
+    legitimate success).  A failure inside any step sets ``error`` and marks the
+    corresponding flag False so callers can treat "note written but not indexed"
+    as a retryable failure instead of silently swallowing it.
+    """
+
+    chunks_created: int = 0
+    chunks_stored: int = 0
+    embedding_succeeded: bool = True
+    indexing_succeeded: bool = True
+    error: str | None = None
+
+    @property
+    def succeeded(self) -> bool:
+        """True when every produced chunk was embedded and stored."""
+        if self.chunks_created == 0:
+            return True
+        return self.embedding_succeeded and self.indexing_succeeded
+
+
+@dataclass(slots=True)
 class IngestionWorkflowResult:
     """Successful end-to-end ingestion workflow result."""
 
@@ -106,6 +131,9 @@ class IngestionWorkflowResult:
     knowledge_graph: KnowledgeGraph | None = None
     chunks_stored: int = 0
     cross_links_added: int = 0
+    embedding_succeeded: bool = True
+    indexing_succeeded: bool = True
+    engine_error: str | None = None
 
 
 class IngestionWorkflow:
@@ -163,6 +191,7 @@ class IngestionWorkflow:
         self._vector_store = vector_store
         self._kg_builder = knowledge_graph_builder
         self._graph_path = graph_persistence_path
+        self._last_knowledge_result: KnowledgeEngineResult | None = None
 
     def _metadata(self) -> MetadataSettings:
         if self._settings is None:
@@ -353,6 +382,9 @@ class IngestionWorkflow:
             document,
             ai_result.analysis,
         )
+        engine = self._last_knowledge_result or KnowledgeEngineResult(
+            chunks_stored=chunks_stored,
+        )
 
         ocr_confidence = None
         if ocr_result is not None and ocr_result.confidence is not None:
@@ -396,6 +428,9 @@ class IngestionWorkflow:
             knowledge_graph=kg,
             chunks_stored=chunks_stored,
             cross_links_added=cross_links,
+            embedding_succeeded=engine.embedding_succeeded,
+            indexing_succeeded=engine.indexing_succeeded,
+            engine_error=engine.error,
         )
 
     def _ingest_children(self, document: SourceDocument) -> None:
@@ -886,15 +921,23 @@ class IngestionWorkflow:
         document: SourceDocument,
         analysis: DocumentAnalysis,
     ) -> tuple[KnowledgeGraph | None, int, int]:
-        """Run knowledge engine steps: chunk, embed, store, graph, cross-links."""
+        """Run knowledge engine steps: chunk, embed, store, graph, cross-links.
+
+        The returned 3-tuple is unchanged (internal + test contract); the full
+        outcome — including whether every produced chunk was embedded and
+        indexed — is exposed via ``self._last_knowledge_result``.  Algorithm
+        behavior is frozen: only the failure signal is surfaced now instead of
+        being silently swallowed.
+        """
+        outcome = KnowledgeEngineResult()
         if self._chunker is None or self._embedding_service is None or self._vector_store is None:
+            self._last_knowledge_result = outcome
             return None, 0, 0
 
         from app.domain.vector_store import VectorEntry
         from app.infrastructure.knowledge_graph import KnowledgeGraphBuilder
 
         graph = None
-        chunks_stored = 0
         cross_links = 0
 
         try:
@@ -903,10 +946,14 @@ class IngestionWorkflow:
                 str(document.source),
                 document.source_type,
             )
+            outcome.chunks_created = len(chunks)
 
             if chunks:
                 texts = [c.text for c in chunks]
                 embeddings = self._embedding_service.embed_batch(texts)
+                outcome.embedding_succeeded = all(
+                    emb.embedding for emb in embeddings
+                )
                 entries = []
                 for chunk, emb_result in zip(chunks, embeddings, strict=False):
                     if emb_result.embedding:
@@ -923,11 +970,34 @@ class IngestionWorkflow:
                                 metadata=chunk.metadata,
                             )
                         )
-                if entries:
+                # Phase 6H (ingestion lifecycle): on a successful re-ingest of
+                # source X, drop every prior chunk owned by X before adding the
+                # replacement, so a modified file leaves no orphan chunks and
+                # BM25 (keyed off vector-store version) rebuilds.  Removal is
+                # gated on FULL embed success so a failed re-ingest preserves
+                # the old known-good data (STEP 3 atomicity contract).
+                if outcome.embedding_succeeded and entries:
+                    self._vector_store.remove_by_source(str(document.source))
                     self._vector_store.add_batch(entries)
-                    chunks_stored = len(entries)
+                    outcome.chunks_stored = len(entries)
                     self._vector_store.save()
+                outcome.indexing_succeeded = outcome.chunks_stored == len(chunks)
+                if not outcome.succeeded:
+                    outcome.error = (
+                        "embedding/indexing incomplete "
+                        f"({outcome.chunks_stored}/{len(chunks)} chunks stored)"
+                    )
+        except Exception as exc:
+            logger.warning(
+                "Knowledge engine step failed.",
+                extra={"source": document.source},
+                exc_info=True,
+            )
+            outcome.embedding_succeeded = False
+            outcome.indexing_succeeded = False
+            outcome.error = str(exc) or exc.__class__.__name__
 
+        try:
             if self._kg_builder is None:
                 self._kg_builder = KnowledgeGraphBuilder()
             result = self._kg_builder.build_from_analysis(
@@ -942,33 +1012,51 @@ class IngestionWorkflow:
                     if self._graph_path.exists()
                     else KnowledgeGraph()
                 )
-                merged = self._kg_builder.merge_graphs(existing, graph)
-                merged.save(self._graph_path)
-                graph = merged
+                # Phase 6H: rebuild the persisted graph for this source only
+                # when ingestion succeeded, so a failed re-ingest leaves the
+                # prior known-good nodes/edges intact (STEP 3 atomicity).
+                if outcome.succeeded:
+                    existing.remove_source(str(document.source))
+                    merged = self._kg_builder.merge_graphs(existing, graph)
+                    merged.save(self._graph_path)
+                    graph = merged
+                else:
+                    graph = existing
 
-            if chunks and embeddings:
+            if outcome.chunks_created and outcome.succeeded:
                 cross_links = self._find_cross_document_links(
                     chunks,
                     embeddings,
                     document.source,
                 )
-
         except Exception:
             logger.warning(
-                "Knowledge engine step failed.",
+                "Knowledge graph step failed.",
                 extra={"source": document.source},
                 exc_info=True,
             )
+
+        if outcome.chunks_stored == 0 and outcome.chunks_created > 0:
+            logger.warning(
+                "No chunks stored.",
+                extra={
+                    "source": document.source,
+                    "chunks_created": outcome.chunks_created,
+                    "error": outcome.error,
+                },
+            )
+
+        self._last_knowledge_result = outcome
 
         logger.info(
             "Knowledge engine completed.",
             extra={
                 "source": document.source,
-                "chunks_stored": chunks_stored,
+                "chunks_stored": outcome.chunks_stored,
                 "cross_links": cross_links,
             },
         )
-        return graph, chunks_stored, cross_links
+        return graph, outcome.chunks_stored, cross_links
 
     def _find_cross_document_links(
         self,

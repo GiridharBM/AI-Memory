@@ -9,9 +9,11 @@ from types import SimpleNamespace
 import pytest
 from typer.testing import CliRunner
 
+from app.application.qa_workflow import QAEmptyAnswerError, QATimeoutError
 from app.cli import entry
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.domain.notes import ObsidianNote
+from app.infrastructure.state.manifest import ManifestManager
 from app.infrastructure.vault import WikiUpdateResult
 
 runner = CliRunner()
@@ -52,7 +54,7 @@ def test_cli_status_command_displays_watcher_queue_and_manifest(
     assert "Watcher" in result.output
     assert "Queue" in result.output
     assert "Manifest entries" in result.output
-    assert "Generated notes" in result.output
+    assert "Real generated notes" in result.output
     assert (tmp_path / "inbox").exists()
     assert (tmp_path / "processed").exists()
     assert (tmp_path / "failed").exists()
@@ -84,6 +86,8 @@ def test_cli_ingest_markdown_uses_workflow(
 ) -> None:
     source = tmp_path / "note.md"
     source.write_text("# Note", encoding="utf-8")
+    # Phase 6A: direct ingest records into the ledger, so point it at tmp.
+    monkeypatch.setenv("PAM_MANIFEST__PATH", str(tmp_path / "manifests" / "processed.json"))
 
     class FakeWorkflow:
         @classmethod
@@ -367,6 +371,418 @@ def test_cli_ask_reports_generation_failure(monkeypatch: pytest.MonkeyPatch) -> 
     assert result.exit_code == 1
     assert "Ask failed" in result.output
     assert "Ollama server is unavailable" in result.output
+
+
+def test_cli_ask_timeout_reports_failure_exit_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeQAWorkflow:
+        @classmethod
+        def create_default(
+            cls, settings: object, *, model: object | None = None
+        ) -> FakeQAWorkflow:
+            return cls()
+
+        def ask(
+            self,
+            question: str,
+            *,
+            top_k: int = 5,
+            min_score: float = 0.0,
+            filter: object | None = None,
+        ) -> SimpleNamespace:
+            raise QATimeoutError("QA generation exceeded the wall-clock timeout.")
+
+    monkeypatch.setattr(entry, "QAWorkflow", FakeQAWorkflow)
+
+    result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert result.exit_code == 1
+    assert "Ask failed" in result.output
+    assert "wall-clock timeout" in result.output
+
+
+def _qa_result(
+    *,
+    answer: str = "AI is a field.",
+    sources: list[object] | None = None,
+    outcome: str | None = None,
+    citations: list[object] | None = None,
+    invalid: list[int] | None = None,
+    duplicates: int = 0,
+    reason: str | None = None,
+    model: str = "qwen3:8b",
+) -> SimpleNamespace:
+    namespace: dict[str, object] = {
+        "answer": answer,
+        "sources": sources or [],
+        "model": model,
+    }
+    if outcome is not None:
+        namespace["outcome"] = outcome
+    if citations is not None:
+        namespace["citations"] = citations
+    if invalid is not None:
+        namespace["invalid_citations"] = invalid
+    if duplicates:
+        namespace["duplicate_citations"] = duplicates
+    if reason is not None:
+        namespace["abstention_reason"] = reason
+    return SimpleNamespace(**namespace)
+
+
+def _fake_workflow_factory(result: SimpleNamespace) -> type[object]:
+    class FakeQAWorkflow:
+        @classmethod
+        def create_default(
+            cls, settings: object, *, model: object | None = None
+        ) -> FakeQAWorkflow:
+            return cls()
+
+        def ask(
+            self,
+            question: str,
+            *,
+            top_k: int = 5,
+            min_score: float = 0.0,
+            filter: object | None = None,
+        ) -> SimpleNamespace:
+            return result
+
+    return FakeQAWorkflow
+
+
+@pytest.mark.parametrize("outcome", ["answered", None])
+def test_cli_ask_answered_outcome_renders_answer_and_sources(
+    monkeypatch: pytest.MonkeyPatch, outcome: str | None
+) -> None:
+    result = _qa_result(
+        answer="AI stands for artificial intelligence.",
+        sources=[
+            SimpleNamespace(
+                score=0.5,
+                source="ai.md",
+                source_type="markdown",
+                text="AI is artificial intelligence.",
+            )
+        ],
+        outcome=outcome,
+    )
+    monkeypatch.setattr(entry, "QAWorkflow", _fake_workflow_factory(result))
+
+    cli_result = runner.invoke(entry.cli, ["ask", "What is AI?", "--top-k", "3"])
+
+    assert cli_result.exit_code == 0
+    assert "Answer: What is AI?" in cli_result.output
+    assert "AI stands for artificial intelligence." in cli_result.output
+    assert "Sources" in cli_result.output
+    assert "ai.md" in cli_result.output
+
+
+def test_cli_ask_renders_cited_sources_with_metadata(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = _qa_result(
+        answer="AI is covered in [SOURCE 1].",
+        sources=[],
+        citations=[
+            SimpleNamespace(
+                number=1,
+                hit=SimpleNamespace(
+                    source="C:\\vault\\ai.md",
+                    source_type="markdown",
+                    score=0.42,
+                    text="AI is artificial intelligence.",
+                    metadata={"heading": "History"},
+                ),
+            )
+        ],
+    )
+    monkeypatch.setattr(entry, "QAWorkflow", _fake_workflow_factory(result))
+
+    cli_result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert cli_result.exit_code == 0
+    assert "Sources" in cli_result.output  # cited-sources table rendered
+    assert "ai.md" in cli_result.output  # basename of the source
+    assert "History" in cli_result.output  # section heading from metadata
+    assert "markdown" in cli_result.output  # source type
+
+
+def test_cli_ask_abstention_renders_insufficient_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = _qa_result(
+        answer="I don't have enough relevant information to answer.",
+        sources=[],
+        outcome="abstained",
+        reason="no_results",
+    )
+    monkeypatch.setattr(entry, "QAWorkflow", _fake_workflow_factory(result))
+
+    cli_result = runner.invoke(entry.cli, ["ask", "Can I buy a home in Denmark?"])
+
+    assert cli_result.exit_code == 0
+    assert "Insufficient evidence" in cli_result.output
+    assert "I don't have enough relevant information" in cli_result.output
+    assert "no_results" in cli_result.output  # abstention reason preserved
+
+
+def test_cli_ask_renders_invalid_citation_warning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = _qa_result(
+        answer="The answer. [SOURCE 9]",
+        sources=[SimpleNamespace(score=0.5, source="ai.md", text="AI.")],
+        citations=[],
+        invalid=[9],
+    )
+    monkeypatch.setattr(entry, "QAWorkflow", _fake_workflow_factory(result))
+
+    cli_result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert cli_result.exit_code == 0  # warning, not a hard failure
+    assert "Invalid citations" in cli_result.output
+    assert "[SOURCE 9]" in cli_result.output
+    assert "no citation was renumbered" in cli_result.output
+    assert "The answer." in cli_result.output  # answer text unchanged
+
+
+def test_cli_ask_renders_duplicate_citation_note(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = _qa_result(
+        answer="A [SOURCE 1] B [SOURCE 1].",
+        sources=[SimpleNamespace(score=0.5, source="ai.md", text="AI.")],
+        citations=[SimpleNamespace(number=1, hit=SimpleNamespace(
+            source="ai.md", source_type="markdown", score=0.5,
+            text="AI is artificial intelligence.", metadata={"heading": "X"},
+        ))],
+        duplicates=1,
+    )
+    monkeypatch.setattr(entry, "QAWorkflow", _fake_workflow_factory(result))
+
+    cli_result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert cli_result.exit_code == 0
+    assert "repeated citation" in cli_result.output
+
+
+def test_cli_ask_labels_uncited_answer_honestly(monkeypatch: pytest.MonkeyPatch) -> None:
+    result = _qa_result(
+        answer="AI stands for artificial intelligence.",
+        sources=[
+            SimpleNamespace(
+                score=0.5, source="ai.md", source_type="markdown",
+                text="AI is artificial intelligence.",
+            )
+        ],
+    )
+    monkeypatch.setattr(entry, "QAWorkflow", _fake_workflow_factory(result))
+
+    cli_result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert cli_result.exit_code == 0
+    # Honest presentation: uncited answers are labeled, not passed off as
+    # verified sources.
+    assert "ANSWERED — NO CITATIONS PROVIDED" in cli_result.output
+    assert "SOURCES VERIFIED" not in cli_result.output
+
+
+def test_cli_ask_labels_cited_answer_as_verified(monkeypatch: pytest.MonkeyPatch) -> None:
+    result = _qa_result(
+        answer="AI is covered in [SOURCE 1].",
+        citations=[
+            SimpleNamespace(
+                number=1,
+                hit=SimpleNamespace(
+                    source="ai.md", source_type="markdown", score=0.42,
+                    text="AI is artificial intelligence.", metadata={"heading": "History"},
+                ),
+            )
+        ],
+    )
+    monkeypatch.setattr(entry, "QAWorkflow", _fake_workflow_factory(result))
+
+    cli_result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert cli_result.exit_code == 0
+    assert "ANSWERED — SOURCES VERIFIED" in cli_result.output
+    assert "NO CITATIONS PROVIDED" not in cli_result.output
+
+
+def test_cli_ask_empty_answer_reports_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeQAWorkflow:
+        @classmethod
+        def create_default(
+            cls, settings: object, *, model: object | None = None
+        ) -> FakeQAWorkflow:
+            return cls()
+
+        def ask(
+            self,
+            question: str,
+            *,
+            top_k: int = 5,
+            min_score: float = 0.0,
+            filter: object | None = None,
+        ) -> object:
+            raise QAEmptyAnswerError(
+                "Unable to generate an answer: the model returned an empty response."
+            )
+
+    monkeypatch.setattr(entry, "QAWorkflow", FakeQAWorkflow)
+
+    cli_result = runner.invoke(entry.cli, ["ask", "What is AI?"])
+
+    assert cli_result.exit_code == 1
+    assert "Ask failed" in cli_result.output
+    assert "empty response" in cli_result.output
+
+
+def test_cli_ingest_file_generic_command_dedups_and_records_ledger(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "note.md"
+    source.write_text("# Note", encoding="utf-8")
+    manifest_path = tmp_path / "manifests" / "processed.json"
+    monkeypatch.setenv("PAM_MANIFEST__PATH", str(manifest_path))
+    calls: list[str | Path] = []
+
+    class FakeWorkflow:
+        @classmethod
+        def create_default(
+            cls,
+            settings: object,
+            *,
+            vision_client: object | None = None,
+            transcriber: object | None = None,
+        ) -> FakeWorkflow:
+            return cls()
+
+        def run(
+            self, source_arg: str | Path, *, expected_source_type: str | None,
+        ) -> SimpleNamespace:
+            assert expected_source_type is None  # generic auto-detect
+            calls.append(source_arg)
+            return _workflow_result(tmp_path)
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", FakeWorkflow)
+
+    result = runner.invoke(entry.cli, ["ingest", "file", str(source)])
+
+    assert result.exit_code == 0
+    assert "Ingestion Complete" in result.output
+    assert "Chunks indexed" in result.output
+    assert calls == [source]
+
+    # A re-drop of identical content is skipped and recorded as a duplicate.
+    result2 = runner.invoke(entry.cli, ["ingest", "file", str(source)])
+
+    assert result2.exit_code == 0
+    assert "Ingest skipped (duplicate)" in result2.output
+    assert calls == [source]  # workflow not re-run
+
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+    assert [entry.status for entry in manager.list_entries()] == [
+        "processed",
+        "skipped_duplicate",
+    ]
+
+
+def test_cli_ingest_file_records_failure_in_ledger(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "note.md"
+    source.write_text("# Note", encoding="utf-8")
+    manifest_path = tmp_path / "manifests" / "processed.json"
+    monkeypatch.setenv("PAM_MANIFEST__PATH", str(manifest_path))
+
+    class FakeWorkflow:
+        @classmethod
+        def create_default(
+            cls,
+            settings: object,
+            *,
+            vision_client: object | None = None,
+            transcriber: object | None = None,
+        ) -> FakeWorkflow:
+            return cls()
+
+        def run(
+            self, source_arg: str | Path, *, expected_source_type: str | None,
+        ) -> SimpleNamespace:
+            raise entry.IngestionWorkflowError("unsupported content")
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", FakeWorkflow)
+
+    result = runner.invoke(entry.cli, ["ingest", "file", str(source)])
+
+    assert result.exit_code == 1
+    assert "Processing failed" in result.output
+
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+    assert manager.count() == 1
+    entry_out = manager.list_entries()[0]
+    assert entry_out.status == "failed"
+    assert "IngestionWorkflowError" in entry_out.error_reason
+
+
+def test_cli_status_shows_durable_ledger_counts(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _set_runtime_env_overrides(monkeypatch, tmp_path)
+    monkeypatch.setenv("PAM_PATHS__MANIFEST_ROOT", str(tmp_path / "manifests"))
+
+    vault = tmp_path / "vault" / "Notes"
+    vault.mkdir(parents=True)
+
+    manifest_path = tmp_path / "manifests" / "processed.json"
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+    source = tmp_path / "inbox" / "x.md"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("# x", encoding="utf-8")
+    (vault / "A.md").write_text(
+        "---\ntitle: A\nsource: " + str(source).replace("\\", "\\\\") + "\nsource_type: markdown\n---\n# A",
+        encoding="utf-8",
+    )
+    digest = manager.hash_for_path(source)
+    manager.add_processed_file(path=source, sha256=digest, extension=".md")
+    manager.add_processed_file(path=source, sha256=digest, extension=".md", status="skipped_duplicate")
+    manager.add_failed_file(path=source, sha256=digest, extension=".md", error_reason="boom")
+    manager.save()
+    (tmp_path / "manifests" / "vector_store.json").write_text(
+        '{"entries":[{},{}]}', encoding="utf-8",
+    )
+
+    result = runner.invoke(entry.cli, ["status"])
+
+    assert result.exit_code == 0
+    assert "AI Memory Status" in result.output
+    ledger_rows = [
+        line for line in result.output.splitlines() if "Durable ledger" in line
+    ]
+    assert len(ledger_rows) == 3
+    assert all("1" in row for row in ledger_rows)  # processed=1, skipped=1, failed=1
+    chunk_row = next(line for line in result.output.splitlines() if "Indexed chunks" in line)
+    assert "2" in chunk_row  # vector store holds two entries
+    note_row = next(line for line in result.output.splitlines() if "Real generated notes" in line)
+    assert "1" in note_row
+
+
+def _set_runtime_env_overrides(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(entry, "_ollama_status", lambda settings: "Connected")
+    monkeypatch.setenv("PAM_WATCHER__INBOX_PATH", str(tmp_path / "inbox"))
+    monkeypatch.setenv("PAM_WATCHER__PROCESSED_PATH", str(tmp_path / "processed"))
+    monkeypatch.setenv("PAM_WATCHER__FAILED_PATH", str(tmp_path / "failed"))
+    monkeypatch.setenv("PAM_PATHS__VAULT_ROOT", str(tmp_path / "vault"))
+    monkeypatch.setenv("PAM_PATHS__LOG_ROOT", str(tmp_path / "logs"))
+    monkeypatch.setenv("PAM_PATHS__CACHE_ROOT", str(tmp_path / "cache"))
+    monkeypatch.setenv("PAM_MANIFEST__PATH", str(tmp_path / "manifests" / "processed.json"))
+    monkeypatch.setenv("PAM_QUEUE__STATE_PATH", str(tmp_path / "manifests" / "queue.json"))
+    monkeypatch.setenv("PAM_PROCESSING__PROCESSED_PATH", str(tmp_path / "processed"))
+    monkeypatch.setenv("PAM_PROCESSING__FAILED_PATH", str(tmp_path / "failed"))
 
 
 def _workflow_result(tmp_path: Path) -> SimpleNamespace:

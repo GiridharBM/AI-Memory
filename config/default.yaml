@@ -13,7 +13,7 @@ paths:
 ollama:
   host: http://localhost:11434
   model: qwen3:8b
-  timeout_seconds: 1800
+  timeout_seconds: 3600
   request_retries: 3
   retry_backoff_seconds: 1.0
 
@@ -186,6 +186,15 @@ hyde:
   enabled: false
   max_length: 500
   timeout_seconds: 30.0
+
+answerability:
+  enabled: false           # Phase 3G-B: post-retrieval evidence gate (off by default)
+  model: null              # null ⇒ use ollama.model (qwen3:8b)
+  timeout_seconds: 10.0
+  max_evidence_chunks: 5   # chunks sent to the verifier prompt
+
+qa:
+  timeout_seconds: 120     # Phase 6A: bounds only the QA generation LLM call
 
 chunking:
   sentence_tokenizer: "auto"     # auto ⇒ nltk when available, stdlib heuristic fallback; "heuristic" ⇒ deterministic stdlib; "nltk" ⇒ force nltk

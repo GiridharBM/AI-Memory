@@ -47,6 +47,8 @@ class TextIngestor(BaseIngestor):
         )
 
     def _read_text(self, source_path: Path) -> str:
+        if source_path.suffix.lower() == ".rtf":
+            return self._read_rtf(source_path)
         try:
             return source_path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
@@ -56,3 +58,18 @@ class TextIngestor(BaseIngestor):
                 raise IngestionError(f"Unable to decode text file '{source_path}'.") from exc
         except OSError as exc:
             raise IngestionError(f"Unable to read text file '{source_path}'.") from exc
+
+    def _read_rtf(self, path: Path) -> str:
+        try:
+            from striprtf.striprtf import rtf_to_text  # type: ignore[import-untyped]
+
+            raw = path.read_text(encoding="utf-8", errors="replace")
+            return rtf_to_text(raw)
+        except ImportError:
+            raise IngestionError(
+                "striprtf is required for RTF ingestion. Install with: pip install striprtf"
+            ) from None
+        except IngestionError:
+            raise
+        except Exception as exc:
+            raise IngestionError(f"Unable to read RTF file '{path}'.") from exc

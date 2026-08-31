@@ -91,6 +91,22 @@ class VectorStore:
             return True
         return False
 
+    def remove_by_source(self, source: str) -> int:
+        """Remove every chunk owned by ``source``.
+
+        Returns the number of entries removed.  Bumps ``version`` (like
+        ``remove``) so derived caches such as the BM25 index in
+        ``HybridSearch`` detect the corpus change and rebuild on next use.
+        Unrelated sources are never touched.
+        """
+        to_remove = [eid for eid, entry in self._entries.items() if entry.source == source]
+        for eid in to_remove:
+            del self._entries[eid]
+            self._norms.pop(eid, None)
+        if to_remove:
+            self._version += 1
+        return len(to_remove)
+
     def search(
         self,
         query_embedding: list[float],

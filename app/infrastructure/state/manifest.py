@@ -14,6 +14,13 @@ from app.infrastructure.state.models import ManifestEntry, ManifestState
 
 logger = get_logger(__name__)
 
+SUCCESSFUL_STATUSES = frozenset({"processed", "skipped_duplicate"})
+
+
+def is_successful_status(status: str) -> bool:
+    """Return true for statuses that count as durably processed."""
+    return status in SUCCESSFUL_STATUSES
+
 
 class ManifestManager:
     """Cache and persist the manifest of processed files."""
@@ -83,6 +90,18 @@ class ManifestManager:
 
         return any(entry.sha256 == sha256 for entry in self._state.files)
 
+    def contains_successful_hash(self, sha256: str) -> bool:
+        """Return true if the hash was already processed successfully.
+
+        Failed entries do not count as duplicates: a file re-dropped after a
+        failure (ingestion, embedding, or indexing) must be retried, not skipped.
+        """
+
+        return any(
+            entry.sha256 == sha256 and is_successful_status(entry.status)
+            for entry in self._state.files
+        )
+
     def contains_path(self, path: Path) -> bool:
         """Return true if the manifest already contains the path."""
 
@@ -132,8 +151,18 @@ class ManifestManager:
         sha256: str,
         extension: str,
         generated_note: str | None = None,
+        status: str = "processed",
+        error_reason: str | None = None,
+        chunks_stored: int | None = None,
+        embedding_succeeded: bool | None = None,
+        indexing_succeeded: bool | None = None,
     ) -> ManifestEntry:
-        """Create and add an entry for a processed file."""
+        """Create and add a ledger entry for a processed file.
+
+        ``status`` may be ``processed``, ``skipped_duplicate``, or ``failed``.
+        Failed entries carry ``error_reason`` and are excluded from hash-based
+        dedup so the file can be retried on re-drop.
+        """
 
         entry = ManifestEntry(
             sha256=sha256,
@@ -141,11 +170,33 @@ class ManifestManager:
             original_path=self._normalize_path(path),
             processed_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
             extension=extension,
-            status="processed",
+            status=status,
             generated_note=generated_note,
+            error_reason=error_reason,
+            chunks_stored=chunks_stored,
+            embedding_succeeded=embedding_succeeded,
+            indexing_succeeded=indexing_succeeded,
         )
         self.add_entry(entry)
         return entry
+
+    def add_failed_file(
+        self,
+        *,
+        path: Path,
+        sha256: str,
+        extension: str,
+        error_reason: str,
+    ) -> ManifestEntry:
+        """Record a failed ingest in the ledger (retryable on re-drop)."""
+
+        return self.add_processed_file(
+            path=path,
+            sha256=sha256,
+            extension=extension,
+            status="failed",
+            error_reason=error_reason,
+        )
 
     def hash_for_path(self, path: Path) -> str:
         """Compute a supported file hash."""
