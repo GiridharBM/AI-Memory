@@ -621,6 +621,18 @@ def _print_search_results(query: str, hits: list[SearchHit]) -> None:
 
 def _print_qa_answer(question: str, result: QAAnswer) -> None:
     outcome = getattr(result, "outcome", "answered")
+    origin = getattr(result, "origin", "retrieval")
+
+    if origin == "system":
+        console.print(
+            Panel(result.answer, title="System facts",
+                  border_style="cyan"),
+        )
+        console.print(
+            "[cyan]Answer from PAM runtime/configuration "
+            "(no retrieval, no LLM, no vector search).[/cyan]"
+        )
+        return
 
     if outcome == "abstained":
         console.print(

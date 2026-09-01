@@ -8,7 +8,13 @@ from typing import Any
 
 @dataclass(slots=True)
 class ManifestEntry:
-    """A processed file entry stored in the manifest."""
+    """A ledger entry recorded in the processed-files manifest.
+
+    ``status`` is one of ``processed`` (successfully ingested and indexed),
+    ``skipped_duplicate`` (a repeat of an already-successful source), or
+    ``failed`` (ingestion/embedding/indexing failed; retryable).  The outcome
+    fields make the ledger a durable record of what actually happened.
+    """
 
     sha256: str
     original_filename: str
@@ -18,6 +24,10 @@ class ManifestEntry:
     status: str
     generated_note: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    error_reason: str | None = None
+    chunks_stored: int | None = None
+    embedding_succeeded: bool | None = None
+    indexing_succeeded: bool | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the entry to a JSON-friendly dictionary."""
@@ -25,6 +35,12 @@ class ManifestEntry:
         payload = asdict(self)
         if not payload["metadata"]:
             payload.pop("metadata")
+        for optional in ("error_reason", "chunks_stored"):
+            if payload.get(optional) is None:
+                payload.pop(optional, None)
+        for optional in ("embedding_succeeded", "indexing_succeeded"):
+            if payload.get(optional) is None:
+                payload.pop(optional, None)
         return payload
 
     @classmethod
@@ -42,6 +58,20 @@ class ManifestEntry:
                 None if data.get("generated_note") is None else str(data["generated_note"])
             ),
             metadata=dict(data.get("metadata", {})),
+            error_reason=(
+                None if data.get("error_reason") is None else str(data["error_reason"])
+            ),
+            chunks_stored=(
+                None if data.get("chunks_stored") is None else int(data["chunks_stored"])
+            ),
+            embedding_succeeded=(
+                None if data.get("embedding_succeeded") is None
+                else bool(data["embedding_succeeded"])
+            ),
+            indexing_succeeded=(
+                None if data.get("indexing_succeeded") is None
+                else bool(data["indexing_succeeded"])
+            ),
         )
 
 

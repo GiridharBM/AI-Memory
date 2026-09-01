@@ -30,6 +30,7 @@ from dataclasses import dataclass, field
 
 from app.core.config import Settings
 from app.core.logging import get_logger
+from app.application.system_facts import SystemFactsRouter, SystemFactsService
 from app.infrastructure.answerability import AnswerabilityGate, AnswerabilityResult
 from app.infrastructure.llm import (
     OllamaClient,
@@ -54,6 +55,9 @@ ABSTENTION_MESSAGE = (
 
 OUTCOME_ANSWERED = "answered"
 OUTCOME_ABSTAINED = "abstained"
+
+ORIGIN_RETRIEVAL = "retrieval"
+ORIGIN_SYSTEM = "system"
 
 _SOURCE_CITATION_PATTERN = re.compile(r"\[SOURCE\s+(\d+)\]", re.IGNORECASE)
 
@@ -194,6 +198,7 @@ class QAAnswer:
     duplicate_citations: int = 0
     latency_seconds: float | None = None
     telemetry: ObservationTelemetry | None = None
+    origin: str = ORIGIN_RETRIEVAL
 
 
 @dataclass(slots=True)
@@ -382,6 +387,7 @@ class QAWorkflow:
         min_rerank_score: float = 0.0,
         answerability_gate: AnswerabilityGate | None = None,
         generation_timeout_seconds: float | None = None,
+        system_facts: SystemFactsService | None = None,
     ) -> None:
         self._search_service = search_service
         self._ollama_client = ollama_client
@@ -389,6 +395,8 @@ class QAWorkflow:
         self._reranker = reranker
         self._answerability_gate = answerability_gate
         self._generation_timeout_seconds = generation_timeout_seconds
+        self._system_facts = system_facts
+        self._system_facts_router = SystemFactsRouter()
         self._abstention_gate = AbstentionGate(
             min_cosine=min_cosine,
             min_rerank_score=min_rerank_score,
@@ -432,6 +440,7 @@ class QAWorkflow:
             min_rerank_score=min_rerank_score,
             answerability_gate=answerability_gate,
             generation_timeout_seconds=settings.qa.timeout_seconds,
+            system_facts=SystemFactsService(settings),
         )
 
     def ask(
@@ -447,6 +456,22 @@ class QAWorkflow:
         question = question.strip() if question else ""
         if not question:
             raise QAError("Question must not be empty.")
+
+        if self._system_facts is not None:
+            intent = self._system_facts_router.route(question)
+            if intent is not None:
+                fact = self._system_facts.resolve(intent)
+                logger.info(
+                    "Answering from System Facts.",
+                    extra={"intent": intent, "question": question},
+                )
+                return QAAnswer(
+                    answer=fact.answer,
+                    sources=[],
+                    model="",
+                    outcome=OUTCOME_ANSWERED,
+                    origin=ORIGIN_SYSTEM,
+                )
 
         # When reranker is active, retrieve extra candidates for reranking
         rerank_top_n = 0

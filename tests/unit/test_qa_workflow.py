@@ -2,20 +2,34 @@
 
 from __future__ import annotations
 
+import threading
+import time
+
 import pytest
 
 from app.application.qa_workflow import (
     ABSTENTION_MESSAGE,
     MAX_CONTEXT_CHARS,
     MAX_CONTEXT_CHUNKS,
-    QAAnswer,
-    QAError,
-    QAWorkflow,
+    OUTCOME_ABSTAINED,
+    OUTCOME_ANSWERED,
     AbstentionGate,
-    AbstentionResult,
+    QAAnswer,
+    QAEmptyAnswerError,
+    QAError,
+    QATimeoutError,
+    QAWorkflow,
     build_context,
+    extract_citations,
+    has_insufficiency_language,
+    resolve_citations,
 )
-from app.infrastructure.llm import OllamaClientError, OllamaRequest, OllamaTextResponse
+from app.infrastructure.llm import (
+    OllamaClientError,
+    OllamaRequest,
+    OllamaTextResponse,
+    OllamaTimeoutError,
+)
 from app.infrastructure.search import SearchHit
 
 
@@ -55,6 +69,29 @@ class FakeOllamaClient:
         return self.response
 
 
+class BlockingOllamaClient:
+    """Client whose ``generate_text`` blocks until the test releases it."""
+
+    def __init__(self, blocker: threading.Event) -> None:
+        self._blocker = blocker
+
+    def generate_text(self, request: OllamaRequest) -> OllamaTextResponse:
+        self._blocker.wait(timeout=30)
+        return _response("a late answer")
+
+
+class SlowOllamaClient(FakeOllamaClient):
+    """Client that completes a real response after a fixed delay."""
+
+    def __init__(self, delay: float, response: OllamaTextResponse) -> None:
+        super().__init__(response)
+        self._delay = delay
+
+    def generate_text(self, request: OllamaRequest) -> OllamaTextResponse:
+        time.sleep(self._delay)
+        return super().generate_text(request)
+
+
 def _hit(
     text: str = "Python is a programming language.",
     *,
@@ -62,6 +99,7 @@ def _hit(
     score: float = 0.5,
     cosine_score: float = 0.5,
     bm25_score: float = 0.5,
+    metadata: dict[str, str] | None = None,
 ) -> SearchHit:
     return SearchHit(
         text=text,
@@ -71,7 +109,7 @@ def _hit(
         cosine_score=cosine_score,
         bm25_score=bm25_score,
         source_type="markdown",
-        metadata={"heading": "Intro"},
+        metadata=metadata if metadata is not None else {"heading": "Intro"},
     )
 
 
@@ -353,3 +391,352 @@ class TestAbstentionGate:
         result = gate.evaluate(hits)
         assert result.abstain is True
         assert result.reason == "no_evidence"
+
+
+# ── Citation validation (Phase 6B) ────────────────────────────────────
+
+
+class TestCitationValidation:
+    """Unit tests for parsing and validating [SOURCE N] references."""
+
+    def test_extract_citations_returns_numbers_in_order(self) -> None:
+        assert extract_citations("a [SOURCE 2] b [SOURCE 1] c") == [2, 1]
+
+    def test_extract_citations_is_case_insensitive(self) -> None:
+        assert extract_citations("[source 3] [Source 4]") == [3, 4]
+
+    def test_extract_citations_ignores_malformed_tokens(self) -> None:
+        text = "no brackets SOURCE 1, [SOURCES 2], [SOURCE x], [SOURCE1], (source 3)"
+        assert extract_citations(text) == []
+
+    def test_extract_citations_preserves_duplicates(self) -> None:
+        assert extract_citations("[SOURCE 1] [SOURCE 1]") == [1, 1]
+
+    def test_valid_single_citation_resolves(self) -> None:
+        hits = [_hit(source="a.md"), _hit(source="b.md")]
+
+        citations, invalid, duplicates = resolve_citations("uses [SOURCE 2]", hits)
+
+        assert [c.number for c in citations] == [2]
+        assert citations[0].hit.source == "b.md"
+        assert invalid == []
+        assert duplicates == 0
+
+    def test_multiple_valid_citations_preserve_order(self) -> None:
+        hits = [_hit(source=f"d{i}.md") for i in range(4)]
+
+        citations, invalid, duplicates = resolve_citations("[SOURCE 4] and [SOURCE 1]", hits)
+
+        assert [c.number for c in citations] == [4, 1]
+        assert invalid == []
+        assert duplicates == 0
+
+    def test_out_of_range_citation_rejected_not_remapped(self) -> None:
+        hits = [_hit()]  # only one retrieved source
+
+        citations, invalid, duplicates = resolve_citations("cites [SOURCE 9]", hits)
+
+        assert citations == []
+        assert invalid == [9]
+        assert duplicates == 0
+
+    def test_source_zero_is_invalid(self) -> None:
+        hits = [_hit()]
+
+        _, invalid, _ = resolve_citations("[SOURCE 0]", hits)
+
+        assert invalid == [0]
+
+    def test_duplicate_valid_citations_deduplicated_and_counted(self) -> None:
+        hits = [_hit(source="d.md"), _hit(source="e.md")]
+
+        citations, invalid, duplicates = resolve_citations(
+            "[SOURCE 2] [SOURCE 2] [SOURCE 1]", hits
+        )
+
+        assert [c.number for c in citations] == [2, 1]
+        assert invalid == []
+        assert duplicates == 1
+
+    def test_hit_lookup_is_offsets_aligned_to_retrieved_source_numbering(self) -> None:
+        hits = [_hit(source="first.md"), _hit(source="second.md")]
+
+        _, _, _ = resolve_citations("[SOURCE 1] [SOURCE 2]", hits)
+        assert hits[0].source == "first.md"
+
+
+# ── Answer output contract (Phase 6B) ─────────────────────────────────
+
+
+class TestQaAnswerContract:
+    """Workflow-level behavior of the ANSWERED / ABSTAINED contract."""
+
+    def test_answered_outcome_carries_resolved_citations(self) -> None:
+        hits = [_hit(source="a.md"), _hit(source="b.md")]
+        search = FakeSearchService(hits)
+        client = FakeOllamaClient(_response("Python is a language. [SOURCE 2] [SOURCE 1]"))
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("What is Python?")
+
+        assert result.outcome == OUTCOME_ANSWERED
+        assert [c.number for c in result.citations] == [2, 1]
+        assert [c.hit.source for c in result.citations] == ["b.md", "a.md"]
+        assert result.sources == hits
+        assert result.invalid_citations == []
+        assert result.duplicate_citations == 0
+
+    def test_answer_text_is_verbatim_and_valid_citations_preserved(self) -> None:
+        body = "CPython was first released in 1991 [SOURCE 1]."
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response(body))
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("When was CPython released?")
+
+        assert result.answer == body
+        assert _noccs(result.answer, "[SOURCE 1]") == 1
+        assert [c.number for c in result.citations] == [1]
+
+    def test_out_of_range_citation_surfaces_in_invalid_citations(self) -> None:
+        body = "The answer is X. [SOURCE 9]"
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response(body))
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("What is Python?")
+
+        assert result.answer == body  # text untouched, no silent remap
+        assert result.citations == []
+        assert result.invalid_citations == [9]
+
+    def test_duplicate_citations_deduplicated_at_workflow(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response("A [SOURCE 1] is B [SOURCE 1]."))
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("What?")
+
+        assert [c.number for c in result.citations] == [1]
+        assert result.duplicate_citations == 1
+
+    def test_answer_without_citations_keeps_full_sources_for_display(self) -> None:
+        hits = [_hit(source="a.md"), _hit(source="b.md")]
+        search = FakeSearchService(hits)
+        client = FakeOllamaClient(_response("No [SOURCE markers at all.]"))
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("What?")
+
+        assert result.citations == []
+        assert result.invalid_citations == []
+        assert result.sources == hits
+
+    def test_abstention_outcome_preserves_reason_and_skips_llm(self) -> None:
+        hits = [_hit(cosine_score=0.10, bm25_score=0.0)]
+        search = FakeSearchService(hits)
+        client = FakeOllamaClient(_response("This should not be called."))
+        workflow = QAWorkflow(search, client, min_cosine=0.25)
+
+        result = workflow.ask("Can I buy a home in Denmark?")
+
+        assert result.outcome == OUTCOME_ABSTAINED
+        assert result.answer == ABSTENTION_MESSAGE
+        assert result.sources == []
+        assert result.abstention_reason is not None
+        assert not client.requests  # LLM never invoked after an abstention
+
+    def test_source_metadata_reachable_via_citation_hit(self) -> None:
+        search = FakeSearchService([_hit(text="Guido wrote it.", metadata={"heading": "History"})])
+        client = FakeOllamaClient(_response("Author is Guido. [SOURCE 1]"))
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("Who wrote Python?")
+
+        citation = result.citations[0]
+        assert citation.hit.source_type == "markdown"
+        assert citation.hit.metadata["heading"] == "History"
+        assert citation.hit.entry_id.endswith("chunk_0")
+
+
+# ── Empty-answer handling + exception wrapping (Phase 6C) ─────────────
+
+
+class TestEmptyAnswerHandling:
+    """An empty or whitespace-only model response is FAILED, never ANSWERED."""
+
+    @pytest.mark.parametrize("blank", ["", "   ", "\n\t ", " \r\n "])
+    def test_empty_or_whitespace_response_is_failure(self, blank: str) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response(blank))
+        workflow = _workflow(search, client)
+
+        with pytest.raises(QAEmptyAnswerError, match="empty response"):
+            workflow.ask("What is Python?")
+
+    def test_empty_answer_error_is_qa_error_subclass(self) -> None:
+        assert issubclass(QAEmptyAnswerError, QAError)
+
+    def test_empty_answer_is_distinguishable_from_abstention(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response(""))
+        workflow = _workflow(search, client)
+
+        with pytest.raises(QAEmptyAnswerError) as excinfo:
+            workflow.ask("What is Python?")
+
+        # A failure was raised; it is NOT an ABSTAINED QAAnswer.
+        assert isinstance(excinfo.value, QAError)
+        assert not isinstance(excinfo.value, QATimeoutError)
+
+    def test_normal_answer_remains_answered_with_measurements(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response("Python is a language."))
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("What is Python?")
+
+        assert result.outcome == OUTCOME_ANSWERED
+        assert result.latency_seconds is not None and result.latency_seconds >= 0.0
+        assert result.telemetry is not None
+        assert result.telemetry.answer_length == len("Python is a language.")
+        assert result.telemetry.source_count == 1
+        assert result.telemetry.latency_seconds == result.latency_seconds
+
+
+class TestModelExceptionWrapping:
+    """Unexpected provider exceptions are wrapped in the QA hierarchy."""
+
+    def test_unexpected_model_exception_wrapped_as_qa_error(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(error=RuntimeError("boom"))
+        workflow = _workflow(search, client)
+
+        with pytest.raises(QAError, match="unexpected error"):
+            workflow.ask("What is Python?")
+
+    def test_timeout_error_preserved_as_qatimeout(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(error=OllamaTimeoutError("timed out"))
+        workflow = _workflow(search, client)
+
+        with pytest.raises(QATimeoutError):
+            workflow.ask("What is Python?")
+
+    def test_unavailable_error_preserved_as_qa_error(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(error=OllamaClientError("connection refused"))
+        workflow = _workflow(search, client)
+
+        with pytest.raises(QAError, match="Ollama server is unavailable"):
+            workflow.ask("What is Python?")
+
+    def test_insufficiency_heuristic_is_measurement_only(self) -> None:
+        # An answer that reads like a soft abstention stays ANSWERED; the
+        # heuristic only labels telemetry, it never changes the outcome.
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(
+            _response("I don't have enough information in the provided sources to answer.")
+        )
+        workflow = _workflow(search, client)
+
+        result = workflow.ask("What is Python?")
+
+        assert result.outcome == OUTCOME_ANSWERED
+        assert result.telemetry is not None
+        assert result.telemetry.answer_has_insufficiency_language is True
+
+    def test_insufficiency_heuristic_flags_obvious_soft_abstention(self) -> None:
+        assert has_insufficiency_language("I don't have enough information to answer.")
+        assert has_insufficiency_language("The context does not contain the answer.")
+        assert has_insufficiency_language("Insufficient evidence was retrieved.")
+        assert not has_insufficiency_language("Python was created by Guido van Rossum.")
+
+
+class TestWallClockTimeout:
+    """Phase 6F-A: ``generation_timeout_seconds`` is a true wall-clock bound."""
+
+    def test_completes_within_deadline_returns_answered(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response("Python is a language."))
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=5.0)
+
+        result = workflow.ask("What is Python?")
+
+        assert result.outcome == OUTCOME_ANSWERED
+        assert result.answer == "Python is a language."
+        assert len(client.requests) == 1
+
+    def test_slower_than_fast_recognizes_loss_is_still_answered_inside_budget(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = SlowOllamaClient(delay=0.2, response=_response("a slow answer"))
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=5.0)
+
+        result = workflow.ask("What is Python?")
+
+        assert result.outcome == OUTCOME_ANSWERED
+        assert result.answer == "a slow answer"
+        assert result.latency_seconds is not None and result.latency_seconds >= 0.2
+
+    def test_exceeding_deadline_raises_qatimeout(self) -> None:
+        blocker = threading.Event()
+        search = FakeSearchService([_hit()])
+        client = BlockingOllamaClient(blocker)
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=0.1)
+
+        with pytest.raises(QATimeoutError, match="request timed out"):
+            workflow.ask("What is Python?")
+
+        blocker.set()
+
+    def test_qatimeout_is_qa_error_subclass(self) -> None:
+        assert issubclass(QATimeoutError, QAError)
+        assert QATimeoutError is not QAEmptyAnswerError
+
+    def test_deadline_expiry_short_circuits_before_any_answer(self) -> None:
+        blocker = threading.Event()
+        search = FakeSearchService([_hit()])
+        client = BlockingOllamaClient(blocker)
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=0.1)
+
+        with pytest.raises(QATimeoutError):
+            workflow.ask("What is Python?")
+        blocker.set()
+
+    def test_unavailable_error_stays_qa_error_with_deadline(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(error=OllamaClientError("server down"))
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=5.0)
+
+        with pytest.raises(QAError, match="Ollama server is unavailable"):
+            workflow.ask("What is Python?")
+
+    def test_ordinary_exception_stays_qa_error_with_deadline(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(error=RuntimeError("boom"))
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=5.0)
+
+        with pytest.raises(QAError, match="unexpected error"):
+            workflow.ask("What is Python?")
+
+    def test_empty_answer_stays_empty_error_with_deadline(self) -> None:
+        search = FakeSearchService([_hit()])
+        client = FakeOllamaClient(_response(" \n\t "))
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=5.0)
+
+        with pytest.raises(QAEmptyAnswerError, match="empty response"):
+            workflow.ask("What is Python?")
+
+    def test_citation_behavior_unchanged_with_deadline(self) -> None:
+        search = FakeSearchService([_hit(), _hit(source="other.md")])
+        client = FakeOllamaClient(_response("Based on [SOURCE 1] and [SOURCE 9]."))
+        workflow = QAWorkflow(search, client, generation_timeout_seconds=5.0)
+
+        result = workflow.ask("What is Python?")
+
+        assert [c.number for c in result.citations] == [1]
+        assert result.invalid_citations == [9]
+
+
+def _noccs(text: str, needle: str) -> int:
+    return text.count(needle)

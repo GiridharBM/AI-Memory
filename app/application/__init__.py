@@ -2,6 +2,7 @@
 
 from app.application.ai_processor import AIProcessingError, AIProcessingResult, DocumentAIProcessor
 from app.application.qa_workflow import QAAnswer, QAError, QATimeoutError, QAWorkflow
+from app.application.system_facts import SystemFactsRouter, SystemFactsService
 
 __all__ = [
     "AIProcessingError",
@@ -11,4 +12,6 @@ __all__ = [
     "QAError",
     "QATimeoutError",
     "QAWorkflow",
+    "SystemFactsRouter",
+    "SystemFactsService",
 ]

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -11,6 +12,7 @@ import pytest
 from app.core.config import Settings
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.domain.notes import ObsidianNote
+from app.infrastructure.state.manifest import ManifestManager
 from app.infrastructure.vault.wiki_manager import WikiUpdateResult
 from app.pipelines import IngestionWorkflowResult
 from app.queue import QueueItem, QueueManager, QueueStatus, QueueWorker
@@ -174,6 +176,110 @@ def test_worker_move_failure_does_not_record_manifest(
     assert worker.manifest_manager.count() == 0
     assert (tmp_path / "failed" / "note.md").exists()
     assert queue.is_empty()
+
+
+# ── Phase 6A: durable ledger + retry semantics ─────────────────────────
+
+
+def test_worker_retries_file_after_failed_ledger_entry(
+    tmp_settings: Settings, tmp_path: Path,
+) -> None:
+    """A failed ledger entry must not block re-processing the same file."""
+    queue = QueueManager()
+    source = tmp_path / "inbox" / "note.md"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("# Note", encoding="utf-8")
+
+    seeded = ManifestManager(tmp_settings.manifest.path, project_root=tmp_path)
+    digest = seeded.hash_for_path(source)
+    seeded.add_failed_file(path=source, sha256=digest, extension=".md", error_reason="previous")
+    seeded.save()
+
+    item = QueueItem(path=source, extension=".md", created_at=datetime.now(UTC))
+    queue.enqueue(item)
+    runs: list[str | Path] = []
+
+    class RetryWorkflow(SuccessfulWorkflow):
+        def run(
+            self,
+            source_arg: str | Path,
+            *,
+            expected_source_type: str | None = None,
+        ) -> IngestionWorkflowResult:
+            runs.append(source_arg)
+            return super().run(source_arg, expected_source_type=expected_source_type)
+
+    worker = QueueWorker(queue, tmp_settings, workflow=RetryWorkflow())
+
+    assert worker.process_next()
+    assert len(runs) == 1  # workflow ran despite the failed ledger entry
+    assert item.status == QueueStatus.DONE
+    assert (tmp_path / "processed" / "note.md").exists()
+    assert worker.manifest_manager.count() == 2  # previous failure + new success
+
+
+def test_worker_records_skipped_duplicate_in_ledger(
+    tmp_settings: Settings, tmp_path: Path,
+) -> None:
+    """A re-dropped, already-processed file is skipped and recorded as such."""
+    queue = QueueManager()
+    source = tmp_path / "inbox" / "note.md"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("# Note", encoding="utf-8")
+
+    seeded = ManifestManager(tmp_settings.manifest.path, project_root=tmp_path)
+    digest = seeded.hash_for_path(source)
+    seeded.add_processed_file(path=source, sha256=digest, extension=".md")
+    seeded.save()
+
+    item = QueueItem(path=source, extension=".md", created_at=datetime.now(UTC))
+    queue.enqueue(item)
+    worker = QueueWorker(queue, tmp_settings, workflow=EmptyWorkflow())
+
+    assert worker.process_next()
+    assert item.status == QueueStatus.DONE
+    entries = worker.manifest_manager.list_entries()
+    assert len(entries) == 2
+    assert entries[1].status == "skipped_duplicate"
+    assert worker.manifest_manager.contains_successful_hash(digest)
+
+
+def test_worker_fails_item_when_note_written_but_not_indexed(
+    tmp_settings: Settings, tmp_path: Path,
+) -> None:
+    """A note written without embedding/indexing is a retryable failure."""
+    queue = QueueManager()
+    source = tmp_path / "inbox" / "note.md"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("# Note", encoding="utf-8")
+    item = QueueItem(path=source, extension=".md", created_at=datetime.now(UTC))
+    queue.enqueue(item)
+
+    class NotIndexedWorkflow(SuccessfulWorkflow):
+        def run(
+            self,
+            source_arg: str | Path,
+            *,
+            expected_source_type: str | None = None,
+        ) -> IngestionWorkflowResult:
+            result = super().run(source_arg, expected_source_type=expected_source_type)
+            return replace(
+                result,
+                embedding_succeeded=False,
+                indexing_succeeded=False,
+                engine_error="embedding failed",
+            )
+
+    worker = QueueWorker(queue, tmp_settings, workflow=NotIndexedWorkflow())
+
+    assert worker.process_next()
+    assert item.status == QueueStatus.FAILED
+    assert (tmp_path / "failed" / "note.md").exists()
+    assert not (tmp_path / "processed" / "note.md").exists()
+    entry = worker.manifest_manager.list_entries()[0]
+    assert entry.status == "failed"
+    assert "EMBEDDING/INDEXING FAILURE" in entry.error_reason
+    assert not worker.manifest_manager.contains_successful_hash(entry.sha256)
 
 
 # _settings removed: tests use shared tmp_settings fixture from conftest.py
