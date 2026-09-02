@@ -35,7 +35,6 @@ def test_cli_status_command_displays_watcher_queue_and_manifest(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    monkeypatch.setattr(entry, "_ollama_status", lambda settings: "Connected")
     monkeypatch.setenv("PAM_WATCHER__INBOX_PATH", str(tmp_path / "inbox"))
     monkeypatch.setenv("PAM_WATCHER__PROCESSED_PATH", str(tmp_path / "processed"))
     monkeypatch.setenv("PAM_WATCHER__FAILED_PATH", str(tmp_path / "failed"))
@@ -50,14 +49,15 @@ def test_cli_status_command_displays_watcher_queue_and_manifest(
     result = runner.invoke(entry.cli, ["status"])
 
     assert result.exit_code == 0
-    assert "AI Memory Status" in result.output
+    assert "PAM Status (read-only)" in result.output
     assert "Watcher" in result.output
     assert "Queue" in result.output
     assert "Manifest entries" in result.output
     assert "Real generated notes" in result.output
-    assert (tmp_path / "inbox").exists()
-    assert (tmp_path / "processed").exists()
-    assert (tmp_path / "failed").exists()
+    # A5: status is read-only — it must not create runtime directories
+    assert not (tmp_path / "inbox").exists()
+    assert not (tmp_path / "processed").exists()
+    assert not (tmp_path / "failed").exists()
 
 
 def test_cli_doctor_reports_mocked_ollama_available(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -759,12 +759,16 @@ def test_cli_status_shows_durable_ledger_counts(
     result = runner.invoke(entry.cli, ["status"])
 
     assert result.exit_code == 0
-    assert "AI Memory Status" in result.output
+    assert "PAM Status (read-only)" in result.output
     ledger_rows = [
         line for line in result.output.splitlines() if "Durable ledger" in line
     ]
-    assert len(ledger_rows) == 3
-    assert all("1" in row for row in ledger_rows)  # processed=1, skipped=1, failed=1
+    assert len(ledger_rows) == 4  # manifest entries, processed, skipped, failed
+    manifest_row = next(
+        line for line in ledger_rows if "Manifest entries" in line
+    )
+    assert "3" in manifest_row  # processed + skipped + failed
+    assert all("1" in row for row in ledger_rows if "Manifest" not in row)
     chunk_row = next(line for line in result.output.splitlines() if "Indexed chunks" in line)
     assert "2" in chunk_row  # vector store holds two entries
     note_row = next(line for line in result.output.splitlines() if "Real generated notes" in line)
@@ -772,7 +776,6 @@ def test_cli_status_shows_durable_ledger_counts(
 
 
 def _set_runtime_env_overrides(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setattr(entry, "_ollama_status", lambda settings: "Connected")
     monkeypatch.setenv("PAM_WATCHER__INBOX_PATH", str(tmp_path / "inbox"))
     monkeypatch.setenv("PAM_WATCHER__PROCESSED_PATH", str(tmp_path / "processed"))
     monkeypatch.setenv("PAM_WATCHER__FAILED_PATH", str(tmp_path / "failed"))

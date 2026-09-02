@@ -54,6 +54,11 @@ class DocumentIngestionError(BaseModel):
     source_path: Path | None = None
     source_type: str | None = None
     reason: str
+    # Why ingestion failed, for truthful CLI presentation: "blocked"
+    # (secret-bearing guard), "unsupported" (no ingestor), or "ingestion"
+    # (any other ingestion failure).  Default keeps existing constructors
+    # (e.g. test_email_attachments.py) working unchanged.
+    category: str = "ingestion"
 
 
 class DocumentIngestionResult(BaseModel):

@@ -92,7 +92,17 @@ class NoteWriter(Protocol):
 
 
 class IngestionWorkflowError(RuntimeError):
-    """Raised when the end-to-end ingestion workflow cannot complete."""
+    """Raised when the end-to-end ingestion workflow cannot complete.
+
+    ``category`` mirrors ``DocumentIngestionError.category`` ("blocked",
+    "unsupported", "ingestion") so the CLI can present a truthful, distinct
+    panel for each outcome; "retryable" marks external retryable failures
+    (Ollama/AI/OS) raised directly by the workflow itself.
+    """
+
+    def __init__(self, message: str, *, category: str = "retryable") -> None:
+        super().__init__(message)
+        self.category = category
 
 
 @dataclass(slots=True)
@@ -110,6 +120,7 @@ class KnowledgeEngineResult:
     chunks_stored: int = 0
     embedding_succeeded: bool = True
     indexing_succeeded: bool = True
+    graph_succeeded: bool = True
     error: str | None = None
 
     @property
@@ -133,6 +144,7 @@ class IngestionWorkflowResult:
     cross_links_added: int = 0
     embedding_succeeded: bool = True
     indexing_succeeded: bool = True
+    graph_succeeded: bool = True
     engine_error: str | None = None
 
 
@@ -320,7 +332,8 @@ class IngestionWorkflow:
                 if ingestion_result.error
                 else "Unknown ingestion error."
             )
-            raise IngestionWorkflowError(reason)
+            category = ingestion_result.error.category if ingestion_result.error else "ingestion"
+            raise IngestionWorkflowError(reason, category=category)
 
         document = ingestion_result.document
         if expected_source_type is not None and document.source_type != expected_source_type:
@@ -430,6 +443,7 @@ class IngestionWorkflow:
             cross_links_added=cross_links,
             embedding_succeeded=engine.embedding_succeeded,
             indexing_succeeded=engine.indexing_succeeded,
+            graph_succeeded=engine.graph_succeeded,
             engine_error=engine.error,
         )
 
@@ -1035,6 +1049,7 @@ class IngestionWorkflow:
                 extra={"source": document.source},
                 exc_info=True,
             )
+            outcome.graph_succeeded = False
 
         if outcome.chunks_stored == 0 and outcome.chunks_created > 0:
             logger.warning(

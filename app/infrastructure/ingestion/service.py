@@ -76,6 +76,15 @@ class BlockedSourceError(IngestionError):
     """Raised when a source file is blocked by the secret-ingestion guard."""
 
 
+def _failure_category(exc: Exception) -> str:
+    """Classify an ingestion failure for truthful CLI presentation."""
+    if isinstance(exc, BlockedSourceError):
+        return "blocked"
+    if isinstance(exc, UnsupportedSourceError):
+        return "unsupported"
+    return "ingestion"
+
+
 
 
 class DocumentIngestionService:
@@ -162,6 +171,7 @@ class DocumentIngestionService:
                     source_path=normalized_source if isinstance(normalized_source, Path) else None,
                     source_type=self._detect_source_type(normalized_source),
                     reason=str(exc),
+                    category=_failure_category(exc),
                 )
             )
 

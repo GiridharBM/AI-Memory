@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import sys
+from contextlib import suppress
+from dataclasses import dataclass, field
 from importlib.util import find_spec
 from pathlib import Path
 from typing import Annotated
@@ -19,10 +22,10 @@ from rich.table import Table
 from app.application import AIProcessingError, QAAnswer, QAError, QAWorkflow
 from app.core.config import ConfigurationError, Settings, load_settings
 from app.core.logging import get_logger, setup_logging
-from app.infrastructure.llm import OllamaClient, OllamaClientError
 from app.domain.knowledge_graph import KnowledgeGraph
+from app.infrastructure.llm import OllamaClient, OllamaClientError
 from app.infrastructure.search import SearchHit, SearchService
-from app.infrastructure.state.manifest import ManifestManager
+from app.infrastructure.state.manifest import ManifestEntry, ManifestManager, is_successful_status
 from app.infrastructure.vector_store import VectorStore
 from app.pipelines import IngestionWorkflow, IngestionWorkflowError
 from app.queue import QueueStateStore
@@ -144,42 +147,32 @@ def ingest_youtube(url: YouTubeUrlArgument) -> None:
 
 @cli.command("status")
 def status() -> None:
-    """Show local project and vault status."""
+    """Show a concise, truthful overview of current PAM state (read-only)."""
 
     settings = _load_configured_settings()
     setup_logging(settings)
     logger.info("Status requested")
-    _ensure_runtime_directories(settings)
 
     vault_root = settings.paths.vault_root
     notes_root = vault_root / "Notes"
     real_notes, placeholder_notes, other_notes = _note_counts(notes_root)
-    manifest = ManifestManager(
-        settings.manifest.path,
-        project_root=settings.paths.project_root,
-        enabled=settings.manifest.enabled,
-    )
-    manifest_entries = manifest.count()
-    processed_count = sum(
-        1 for entry in manifest.list_entries() if entry.status == "processed"
-    )
+
+    ledger = _read_manifest_entries(settings)
+    ledger_available = ledger is not None
+    ledger = ledger if ledger is not None else []
+    processed_count = sum(1 for entry in ledger if entry.get("status") == "processed")
     skipped_count = sum(
-        1 for entry in manifest.list_entries() if entry.status == "skipped_duplicate"
+        1 for entry in ledger if entry.get("status") == "skipped_duplicate"
     )
-    failed_count = sum(
-        1 for entry in manifest.list_entries() if entry.status == "failed"
-    )
-    retryable_count = sum(
-        1 for entry in manifest.list_entries() if entry.status == "failed"
-    )
-    last_ingest = _last_ingestion(manifest)
-    pending_queue_items = len(QueueStateStore(settings.queue.state_path).load())
-    ollama_status = _ollama_status(settings)
-    vault_status = "Connected" if _is_writable_directory(vault_root) else "Not writable"
+    failed_count = sum(1 for entry in ledger if entry.get("status") == "failed")
+    last_ingest = _last_ingestion(ledger)
+    queue_waiting = _queue_waiting(settings)
+    ollama_host = str(settings.ollama.host)
     indexed_chunks = _indexed_chunks(settings)
     indexed_sources = _indexed_sources(settings)
+    vault_status = _vault_access_status(vault_root)
 
-    table = Table(title="AI Memory Status", show_header=True, header_style="bold")
+    table = Table(title="PAM Status (read-only)", show_header=True, header_style="bold")
     table.add_column("Area")
     table.add_column("Status")
     table.add_column("Details")
@@ -190,16 +183,35 @@ def status() -> None:
         _display_path(settings.watcher.inbox_path, settings.paths.project_root),
     )
     table.add_row("Queue", _healthy("Enabled" if settings.queue.enabled else "Disabled"), "")
-    table.add_row("Items waiting", _healthy(str(pending_queue_items)), "")
-    table.add_row("Manifest entries", _healthy(str(manifest_entries)), "")
-    table.add_row("Sources indexed", _healthy(str(indexed_sources)), "Vector store")
+    table.add_row("Items waiting", _status_style(queue_waiting), "Queue state file")
+    table.add_row(
+        "Manifest entries",
+        _status_style(_ledger_metric(ledger_available, len(ledger))),
+        "Durable ledger",
+    )
+    table.add_row("Sources indexed", _status_style(indexed_sources), "Vector store")
     table.add_row("Indexed chunks", _status_style(indexed_chunks), "Vector store")
-    table.add_row("Successful ingests", _healthy(str(processed_count)), "Durable ledger")
-    table.add_row("Skipped duplicates", _healthy(str(skipped_count)), "Durable ledger")
-    table.add_row("Failed", _status_style(str(failed_count)), "Durable ledger")
-    table.add_row("Retryable pending", _status_style(str(retryable_count)), "Failed entries")
-    table.add_row("Last ingestion", _healthy(last_ingest if last_ingest else "never"), "")
-    table.add_row("Ollama", _status_style(ollama_status), str(settings.ollama.host))
+    table.add_row(
+        "Successful ingests",
+        _status_style(_ledger_metric(ledger_available, processed_count)),
+        "Durable ledger",
+    )
+    table.add_row(
+        "Skipped duplicates",
+        _status_style(_ledger_metric(ledger_available, skipped_count)),
+        "Durable ledger",
+    )
+    table.add_row(
+        "Failed",
+        _status_style(_ledger_metric(ledger_available, failed_count)),
+        "Durable ledger",
+    )
+    table.add_row(
+        "Last ingestion",
+        _status_style(_last_ingestion_display(last_ingest, ledger_available)),
+        "",
+    )
+    table.add_row("Ollama host", _healthy("Configured"), ollama_host)
     table.add_row("Model", settings.ollama.model, "")
     table.add_row("Vault", _status_style(vault_status), str(vault_root))
     table.add_row("Real generated notes", _healthy(str(real_notes)), "")
@@ -209,45 +221,289 @@ def status() -> None:
     table.add_row("Logs", _healthy("Ready"), str(settings.paths.log_root))
     console.print(table)
 
+
+@dataclass(slots=True)
+class SourceRow:
+    """A single indexed source with its metadata for ``pam sources``.
+
+    ``manifest_matches`` records the ledger entries attributed to the source
+    so the presentation (status / last ingested) stays derived from durable
+    state without inventing fields.
+    """
+
+    source: str
+    type: str
+    chunks: int = 0
+    status: str = "indexed"
+    last_ingested: str | None = None
+    manifest_matches: list[ManifestEntry] = field(default_factory=list)
+
+
+@cli.command("sources")
+def sources() -> None:
+    """List the sources currently indexed by PAM (read-only).
+
+    The persistent vector store is the authority on what is indexable; the
+    durable ledger (manifest) annotates each with ingestion status and the most
+    recent successful ingestion time.  This command never queries the corpus,
+    launches an LLM, or performs retrieval — it only reads durable state.
+    """
+
+    settings = _load_configured_settings()
+    setup_logging(settings)
+    logger.info("Sources requested")
+
+    rows = _read_vector_store_sources(settings)
+    if rows is None:
+        console.print(
+            Panel.fit(
+                "The vector store could not be read; source listing is unavailable.",
+                title="Sources unavailable",
+                border_style="red",
+            ),
+        )
+        raise typer.Exit(1)
+
+    if not rows:
+        console.print(
+            Panel.fit(
+                "No sources are indexed yet. Run `pam ingest file <path>` to add one.",
+                title="Sources",
+            ),
+        )
+        return
+
+    manifest = ManifestManager(
+        settings.manifest.path,
+        project_root=settings.paths.project_root,
+        enabled=settings.manifest.enabled,
+    )
+    _annotate_source_ledger(rows, manifest, settings.paths.project_root)
+
+    table = Table(title="Indexed Sources", show_header=True, header_style="bold")
+    table.add_column("Source")
+    table.add_column("Type")
+    table.add_column("Chunks", justify="right")
+    table.add_column("Status")
+    table.add_column("Last Ingested (UTC)")
+
+    for row in rows:
+        table.add_row(
+            row.source,
+            row.type if row.type else "—",
+            str(row.chunks),
+            _source_status_style(row.status),
+            row.last_ingested if row.last_ingested else "—",
+        )
+
+    console.print(table)
+    logger.info(
+        "Sources listed.",
+        extra={"source_count": len(rows), "chunk_count": sum(r.chunks for r in rows)},
+    )
+
+
+def _read_vector_store_sources(settings: Settings) -> list[SourceRow] | None:
+    """Return per-source rows from the persistent vector store, or ``None``.
+
+    ``None`` signals the store cannot be read (no fabricated zero).  Rows are
+    grouped by the canonical ``source`` value and sorted deterministically by
+    source string.  ``type`` is the first observed ``source_type``.
+    """
+    store_path = settings.paths.manifest_root / "vector_store.json"
+    if not store_path.exists():
+        return []
+
+    try:
+        data = json.loads(store_path.read_text(encoding="utf-8"))
+        entries = data.get("entries", []) if isinstance(data, dict) else []
+    except (json.JSONDecodeError, OSError):
+        return None
+    if not isinstance(entries, list):
+        return None
+
+    by_source: dict[str, SourceRow] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        source = str(entry.get("source", ""))
+        if not source:
+            continue
+        row = by_source.get(source)
+        if row is None:
+            by_source[source] = SourceRow(
+                source=source,
+                type=str(entry.get("source_type", "") or ""),
+            )
+            row = by_source[source]
+        row.chunks += 1
+        if not row.type and entry.get("source_type"):
+            row.type = str(entry["source_type"])
+
+    return [by_source[source] for source in sorted(by_source)]
+
+
+def _annotate_source_ledger(
+    rows: list[SourceRow],
+    manifest: ManifestManager,
+    project_root: Path,
+) -> None:
+    """Annotate each source row with ledger status and last successful ingest."""
+    entries = manifest.list_entries()
+    for row in rows:
+        targets = _source_forms(row.source, project_root)
+        matched = [
+            entry
+            for entry in entries
+            if _manifest_entry_matches(
+                entry.original_path,
+                entry.original_filename,
+                entry.sha256,
+                targets,
+            )
+        ]
+        row.manifest_matches = matched
+
+        status = "indexed"
+        last_ingested: str | None = None
+        for entry in matched:
+            if entry.status == "failed":
+                status = "failed"
+            elif status == "indexed" and entry.status in {"processed", "skipped_duplicate"}:
+                status = entry.status
+            if is_successful_status(entry.status) and (
+                last_ingested is None or entry.processed_at > last_ingested
+            ):
+                last_ingested = entry.processed_at
+        row.status = status
+        row.last_ingested = last_ingested
+
+
+def _source_status_style(status: str) -> str:
+    """Return a status string styled consistently with ``status`` output."""
+    if status == "indexed":
+        return "indexed (no ledger)"
+    return status
+
+
 @cli.command("remove")
-def remove_source(source: Annotated[str, typer.Argument(help="Source path or URL to remove.")]) -> None:
+def remove_source(
+    source: Annotated[str, typer.Argument(help="Source path or URL to remove.")],
+) -> None:
     """Remove one source from the index (vectors, KG, and ledger).
 
     Identifies the source deterministically, removes only its vector chunks,
     knowledge-graph nodes/edges, and manifest entries. Never deletes vault
     notes (which may hold user-written content) and provides no 'remove
     everything' operation. BM25 state is rebuilt automatically on next use.
+    Unknown sources and ambiguous matches abort without deleting anything.
     """
     settings = _load_configured_settings()
     setup_logging(settings)
     project_root = settings.paths.project_root
     targets = _source_forms(source, project_root)
 
-    store_path = settings.paths.manifest_root / "vector_store.json"
-    store = VectorStore(persistence_path=store_path)
-    removed_chunks = 0
-    for target in targets:
-        removed_chunks += store.remove_by_source(target)
-    store.save()
+    store = VectorStore(
+        persistence_path=settings.paths.manifest_root / "vector_store.json",
+    )
 
     graph_path = settings.paths.manifest_root / "knowledge_graph.json"
-    kg = KnowledgeGraph.load(graph_path) if graph_path.exists() else KnowledgeGraph()
-    removed_nodes = removed_edges = 0
-    for target in targets:
-        nodes, edges = kg.remove_source(target)
-        removed_nodes += nodes
-        removed_edges += edges
-    kg.save(graph_path)
+    if graph_path.exists():
+        try:
+            kg = KnowledgeGraph.load(graph_path)
+        except (OSError, ValueError) as exc:
+            console.print(
+                Panel.fit(
+                    "Could not read the knowledge graph; nothing was removed.",
+                    border_style="red",
+                    title="Remove failed",
+                ),
+            )
+            logger.error("Knowledge graph read failed during remove: %s", exc)
+            raise typer.Exit(1) from exc
+    else:
+        kg = KnowledgeGraph()
 
     manifest = ManifestManager(
         settings.manifest.path,
         project_root=project_root,
         enabled=settings.manifest.enabled,
     )
+    ledger_matches = [
+        entry
+        for entry in manifest.list_entries()
+        if _manifest_entry_matches(
+            entry.original_path,
+            entry.original_filename,
+            entry.sha256,
+            targets,
+        )
+    ]
+
+    matched = {
+        _canonical_source(entry.source, project_root)
+        for entry in store.entries()
+        if entry.source in targets
+    }
+    matched |= {
+        _canonical_source(node.source, project_root)
+        for node in kg.nodes.values()
+        if node.source in targets
+    }
+    matched |= {
+        _canonical_source(entry.original_path, project_root)
+        for entry in ledger_matches
+    }
+
+    if len(matched) > 1:
+        console.print(
+            Panel.fit(
+                f"'{source}' matches multiple sources. Use an absolute path or "
+                "a more specific source so only the intended one is removed.",
+                border_style="red",
+                title="Remove aborted (ambiguous source)",
+            ),
+        )
+        raise typer.Exit(1)
+    if not matched:
+        console.print(
+            Panel.fit(
+                f"No indexed source matching '{source}'.",
+                border_style="red",
+                title="Source not found",
+            ),
+        )
+        raise typer.Exit(1)
+
+    # Resolve basename/normalized matches to the full ownership key so the
+    # vector and graph stores (keyed by absolute path / verbatim URL) agree
+    # with the ledger identity.
+    resolved = set(targets)
+    for canonical in matched:
+        res = Path(canonical)
+        if not res.is_absolute():
+            resolved.add(str((project_root / res).resolve()))
+    targets = resolved
+
+    removed_chunks = 0
+    for target in targets:
+        removed_chunks += store.remove_by_source(target)
+    store.save()
+
+    removed_nodes = 0
+    removed_edges = 0
+    for target in targets:
+        nodes, edges = kg.remove_source(target)
+        removed_nodes += nodes
+        removed_edges += edges
+    kg.save(graph_path)
+
     removed_ledger = 0
-    for entry in manifest.list_entries():
-        if _manifest_entry_matches(entry.original_path, entry.original_filename, entry.sha256, targets):
-            manifest.remove_entry(sha256=entry.sha256)
+    for entry in ledger_matches:
+        entry_path = Path(entry.original_path)
+        if not entry_path.is_absolute():
+            entry_path = project_root / entry_path
+        if manifest.remove_entry(path=entry_path):
             removed_ledger += 1
     manifest.save()
 
@@ -721,8 +977,12 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         enabled=settings.manifest.enabled,
     )
     ledger_path = Path(source)
-    is_file = isinstance(source, Path)
-    digest = manifest.hash_for_path(source) if is_file else None
+    try:
+        digest = manifest.hash_for_path(source) if isinstance(source, Path) else None
+    except ValueError:
+        # Unsupported/undigestible file type: let the workflow decide and
+        # present the truthful outcome rather than leaking a raw hash error.
+        digest = None
 
     if digest is not None and manifest.contains_successful_hash(digest):
         manifest.add_processed_file(
@@ -734,7 +994,9 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         _try_save_ledger(manifest)
         console.print(
             Panel.fit(
-                "This file was already processed successfully (identical content); skipping.",
+                "This file was already processed successfully (identical content); "
+                "skipping. Existing note, index, and knowledge-graph data for this "
+                "source was left untouched.",
                 title="Ingest skipped (duplicate)",
             ),
         )
@@ -749,7 +1011,8 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         _try_save_ledger(manifest)
         console.print(
             Panel.fit(
-                "This source was already recorded; skipping.",
+                "This source was already recorded; skipping. Existing note, index, "
+                "and knowledge-graph data for this source was left untouched.",
                 title="Ingest skipped (duplicate)",
             ),
         )
@@ -759,15 +1022,20 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         workflow = IngestionWorkflow.create_default(settings)
         result = workflow.run(source, expected_source_type=expected_source_type)
     except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError) as exc:
-        manifest.add_failed_file(
-            path=ledger_path,
-            sha256=digest or "",
-            extension=ledger_path.suffix,
-            error_reason=f"{exc.__class__.__name__}: {exc}",
+        logger.error("Ingestion pipeline failed: %s", exc)
+        _record_failed_ingest(manifest, ledger_path, digest, exc)
+        _print_ingest_failure(
+            category=getattr(exc, "category", "retryable"),
+            reason=str(exc),
         )
-        _try_save_ledger(manifest)
-        logger.exception("Ingestion pipeline failed.")
-        console.print(Panel(str(exc), title="Processing failed", border_style="red"))
+        raise typer.Exit(1) from exc
+    except Exception as exc:
+        logger.error("Unexpected failure during ingestion: %s", exc)
+        _record_failed_ingest(manifest, ledger_path, digest, exc)
+        _print_ingest_failure(
+            category="retryable",
+            reason=str(exc) or exc.__class__.__name__,
+        )
         raise typer.Exit(1) from exc
 
     embedded = getattr(result, "embedding_succeeded", True)
@@ -778,7 +1046,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         sha256=digest or "",
         extension=ledger_path.suffix,
         generated_note=result.note.filename,
-        chunks_stored=getattr(result, "chunks_stored", 0),
+        chunks_stored=getattr(result, "chunks_stored", False),
         embedding_succeeded=embedded,
         indexing_succeeded=indexed,
         status="processed" if fully_indexed else "failed",
@@ -790,16 +1058,58 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
     )
     _try_save_ledger(manifest)
 
+    if not fully_indexed:
+        reason = getattr(result, "engine_error", None) or "unknown engine failure"
+        console.print(
+            Panel.fit(
+                f"The note was written, but the source was not fully indexed "
+                f"({reason}). The ledger records this attempt as failed; you can "
+                f"retry ingestion to complete the index.",
+                title="Ingestion incomplete",
+                border_style="red",
+            ),
+        )
+        raise typer.Exit(1)
+
+    if not getattr(result, "graph_succeeded", True) and getattr(
+        result, "chunks_stored", False
+    ):
+        console.print(
+            Panel.fit(
+                "The note and chunks were indexed, but the knowledge graph could "
+                "not be updated for this source. Everything else was saved.",
+                title="Knowledge graph warning",
+                border_style="yellow",
+            ),
+        )
+
     _print_ingest_success(
+        source=getattr(result.document, "source", ledger_path),
         source_type=result.document.source_type,
         note_title=result.note.title,
         note_path=result.write_result.note_path,
         created=result.write_result.created,
         updated=result.write_result.updated,
         attempts=result.ai_result.attempts,
-        chunks_stored=getattr(result, "chunks_stored", 0),
+        chunks_stored=getattr(result, "chunks_stored", False),
         indexed=fully_indexed,
     )
+
+
+def _record_failed_ingest(
+    manifest: ManifestManager,
+    path: Path,
+    digest: str | None,
+    exc: Exception,
+) -> None:
+    """Record a failed ingest attempt in the durable ledger."""
+    manifest.add_failed_file(
+        path=path,
+        sha256=digest or "",
+        extension=path.suffix,
+        error_reason=f"{exc.__class__.__name__}: {exc}",
+    )
+    _try_save_ledger(manifest)
 
 
 def _try_save_ledger(manifest: ManifestManager) -> None:
@@ -812,6 +1122,7 @@ def _try_save_ledger(manifest: ManifestManager) -> None:
 
 def _print_ingest_success(
     *,
+    source: str | Path,
     source_type: str,
     note_title: str,
     note_path: Path,
@@ -824,6 +1135,7 @@ def _print_ingest_success(
     table = Table(title="Ingestion Complete", show_header=True, header_style="bold green")
     table.add_column("Item")
     table.add_column("Value")
+    table.add_row("Source", str(source))
     table.add_row("Source type", source_type)
     table.add_row("Note", note_title)
     table.add_row("Path", str(note_path))
@@ -833,6 +1145,36 @@ def _print_ingest_success(
     table.add_row("Chunks indexed", str(chunks_stored))
     table.add_row("Indexed", _yes_no(indexed))
     console.print(table)
+
+
+def _print_ingest_failure(*, category: str, reason: str) -> None:
+    """Present a failed ingest with the truthful outcome category."""
+    if category == "blocked":
+        console.print(
+            Panel.fit(
+                f"{reason} The file was not read and no contents were indexed.",
+                title="Ingest blocked (security)",
+                border_style="red",
+            ),
+        )
+        return
+    if category == "unsupported":
+        console.print(
+            Panel.fit(
+                f"{reason} Ingest a supported file type and try again.",
+                title="Unsupported source",
+                border_style="yellow",
+            ),
+        )
+        return
+    console.print(
+        Panel.fit(
+            f"{reason} You can retry after resolving the underlying issue "
+            f"(e.g. Ollama offline, model unavailable, or transient error).",
+            title="Processing failed",
+            border_style="red",
+        ),
+    )
 
 
 def _load_configured_settings(*, environment: str | None = None) -> Settings:
@@ -871,10 +1213,86 @@ def _manifest_count(settings: Settings) -> int:
     ).count()
 
 
-def _ollama_status(settings: Settings) -> str:
+def _read_manifest_entries(settings: Settings) -> list[dict] | None:
+    """Return the durable ledger entries read-only, or ``None`` if unreadable.
+
+    Unlike ``ManifestManager`` construction, this never creates directories,
+    writes a fresh manifest, or quarantines a recreated file: status must not
+    mutate durable state. A missing manifest is a genuinely empty ledger (``[]``);
+    a present-but-unreadable one is ``None``, never a fabricated zero.
+    """
+    manifest_path = settings.manifest.path
+    if not manifest_path.is_absolute():
+        manifest_path = settings.paths.project_root / manifest_path
+    if not manifest_path.exists():
+        return []
     try:
-        return "Connected" if OllamaClient(settings.ollama).is_available() else "Unavailable"
-    except Exception:
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError, ValueError):
+        return None
+    files = data.get("files", []) if isinstance(data, dict) else []
+    if not isinstance(files, list):
+        return None
+    return [entry for entry in files if isinstance(entry, dict)]
+
+
+def _ledger_metric(available: bool, value: int) -> str:
+    """Render a ledger-derived count, preserving unavailable state."""
+    return str(value) if available else "unavailable"
+
+
+def _last_ingestion(entries: list[dict]) -> str | None:
+    """Return the most recent successful ingestion timestamp, if any.
+
+    Derived purely from durable ledger ``processed_at`` values; never the
+    process start time, the clock, or filesystem mtimes.
+    """
+    latest: str | None = None
+    for entry in entries:
+        if entry.get("status") not in {"processed", "skipped_duplicate"}:
+            continue
+        processed_at = entry.get("processed_at")
+        if not isinstance(processed_at, str) or not processed_at:
+            continue
+        if latest is None or processed_at > latest:
+            latest = processed_at
+    return latest
+
+
+def _last_ingestion_display(last_ingest: str | None, ledger_available: bool) -> str:
+    """Present last-ingestion truthfully: value, ``never``, or ``unavailable``."""
+    if not ledger_available:
+        return "unavailable"
+    return last_ingest if last_ingest else "never"
+
+
+def _queue_waiting(settings: Settings) -> str:
+    """Return the pending queue item count, or ``unavailable`` when unreadable.
+
+    ``QueueStateStore.load`` swallows unreadable state into an empty list so the
+    worker's restart path can recover; status must not report a fabricated zero,
+    so readability of the state file is verified first.
+    """
+    path = settings.queue.state_path
+    if not path.exists():
+        return "0"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        items = data.get("items", []) if isinstance(data, dict) else []
+    except (json.JSONDecodeError, OSError, ValueError):
+        return "unavailable"
+    if not isinstance(items, list):
+        return "unavailable"
+    return str(len(QueueStateStore(path).load()))
+
+
+def _vault_access_status(path: Path) -> str:
+    """Read-only vault availability check (never writes a probe file)."""
+    if not path.exists():
+        return "Missing"
+    try:
+        return "Connected" if os.access(path, os.W_OK) else "Not writable"
+    except OSError:
         return "Unavailable"
 
 
@@ -940,17 +1358,6 @@ def _note_counts(notes_root: Path) -> tuple[int, int, int]:
     return real, placeholder, other
 
 
-def _last_ingestion(manifest: ManifestManager) -> str | None:
-    """Return the most recent successful ingestion timestamp, if any."""
-    latest: str | None = None
-    for entry in manifest.list_entries():
-        if entry.status not in {"processed", "skipped_duplicate"}:
-            continue
-        if latest is None or entry.processed_at > latest:
-            latest = entry.processed_at
-    return latest
-
-
 def _placeholder_style(count: int) -> str:
     return f"[yellow]{count}[/yellow]" if count else str(count)
 
@@ -968,11 +1375,6 @@ def _frontmatter_value(text: str, key: str) -> str | None:
     return value_match.group("value").strip()
 
 
-def _is_writable_directory(path: Path) -> bool:
-    ok, _details = _check_writable_directory(path)
-    return ok
-
-
 def _healthy(value: str) -> str:
     return f"[green]{value}[/green]"
 
@@ -980,7 +1382,7 @@ def _healthy(value: str) -> str:
 def _status_style(value: str) -> str:
     if value in {"Connected", "Ready", "Configured", "Enabled"}:
         return f"[green]{value}[/green]"
-    if value in {"Unavailable", "Not writable", "Disabled"}:
+    if value in {"Unavailable", "Not writable", "Disabled", "Missing"}:
         return f"[yellow]{value}[/yellow]"
     return value
 
@@ -1025,22 +1427,51 @@ def _source_forms(source: str, project_root: Path) -> set[str]:
     """
     forms = {source}
     if "://" in source:
+        # Ledger rows for URL sources are keyed by a Path-mangled form of the
+        # URL; include those resolved/relative forms alongside the verbatim
+        # value so the ledger and the vector/graph stores both match.
+        try:
+            converted = Path(source)
+            resolved = converted.resolve()
+            forms.add(str(converted))
+            forms.add(str(resolved))
+            with suppress(ValueError):
+                forms.add(str(resolved.relative_to(project_root)))
+        except OSError:
+            pass
         return forms
     path = Path(source).expanduser()
     try:
-        resolved = path.resolve()
+        if path.is_absolute():
+            resolved = path.resolve()
+        else:
+            # Resolve relative inputs against the project root rather than the
+            # CWD so ``pam remove notes/a.md`` works from any directory.
+            resolved = (project_root / source).resolve()
     except OSError:
         return forms
     forms.add(str(resolved))
-    try:
+    with suppress(ValueError):
         forms.add(str(resolved.relative_to(project_root)))
-    except ValueError:
-        pass
-    try:
+    with suppress(ValueError):
         forms.add(str(path.relative_to(project_root)))
-    except ValueError:
-        pass
     return forms
+
+
+def _canonical_source(value: str, project_root: Path) -> str:
+    """Unify a vector/KG/ledger identity into one comparable key.
+
+    Mirrors the manifest's own normalization (resolve, then project-relative
+    when possible) so a single source compares equal across the vector store,
+    knowledge graph, and ledger regardless of absolute/relative/URL spelling.
+    """
+    p = Path(value)
+    if not p.is_absolute():
+        p = project_root / p
+    try:
+        return str(p.resolve().relative_to(project_root))
+    except ValueError:
+        return str(p.resolve())
 
 
 def _manifest_entry_matches(
