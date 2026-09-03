@@ -48,7 +48,8 @@ def test_duplicate_skip(
     assert "Duplicate detected" in caplog.text
     assert item.status == QueueStatus.DONE
     assert source.exists()
-    assert manager.count() == 1
+    assert manager.list_entries()[-1].status == "skipped_duplicate"  # durable ledger
+    assert manager.count() == 2
     assert queue.is_empty()
 
 

@@ -30,7 +30,10 @@ def _store_with(*entries: VectorEntry) -> VectorStore:
 
 class TestRrfFormula:
     def test_single_rank_value(self) -> None:
-        assert _rrf_fuse(["a"]) == [("a", pytest.approx(R1))]
+        result = _rrf_fuse(["a"])
+        assert len(result) == 1
+        assert result[0][0] == "a"
+        assert result[0][1] == pytest.approx(R1)
 
     def test_multi_rank_descending(self) -> None:
         fused = _rrf_fuse(["a", "b", "c"])
@@ -40,23 +43,26 @@ class TestRrfFormula:
 
     def test_dual_list_accumulates(self) -> None:
         fused = _rrf_fuse(["a", "b"], ["a", "c"])
-        assert fused == [
-            ("a", pytest.approx(R1_BOTH)),
-            ("b", pytest.approx(R2)),
-            ("c", pytest.approx(R2)),
-        ]
+        assert fused[0][0] == "a"
+        assert fused[0][1] == pytest.approx(R1_BOTH)
+        assert fused[1][0] == "b"
+        assert fused[1][1] == pytest.approx(R2)
+        assert fused[2][0] == "c"
+        assert fused[2][1] == pytest.approx(R2)
 
     def test_custom_k(self) -> None:
-        assert _rrf_fuse(["a"], k=10) == [("a", pytest.approx(1.0 / 11.0))]
+        result = _rrf_fuse(["a"], k=10)
+        assert result[0][0] == "a"
+        assert result[0][1] == pytest.approx(1.0 / 11.0)
 
     def test_ties_resolve_by_id(self) -> None:
         fused = _rrf_fuse(["b", "a"], ["a", "b"])
         # a and b both score 1/61 + 1/62 (one rank-1, one rank-2 leg each);
         # the equal fused scores resolve by entry id.
-        assert fused == [
-            ("a", pytest.approx(R1 + R2)),
-            ("b", pytest.approx(R1 + R2)),
-        ]
+        assert fused[0][0] == "a"
+        assert fused[0][1] == pytest.approx(R1 + R2)
+        assert fused[1][0] == "b"
+        assert fused[1][1] == pytest.approx(R1 + R2)
 
     def test_no_lists_returns_empty(self) -> None:
         assert _rrf_fuse() == []
@@ -64,7 +70,8 @@ class TestRrfFormula:
 
     def test_duplicate_id_in_single_list_accumulates(self) -> None:
         fused = _rrf_fuse(["a", "a"])
-        assert fused == [("a", pytest.approx(R1 + R2))]
+        assert fused[0][0] == "a"
+        assert fused[0][1] == pytest.approx(R1 + R2)
 
 
 class TestCosineExtremes:

@@ -172,7 +172,9 @@ def test_worker_skips_duplicate_without_processing_or_moving(tmp_path: Path) -> 
     assert source.exists()
     assert not (settings.processing.processed_path / "duplicate.md").exists()
     assert not (settings.paths.vault_root / "Notes").exists()
-    assert ManifestManager(settings.manifest.path, project_root=tmp_path).count() == 1
+    manifest = ManifestManager(settings.manifest.path, project_root=tmp_path)
+    assert manifest.list_entries()[-1].status == "skipped_duplicate"
+    assert manifest.count() == 2  # original + durable skipped_duplicate entry
 
 
 def _worker_for_source(
