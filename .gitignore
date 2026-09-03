@@ -52,3 +52,7 @@ data/manifests/*
 .obsidian/workspace*.json
 .obsidian/cache/
 .obsidian/workspace.json
+
+# Personal Obsidian workspace state (regenerated per session; not project files)
+.obsidian/app.json
+.obsidian/graph.json
