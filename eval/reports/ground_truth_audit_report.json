@@ -1,14 +1,16 @@
 {
   "summary": {
-    "total_queries": 160,
-    "positive_queries": 123,
-    "negative_queries": 37,
+    "total_queries": 199,
+    "positive_queries": 157,
+    "negative_queries": 42,
     "categories": {
-      "factoid": 87,
-      "comparison": 16,
-      "negative": 37,
+      "factoid": 106,
+      "comparison": 20,
+      "negative": 42,
       "cross_document": 11,
-      "tricky": 9
+      "tricky": 9,
+      "precise_detail": 7,
+      "multi_chunk": 4
     }
   },
   "issues": [],
