@@ -22,10 +22,9 @@ The commit after the release (`7aac60b`) is a documentation-organization change 
 does **not** change the V1.1.0 release tag. Subsequent commits are documentation /
 maintenance work; the V1.1.0 tag remains the published release reference.
 
-> Note: the packaged `pyproject.toml` still carries `version = "1.0.0"`. V1.1.0 is
-> the release/tag designation for this project and is tracked by the Git tag, not a
-> `pyproject.toml` bump. This is a known packaging detail and does not change the
-> published-release designation below.
+> Note: `pyproject.toml` now carries `version = "1.1.0"`, aligned with the V1.1.0
+> release/tag designation (alignment made in `14ceaae`). The package version and the
+> V1.1.0 Git tag are now consistent.
 
 ---
 
@@ -140,10 +139,10 @@ CLI (pam)
   production value (0.25). Documented in evaluation/provenance records.
 - **Known test flake** — a logging-isolation flake (`test_cli_remove.py`) surfaces under
   specific full-suite test ordering; it is a test-hygiene issue, not a production defect.
-- **Stale evaluation assertions** — `test_eval_dataset.py` asserts the older v2.0
-  dataset contract while the working-tree dataset is v3.0; these are known stale
-  evaluation assertions, not product defects.
-- **Packaging version** — `pyproject.toml` version is `1.0.0`; V1.1.0 is tracked by the
+- **Evaluation tooling aligned to v3.0** — `test_eval_dataset.py` and the eval tooling
+  (`eval/scripts/run_eval.py`, `eval/scripts/ground_truth_audit.py`) have been reconciled
+  to the current v3.0 dataset contract (contract tests pass).
+- **Packaging version** — `pyproject.toml` version is `1.1.0`, aligned with the V1.1.0
   Git tag (see Current Release).
 
 Engineering debt is kept distinct from user-facing product defects.
@@ -183,13 +182,13 @@ measurements as a claim about a new run.
 
 Latest known verification snapshot (dated):
 
-- **~1703 passed**
-- **57 deselected** (integration-marker tests excluded from the default run)
-- **8 failed**, consisting of:
-  - **7 known stale evaluation assertions** (`test_eval_dataset.py` v2.0-vs-v3.0 contract)
-  - **1 known logging-isolation flake** (`test_cli_remove.py`, test-hygiene)
+- **~1688 passed**
+- **1 deselected** (integration-marker test excluded from the default run)
+- **1 failed** — a known logging-isolation flake (`test_cli_remove.py`, test-hygiene;
+  passes in isolation)
+- **Evaluation contract tests pass** — `test_eval_dataset.py` (v3.0 contract) = **32 passed**
 
-These 8 are not eight product defects. The detailed verification state is maintained in
+This single failure is not a product defect. The detailed verification state is maintained in
 the testing/release documentation (`docs/TESTING_AND_VERIFICATION.md`, release
 provenance records in `docs/releases/`). Do not assume "all tests pass"; verify against
 the current release records.
@@ -200,12 +199,10 @@ the current release records.
 
 Verified open items:
 
-1. `test_eval_dataset.py` stale v2.0-vs-v3.0 assertions (7).
-2. Logging-isolation test flake (`test_cli_remove.py`) under specific suite ordering.
-3. Retrieval threshold reconciliation (0.25 production vs experimental alternatives).
-4. Vector-store / KG persistence not fully transactional across both stores.
-5. KG shared-node removal semantics.
-6. `pyproject.toml` version (`1.0.0`) not aligned with the V1.1.0 release label.
+1. Logging-isolation test flake (`test_cli_remove.py`) under specific suite ordering.
+2. Retrieval threshold reconciliation (0.25 production vs experimental alternatives).
+3. Vector-store / KG persistence not fully transactional across both stores.
+4. KG shared-node removal semantics.
 
 ---
 
