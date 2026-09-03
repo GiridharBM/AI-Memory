@@ -10,6 +10,11 @@ Checks for:
 - Source keys not in the known source document mapping
 - Malformed category values
 - Missing required fields
+
+The valid category and source-key sets are derived from the dataset's own
+metadata (``metadata.categories`` and ``metadata.source_documents``) when
+present, falling back to the static defaults below for older datasets that
+predate that metadata.
 """
 
 from __future__ import annotations
@@ -40,6 +45,12 @@ def audit(dataset_path: Path = DATASET_PATH) -> dict:
     issues: list[dict] = []
     warnings: list[dict] = []
 
+    # Derive the valid category / source-key sets from the dataset's metadata
+    # when present, falling back to the static defaults for older datasets.
+    metadata = ds.get("metadata", {})
+    valid_categories = set(metadata.get("categories", [])) or VALID_CATEGORIES
+    known_source_keys = set(metadata.get("source_documents", {}).keys()) or KNOWN_SOURCE_KEYS
+
     # Duplicate detection
     seen_ids: dict[str, int] = {}
     seen_texts: dict[str, int] = {}
@@ -69,7 +80,7 @@ def audit(dataset_path: Path = DATASET_PATH) -> dict:
 
         # Category validation
         cat = q.get("category", "")
-        if cat not in VALID_CATEGORIES:
+        if cat not in valid_categories:
             issues.append({"type": "invalid_category", "id": qid, "category": cat})
 
         # Difficulty validation
@@ -80,7 +91,7 @@ def audit(dataset_path: Path = DATASET_PATH) -> dict:
         # Source key validation
         sources = q.get("expected_sources", [])
         for s in sources:
-            if s not in KNOWN_SOURCE_KEYS:
+            if s not in known_source_keys:
                 issues.append({"type": "unknown_source_key", "id": qid, "source": s})
 
         # Positive/negative consistency
