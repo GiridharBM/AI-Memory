@@ -1,17 +1,19 @@
 {
   "metadata": {
-    "version": "2.0",
+    "version": "3.0",
     "created": "2026-08-19",
-    "description": "PAM V1 retrieval evaluation dataset v2.0. 160 queries (124 positive, 36 negative) against 12 documents. Expanded in Phase 3D from original v1.0 (50 queries).",
+    "description": "PAM V1 retrieval evaluation dataset v3.0. 199 queries (157 positive, 42 negative) against the 24-source / 195-chunk real corpus. Merged in Phase 5D from dataset v2.0 (160 queries) by removing obsolete q092-q094 (pam_smoke_test) and adding the Phase 5B real-corpus queries q161-q202.",
     "vector_store_path": "data/manifests/vector_store.json",
-    "total_documents": 12,
-    "total_chunks": 101,
+    "total_documents": 24,
+    "total_chunks": 195,
     "categories": {
       "factoid": "Single-fact questions answerable from one document",
       "comparison": "Questions requiring information from multiple documents",
       "negative": "Questions with no answer in the corpus",
       "cross_document": "Questions requiring synthesis across documents",
-      "tricky": "Questions where the answer is partial or requires careful reading"
+      "tricky": "Questions where the answer is partial or requires careful reading",
+      "precise_detail": "",
+      "multi_chunk": ""
     },
     "difficulty_scale": "easy, medium, hard",
     "source_documents": {
@@ -26,13 +28,29 @@
       "tihan": "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
       "b_md": "b.md",
       "pam_smoke_test": "pam_smoke_test.txt",
-      "sigmamusicart": "sigmamusicart-song-english-edm-296526.mp3"
+      "sigmamusicart": "sigmamusicart-song-english-edm-296526.mp3",
+      "pam_guide": "PAM_V1_LEARNING_GUIDE",
+      "web_module5": "Web Module 5",
+      "gpu_report": "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report",
+      "auto_testing": "Auto_Testing_Faculty_Explanation",
+      "docker_cheatsheet": "Docker CheatSheet",
+      "graph_theory": "Module 5-Graph Theory",
+      "flat_tm": "FLAT MODULE 5",
+      "cert_devops_aws": "Getting Started with DevOps on AWS",
+      "cert_cloudformation": "AWS CloudFormation",
+      "cert_aws_foundations": "AWS Foundations",
+      "cert_intro_cloud": "Introduction to Cloud",
+      "cert_python_ds": "python for data science",
+      "cert_data_analysis": "Data Analysis with Python Coursera",
+      "cert_docker_intro": "Docker_Introduction"
     },
-    "updated": "2026-08-21",
-    "phase": "3D",
+    "updated": "2026-08-27",
+    "phase": "5D",
     "original_version": "1.0",
     "original_commit": "6a603d8",
-    "original_frozen_as": "eval/dataset_v1_frozen.json"
+    "original_frozen_as": "eval/dataset_v1_frozen.json",
+    "frozen": "PHASE_5D",
+    "pre_merge_backup": "eval/results_backup_20260827/dataset_pre_5d.json"
   },
   "queries": [
     {
@@ -1039,39 +1057,6 @@
       "ground_truth_reliable": true
     },
     {
-      "id": "q092",
-      "query": "What local inference tool does PAM integrate with according to the smoke test?",
-      "expected_sources": [
-        "pam_smoke_test"
-      ],
-      "expected_evidence": "Ollama",
-      "category": "factoid",
-      "difficulty": "easy",
-      "ground_truth_reliable": true
-    },
-    {
-      "id": "q093",
-      "query": "What retrieval method does PAM use according to the smoke test?",
-      "expected_sources": [
-        "pam_smoke_test"
-      ],
-      "expected_evidence": "embedding retrieval",
-      "category": "factoid",
-      "difficulty": "easy",
-      "ground_truth_reliable": true
-    },
-    {
-      "id": "q094",
-      "query": "What is the search approach described in the PAM smoke test?",
-      "expected_sources": [
-        "pam_smoke_test"
-      ],
-      "expected_evidence": "local-first search",
-      "category": "factoid",
-      "difficulty": "easy",
-      "ground_truth_reliable": true
-    },
-    {
       "id": "q095",
       "query": "What type of testbed is TiHAN described as?",
       "expected_sources": [
@@ -1788,6 +1773,713 @@
       "difficulty": "hard",
       "ground_truth_reliable": true,
       "notes": "GPT-5.6 demo discusses capabilities but no display hardware details"
+    },
+    {
+      "id": "q161",
+      "query": "What is the RRF constant k used by PAM's hybrid search merge?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "PAM uses k = 60 (the RRF default, search.py:54 and HybridSearch rrf_k: int = 60, search.py:121).",
+      "evidence_fragments": [
+        "PAM uses k = 60 (the RRF default, search.py:54 and HybridSearch rrf_k: int = 60, search.py:121)"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Direct config constant from PAM guide Part 11; one chunk."
+    },
+    {
+      "id": "q162",
+      "query": "Which embedding model produces the vectors stored by PAM, and how many dimensions do they have?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "PAM uses the local model nomic-embed-text, which produces 768-dimensional vectors.",
+      "evidence_fragments": [
+        "PAM uses the local model nomic-embed-text",
+        "which produces 768-dimensional vectors"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Frozen embedding model; single chunk Part 7."
+    },
+    {
+      "id": "q163",
+      "query": "What are the default chunk size and overlap settings of PAM's SemanticChunker?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "Defaults (class attrs): max_chunk_chars = 2000, overlap_chars = 200.",
+      "evidence_fragments": [
+        "max_chunk_chars = 2000, overlap_chars = 200"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Chunker defaults Part 6."
+    },
+    {
+      "id": "q164",
+      "query": "What is the default text model PAM sends to Ollama for document analysis and QA?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "From config/default.yaml: model: qwen3:8b # default text model.",
+      "evidence_fragments": [
+        "model: qwen3:8b # default text model"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Default QA/analysis model; config quote."
+    },
+    {
+      "id": "q165",
+      "query": "How many document kinds, concrete ingestors, and processors does PAM route to?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "24 kinds, 21 concrete ingestors, 20 processors. EXTENSION_KIND_MAP covers 21 kinds; three more special kinds bring the total to 24.",
+      "evidence_fragments": [
+        "EXTENSION_KIND_MAP (app/infrastructure/routing/classifier.py:31) covers 21 kinds; three more special kinds bring the total to 24",
+        "22 classes minus the base = 21 concrete ingestors",
+        "_ALL_PROCESSORS (app/infrastructure/routing/processor_impls.py:463) lists 20 processor classes"
+      ],
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Three numeric facts requiring precise synthesis from Part 4 (kinds/ingestors/processors)."
+    },
+    {
+      "id": "q166",
+      "query": "What abstention threshold does the Auto Testing project's frozen Phase 3B configuration use?",
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_evidence": "The currently frozen Phase 3B configuration uses an abstention threshold of 0.45.",
+      "evidence_fragments": [
+        "The currently frozen Phase 3B configuration uses an abstention threshold of 0.45"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Frozen baseline threshold; single chunk section 8."
+    },
+    {
+      "id": "q167",
+      "query": "Which local LLM generates the final answers in the Auto Testing project?",
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_evidence": "The current generation component uses Qwen3:8B.",
+      "evidence_fragments": [
+        "The current generation component uses Qwen3:8B"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Generation LLM; section 5 step 8."
+    },
+    {
+      "id": "q168",
+      "query": "Which two GPU environments does the GPU testing platform use for local development and larger experiments?",
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_evidence": "Uses the RTX 5060 for local development and the private DGX B200 environment for larger experiments.",
+      "evidence_fragments": [
+        "Use the local RTX 5060 for development and the college's private NVIDIA DGX B200 infrastructure for larger experiments"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Hardware fact from GPU report objectives + GPU Inference Layer."
+    },
+    {
+      "id": "q169",
+      "query": "Which languages does the GPU platform support for test generation initially?",
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_evidence": "Support multiple programming languages, initially Python, Java, and JavaScript/TypeScript.",
+      "evidence_fragments": [
+        "Support multiple programming languages, initially Python, Java, and JavaScript/TypeScript"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Objective 3 list."
+    },
+    {
+      "id": "q170",
+      "query": "What are the two primary types of React components described in the Web Module 5 notes?",
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_evidence": "There are two primary types of React components: 1. Functional Components, 2. Class Components.",
+      "evidence_fragments": [
+        "There are two primary types of React components:"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "React taxonomy; section 'Types of React Components'."
+    },
+    {
+      "id": "q171",
+      "query": "Which ReactDOM API is the modern way to define the root DOM element in React 18+, replacing the legacy render() method?",
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_evidence": "The createRoot() function (used in React 18+) is the modern way to define the top-level DOM element that React manages, replacing the legacy ReactDOM.render().",
+      "evidence_fragments": [
+        "createRoot()function (used in React 18+) is the modern way to define the top -level DOM element",
+        "replacing the legacy ReactDOM.render()"
+      ],
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "React 18 createRoot API; note the PDF text has odd spacing ('top -level') which is preserved verbatim."
+    },
+    {
+      "id": "q172",
+      "query": "Define 'source' and 'sink' in a directed graph.",
+      "expected_sources": [
+        "graph_theory"
+      ],
+      "expected_evidence": "A source is a vertex in a directed graph that has only outgoing edges and no incoming edges. A sink is a vertex in a directed graph that has only incoming edges and no outgoing edges.",
+      "evidence_fragments": [
+        "A source is a vertex in a directed graph that has only outgoing edges and no incoming edges.",
+        "A sink is a vertex in a directed graph that has only incoming edges and no outgoing edges."
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Definitions from Module 5-Graph Theory."
+    },
+    {
+      "id": "q173",
+      "query": "What is the formal 7-tuple definition of a Turing Machine M?",
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "expected_evidence": "A Turing Machine M is a 7-tuple: M = (Q, Σ, Γ', δ, q0, B, F).",
+      "evidence_fragments": [
+        "A Turing Machine M is a 7-tuple, namely.",
+        "M = (Q, Σ, Γ', δ, q₀, B, F)."
+      ],
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "TM definition from FLAT Module 5. Note glyphs Σ, Γ', δ, q₀ are Unicode subscripted/original as in PDF.",
+      "glyph_warning": "q₀ uses U+2080 subscript zero; evidence_fragments include the file-exact glyph."
+    },
+    {
+      "id": "q174",
+      "query": "Which docker command lists all local containers, both running and stopped?",
+      "expected_sources": [
+        "docker_cheatsheet"
+      ],
+      "expected_evidence": "List all Local containers (running & stopped): docker ps -a",
+      "evidence_fragments": [
+        "List all Local containers (running & stopped) docker ps -a"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Exact command from Docker CheatSheet."
+    },
+    {
+      "id": "q175",
+      "query": "How are in-degree and out-degree of a vertex defined in a directed graph?",
+      "expected_sources": [
+        "graph_theory"
+      ],
+      "expected_evidence": "In-degree is the number of directed edges that enter at a vertex (deg-(v)); out-degree is the number of directed edges that leave from a vertex (deg+(v)).",
+      "evidence_fragments": [
+        "In-degree of a vertex in a directed graph is the number of directed edges that enter at that vertex.",
+        "Out-degree of a vertex in a directed graph is the number of directed edges that leave from that vertex."
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Degree definitions from Graph Theory notes."
+    },
+    {
+      "id": "q176",
+      "query": "What are the stages of PAM's ingestion pipeline, in order from a new file in data/inbox/ to the file moved to data/processed/?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "Detect → Classify → Route → Extract → Analyze → Chunk → Embed → Store → Knowledge graph → Write the note → Move + record.",
+      "evidence_fragments": [
+        "1. Detect — a new file appears in data/inbox/",
+        "10. Write the note — generate a Markdown note in the Obsidian vault",
+        "11. Move + record — move the source file to data/processed/"
+      ],
+      "category": "multi_chunk",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "11 ordered stages spanning Part 3 chunks; requires ordered synthesis across chunks.",
+      "multi_chunk_reason": "Stage list is split across multiple chunks (Part 3 spans 4 chunks)."
+    },
+    {
+      "id": "q177",
+      "query": "What are the two hard context limits PAM enforces when building the LLM prompt for pam ask?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "MAX_CONTEXT_CHUNKS = 8 (at most 8 retrieved chunks) and MAX_CONTEXT_CHARS = 12_000 (at most 12k characters of context text).",
+      "evidence_fragments": [
+        "MAX_CONTEXT_CHUNKS = 8 (qa_workflow.py:16)",
+        "MAX_CONTEXT_CHARS = 12_000 (qa_workflow.py:17)"
+      ],
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Bounded-context constants, Part 12 Hard limits."
+    },
+    {
+      "id": "q178",
+      "query": "Describe the Auto Testing project's full runtime flow, from user query to final answer.",
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_evidence": "User Query → Embedding + BM25 → Vector Search + BM25 Search → RRF Fusion (k=60) → Candidate Result → Abstention Gate → Context → Qwen3:8B → Final Answer.",
+      "evidence_fragments": [
+        "User Query → Embedding + BM25 → Vector Search + BM25 Search → RRF Fusion (k=60) → Candidate Result",
+        "Abstention Gate → Context → Qwen3:8B → Final Answer"
+      ],
+      "category": "multi_chunk",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Ordered pipeline in section 4; flow arrows split across chunk boundary.",
+      "arrow_warning": "Arrow glyph U+2192 '→'; preserved verbatim."
+    },
+    {
+      "id": "q179",
+      "query": "What are the steps of the GPU platform's end-to-end workflow, from project ingestion to the final report?",
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_evidence": "12 steps: Project Ingestion, Project Profiling, Code Intelligence, Requirements Intelligence, Retrieval, Test Planning, Test Generation, Sandboxed Execution, Failure Analysis, Improvement Loop, Quality Evaluation, Final Report.",
+      "evidence_fragments": [
+        "1. Project Ingestion: The user uploads a folder or supplies an explicitly selected local project path.",
+        "6. Test Planning: The system identifies test scenarios based on requirements, risk, existing coverage, and code context.",
+        "12. Final Report: The developer receives generated tests, execution evidence, detected issues, metrics, and proposed changes."
+      ],
+      "category": "multi_chunk",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "12-step ordered workflow; section 5 spans multiple chunks.",
+      "multi_chunk_reason": "Steps 1-4 and 5-12 land in different chunks."
+    },
+    {
+      "id": "q180",
+      "query": "How does the React Color Organizer manage application state, and how does data flow down and back up the component tree?",
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_evidence": "All state is grouped in the root component (single source of truth); data flows down via props and back up via callback function properties.",
+      "evidence_fragments": [
+        "In many React applications, it is possible to group all state data in the root component.",
+        "data can be passed back up the tree to the root via two",
+        "When there is a change to the data in the root component, React will change the UI as efficiently as possible to reflect the new state",
+        "Passing data back up to the root component when there are UI events"
+      ],
+      "category": "multi_chunk",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "State management section spanning several chunks at end of notes.",
+      "multi_chunk_reason": "State-tree and callback-up explanations are in different chunks."
+    },
+    {
+      "id": "q181",
+      "query": "What does an undefined entry in a Turing Machine transition table mean?",
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "expected_evidence": "The undefined entries indicate that there are no-transitions defined or these can be transition to dead state; transition to dead state halts the machine and the input string is rejected.",
+      "evidence_fragments": [
+        "The undefined entries in the table indicate that there are no-transitions defined or these can be transition to dead state.",
+        "When there is a transition to the dead state. the machine halts and the input string is rejected by the machine."
+      ],
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Transition-table semantics from FLAT notes."
+    },
+    {
+      "id": "q182",
+      "query": "Compare the Real DOM and the React Virtual DOM: how does each handle updates, and who uses them?",
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_evidence": "Real DOM: actual tree structure, directly manipulates on-screen elements (slow for frequent updates), used by all web browsers. Virtual DOM: lightweight in-memory replica using diffing and batching for fast updates, used by libraries/frameworks like React and Vue.js.",
+      "evidence_fragments": [
+        "The actual tree structure of the web page's HTML elements.",
+        "A lightweight, in -memory replica of the actual DOM.",
+        "Does not directly manipulate the screen; uses diffing and batching for fast updates.",
+        "Used by All web browsers (a native web standard)."
+      ],
+      "category": "comparison",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Feature comparison table spanning two chunks.",
+      "multi_chunk_reason": "Intro paragraph (VDOM) and comparison table are in adjacent chunks."
+    },
+    {
+      "id": "q183",
+      "query": "Why does PAM run both vector search and BM25, and what does hybrid search add?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "BM25 is exact-match, no model, fast, deterministic; vectors handle meaning, synonyms, paraphrase. Alone either can miss; hybrid fixes both.",
+      "evidence_fragments": [
+        "BM25: exact match, no model needed, fast, deterministic.",
+        "Vectors: meaning match, handles synonyms and paraphrase.",
+        "Alone, either can miss: BM25 misses \"saving notes\" for \"storing files\"; vectors can miss an exact rare identifier like a variable name. Hybrid search (Part 10) fixes both."
+      ],
+      "category": "comparison",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Trade-off rationale Part 9."
+    },
+    {
+      "id": "q184",
+      "query": "What are the three system configurations compared in the GPU platform's evaluation strategy?",
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_evidence": "Baseline (coding LLM with minimal context), Intermediate (LLM + code-aware RAG), Proposed (LLM + RAG + autonomous execution/feedback loop).",
+      "evidence_fragments": [
+        "Baseline: coding LLM with minimal context.",
+        "Intermediate: LLM + code-aware RAG.",
+        "Proposed: LLM + RAG + autonomous execution/feedback loop."
+      ],
+      "category": "comparison",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "A/B/C experimental design from section 13."
+    },
+    {
+      "id": "q185",
+      "query": "Why does the Auto Testing system use both semantic retrieval and BM25, and why RRF for fusion?",
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_evidence": "Semantic retrieval handles different wording with same meaning; BM25 handles exact terminology. RRF combines rankings without requiring calibrated scores.",
+      "evidence_fragments": [
+        "Semantic retrieval is strong when the question and source use different wording but have the same meaning.",
+        "BM25 is strong when exact words and terminology are important.",
+        "Why RRF? It provides a simple way to combine rankings from different retrieval systems without requiring their raw scores to be calibrated to the same scale."
+      ],
+      "category": "comparison",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Why-both rationale present in Auto Testing doc section 6 and section 15 Q&A."
+    },
+    {
+      "id": "q186",
+      "query": "In PAM's RRF worked example, which of chunks A, B, C wins, and why?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "B wins (rank 2 + rank 1 beats rank 1 + rank 3), and C loses despite appearing in both lists — depth matters, not just presence.",
+      "evidence_fragments": [
+        "B wins (rank 2 + rank 1 beats rank 1 + rank 3), and C loses despite appearing in both lists — depth matters, not just presence."
+      ],
+      "category": "precise_detail",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "RRF worked example (Part 10); requires understanding of rank fusion."
+    },
+    {
+      "id": "q187",
+      "query": "What is the pool_size formula PAM uses to widen the retrieval pool before fusion?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "pool_size = max(top_k * 5, 50).",
+      "evidence_fragments": [
+        "pool_size = max(top_k * 5, 50) (search.py:158)"
+      ],
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Exact formula, Part 8/10."
+    },
+    {
+      "id": "q188",
+      "query": "What are PAM's BM25 parameters k1 and b, and what does each tune?",
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_evidence": "k1 = 1.5 (term-frequency saturation), b = 0.75 (length normalization strength).",
+      "evidence_fragments": [
+        "PAM's BM25 defaults (bm25.py:29-38): k1 = 1.5 (term-frequency saturation), b = 0.75 (length normalization strength)"
+      ],
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Exact BM25 constants Part 9."
+    },
+    {
+      "id": "q189",
+      "query": "What are the domain and range of the transition function delta in the Turing Machine definition?",
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "expected_evidence": "delta is a transition function from Q x Γ' to Q x Γ' x {L, R}.",
+      "evidence_fragments": [
+        "Q x Γ' to Q x Γ' x {L, R}"
+      ],
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Formal signature; exact glyph Γ' preserved."
+    },
+    {
+      "id": "q190",
+      "query": "In the React ingredients-list example, why does each element need a key property, and what was used as the key?",
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_evidence": "Keys let React update the DOM efficiently; the example used the array index as the unique key.",
+      "evidence_fragments": [
+        "The key property is used by React to help it update the DOM efficiently.",
+        "We can use the array index for each ingredient as that unique value."
+      ],
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Keys rationale + practical usage in the notes example."
+    },
+    {
+      "id": "q191",
+      "query": "Which AWS certificate was completed on August 06, 2026, by Giridhar BM?",
+      "expected_sources": [
+        "cert_devops_aws"
+      ],
+      "expected_evidence": "Getting Started with DevOps on AWS, Completed August 06 2026, awarded to Giridhar BM.",
+      "evidence_fragments": [
+        "Getting Started with DevOps on AWS",
+        "Completed: August 06, 2026",
+        "Awarded to Giridhar BM"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Cert metadata; discriminates among the 4 AWS/CognitiveClass certificates by date.",
+      "discrimination": "AWS CloudFormation is Aug 07, AWS Foundations Aug 08, Devops Aug 06."
+    },
+    {
+      "id": "q192",
+      "query": "Which Cognitive Class certificate refers to CC0101EN?",
+      "expected_sources": [
+        "cert_intro_cloud"
+      ],
+      "expected_evidence": "Introduction to Cloud (CC0101EN, provided by IBM), issued July 18, 2026.",
+      "evidence_fragments": [
+        "successfully completed and received a passing grade in",
+        "Introduction to Cloud",
+        "(CC0101EN, provided by IBM)",
+        "July 18, 2026"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Course code distinguishes from PY0101EN (python) and CO0101EN (docker)."
+    },
+    {
+      "id": "q193",
+      "query": "Who is listed as Senior Data Scientist on the Data Analysis with Python certificate?",
+      "expected_sources": [
+        "cert_data_analysis"
+      ],
+      "expected_evidence": "Joseph Santarcangelo, Senior Data Scientist, IBM.",
+      "evidence_fragments": [
+        "S e n i o r D a t a S c i e n t i s t",
+        "I B M"
+      ],
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "The Coursera PDF is letter-spaced after OCR, so fragments preserve the literal spaced glyphs.",
+      "glyph_warning": "Name and title are letter-spaced in the PDF ('J o s e p h ...'); BM25 exact match will miss, vector must recover it.",
+      "spaced_ocr": "also the learner name 'Giridhar BM' is spaced; fragment intentionally not used to avoid brittle match."
+    },
+    {
+      "id": "q194",
+      "query": "Which certificate covers 'Docker Essentials: A Developer Introduction'?",
+      "expected_sources": [
+        "cert_docker_intro"
+      ],
+      "expected_evidence": "Docker Essentials: A Developer Introduction (co00101EN, provided by IBM), issued July 17, 2026.",
+      "evidence_fragments": [
+        "Docker Essentials: A Developer Introduction",
+        "(co00101EN, provided by IBM)"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Title + code from Docker_Introduction cert; note body uses lowercase 'co00101EN' (file-exact)."
+    },
+    {
+      "id": "q195",
+      "query": "What is the verification URL on the Python 101 for Data Science certificate?",
+      "expected_sources": [
+        "cert_python_ds"
+      ],
+      "expected_evidence": "https://courses.cognitiveclass.ai/certificates/cc4c633ddd60462895717501b79824ed",
+      "evidence_fragments": [
+        "https://courses.cognitiveclass.ai/certificates/cc4c633ddd60462895717501b79824ed"
+      ],
+      "category": "factoid",
+      "difficulty": "medium",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Exact-token byte string; strong recall discriminator."
+    },
+    {
+      "id": "q196",
+      "query": "How much RAM does PAM require to run its vector store?",
+      "expected_sources": [],
+      "expected_evidence": "",
+      "evidence_fragments": [],
+      "category": "negative",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "no",
+      "rationale": "PAM guide documents architecture but never states any RAM requirement. PAM chunks will be strong BM25/vector hits (min_cosine 0.45) yet the answer is absent — tests abstention on a semantically-near, factually-empty query.",
+      "expected_behavior": "ABSTAIN",
+      "similar_source": "pam_guide"
+    },
+    {
+      "id": "q197",
+      "query": "Which version of Node.js is required to run the React examples in the Web Module 5 notes?",
+      "expected_sources": [],
+      "expected_evidence": "",
+      "evidence_fragments": [],
+      "category": "negative",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "no",
+      "rationale": "The notes cover React, JSX, createRoot but never mention Node.js or any version. Web chunks will be retrieved; gate must abstain.",
+      "expected_behavior": "ABSTAIN",
+      "similar_source": "web_module5"
+    },
+    {
+      "id": "q198",
+      "query": "What is the total cost estimate to build the GPU testing platform, including the RTX 5060 hardware?",
+      "expected_sources": [],
+      "expected_evidence": "",
+      "evidence_fragments": [],
+      "category": "negative",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "no",
+      "rationale": "The GPU report details architecture and roadmap but never budgets costs or hardware prices. GPU chunks will be retrieved; gate must abstain.",
+      "expected_behavior": "ABSTAIN",
+      "similar_source": "gpu_report"
+    },
+    {
+      "id": "q199",
+      "query": "What is the full name of the institution abbreviated as SNPSU in the Web Module 5 notes?",
+      "expected_sources": [],
+      "expected_evidence": "",
+      "evidence_fragments": [],
+      "category": "negative",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "no",
+      "rationale": "The notes only ever print 'Dept of CSE, SNPSU'; the full name is never expanded anywhere in the corpus. Web chunks will be retrieved; gate must abstain.",
+      "expected_behavior": "ABSTAIN",
+      "similar_source": "web_module5"
+    },
+    {
+      "id": "q200",
+      "query": "Which container orchestration platform does the Docker CheatSheet recommend for production deployments?",
+      "expected_sources": [],
+      "expected_evidence": "",
+      "evidence_fragments": [],
+      "category": "negative",
+      "difficulty": "hard",
+      "ground_truth_reliable": true,
+      "answerability": "no",
+      "rationale": "The CheatSheet and Docker_Introduction cover only docker CLI and a level-1 cert; neither mentions Kubernetes or any orchestration platform. Docker chunks will be retrieved; gate must abstain.",
+      "expected_behavior": "ABSTAIN",
+      "similar_source": "docker_cheatsheet"
+    },
+    {
+      "id": "q201",
+      "query": "Which AWS certificate was completed on August 07, 2026?",
+      "expected_sources": [
+        "cert_cloudformation"
+      ],
+      "expected_evidence": "AWS CloudFormation: Getting Started, completed August 07, 2026, awarded to Giridhar BM.",
+      "evidence_fragments": [
+        "AWS CloudFormation",
+        "Completed: August 07, 2026"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Date discriminator: DevOps=Aug 06, CloudFormation=Aug 07, Foundations=Aug 08."
+    },
+    {
+      "id": "q202",
+      "query": "Which AWS certificate was completed on August 08, 2026?",
+      "expected_sources": [
+        "cert_aws_foundations"
+      ],
+      "expected_evidence": "AWS Foundations: Getting Started with the AWS Cloud Essentials, completed August 08, 2026, awarded to Giridhar BM.",
+      "evidence_fragments": [
+        "AWS Foundations: Getting Started",
+        "Completed: August 08, 2026"
+      ],
+      "category": "factoid",
+      "difficulty": "easy",
+      "ground_truth_reliable": true,
+      "answerability": "yes",
+      "rationale": "Date discriminator, latest of the three AWS certs."
     }
   ]
 }
