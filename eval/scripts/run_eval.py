@@ -261,6 +261,13 @@ def run_evaluation(
     print(f"\nDataset: {len(queries)} queries")
     print(f"Categories: {set(q['category'] for q in queries)}")
 
+    # Extend the historical source-key→filename map with the dataset's own
+    # metadata (source documents added after the original 12). Metadata wins
+    # for keys it defines; older datasets without this metadata keep the
+    # historical fallback so evaluation remains correct for both.
+    metadata = dataset.get("metadata", {})
+    SOURCE_KEY_TO_FILENAME.update(metadata.get("source_documents", {}))
+
     # Initialize PAM search (unmodified)
     print("\nInitializing PAM search infrastructure...")
     settings = load_settings()
