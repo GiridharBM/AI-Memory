@@ -20,7 +20,7 @@ This directory is the consolidated documentation for **LLM-Wiki / Personal AI Me
 
 | Document | What it is | Start here if you want to… |
 |----------|------------|----------------------------|
-| [**PROJECT_STATUS.md**](./PROJECT_STATUS.md) | Authoritative V1.0.0 status: feature matrix, file-type support, RAG architecture, V1 DoD, V2 roadmap, classified known bugs | Know the real state of the project |
+| [**PROJECT_STATUS.md**](./PROJECT_STATUS.md) | **Current canonical status** — V1.1.0 release, production configuration & limitations, testing snapshot, next work | Know the real state of the project today |
 | [**FINAL_PROJECT_REPORT.md**](./FINAL_PROJECT_REPORT.md) | One clean end-to-end report of the whole project | Understand the project in 10 minutes |
 | [**architecture.md**](./architecture.md) | Authoritative system architecture | Understand how the system is built |
 | [**IMPLEMENTATION_SPECIFICATION.md**](./IMPLEMENTATION_SPECIFICATION.md) | Technical contracts and data schemas | Build on or modify the pipeline |
@@ -57,7 +57,7 @@ requirements.txt / pyproject.toml
 
 ## Quick facts
 
-- **Version:** 1.0.0 (Stable Local MVP; see `PROJECT_STATUS.md` §1 for how this was determined)
+- **Version:** V1.1.0 (current release; see `PROJECT_STATUS.md` for the canonical status — V1.1 focus is reliability, source management, ingestion safety, CLI usability, truthful status, local-first)
 - **Runtime:** Python 3.11–3.13 (validated in CI), Ollama, local-first
 - **Suite:** 1375 tests passing / 57 deselected / 0 failed; coverage **89.80%** (floor 80); 56 unit + 16 integration files
 - **Search:** hybrid (dense cosine + BM25) fused with RRF (k=60), via `pam search`
