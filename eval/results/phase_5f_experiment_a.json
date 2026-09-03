@@ -1,0 +1,1607 @@
+{
+  "metadata": {
+    "phase": "5F Experiment A",
+    "dataset": "v3.0 frozen (199 queries)",
+    "evaluation_date": "2026-08-28 20:27:12",
+    "config": {
+      "top_k": 5,
+      "min_cosine": 0.45,
+      "banded_verifier": false
+    },
+    "source_code_modified": false
+  },
+  "queries": [
+    {
+      "id": "q001",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q002",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q003",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q004",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q005",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q006",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q007",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q008",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q009",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q010",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q011",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q012",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q013",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q014",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q015",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q016",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q017",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q018",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q019",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q020",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q021",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q022",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q023",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q024",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q025",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q026",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q027",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q028",
+      "positive": true,
+      "expected_rank": 5,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q029",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q030",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q031",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q032",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": false,
+      "abstained": true,
+      "correct": true
+    },
+    {
+      "id": "q033",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q034",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q035",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q036",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q037",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q038",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q039",
+      "positive": true,
+      "expected_rank": 5,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q040",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q041",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q042",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q043",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q044",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q045",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q046",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q047",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q048",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q049",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q050",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q051",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q052",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q053",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q054",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q055",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q056",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q057",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q058",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q059",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q060",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q061",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q062",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q063",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q064",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q065",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q066",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q067",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q068",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q069",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q070",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q071",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q072",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q073",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q074",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q075",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q076",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q077",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q078",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q079",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q080",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q081",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q082",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q083",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q084",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q085",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q086",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q087",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q088",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q089",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q090",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q091",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q095",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q096",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q097",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q098",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q099",
+      "positive": true,
+      "expected_rank": 3,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q100",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q101",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q102",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q103",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q104",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q105",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q106",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q107",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q108",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q109",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q110",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q111",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q112",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q113",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q114",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q115",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q116",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": false,
+      "abstained": true,
+      "correct": true
+    },
+    {
+      "id": "q117",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": false,
+      "abstained": true,
+      "correct": true
+    },
+    {
+      "id": "q118",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q119",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q120",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q121",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q122",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q123",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q124",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q125",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q126",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q127",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q128",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q129",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q130",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q131",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q132",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q133",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q134",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q135",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q136",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": false,
+      "abstained": true,
+      "correct": true
+    },
+    {
+      "id": "q137",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q138",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": false,
+      "abstained": true,
+      "correct": true
+    },
+    {
+      "id": "q139",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": false,
+      "abstained": true,
+      "correct": true
+    },
+    {
+      "id": "q140",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q141",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q142",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q143",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q144",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q145",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q146",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q147",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q148",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q149",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q150",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q151",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q152",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q153",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q154",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q155",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q156",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q157",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q158",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q159",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q160",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q161",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q162",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q163",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q164",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q165",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q166",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q167",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q168",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q169",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q170",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q171",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q172",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q173",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q174",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q175",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q176",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q177",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q178",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q179",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q180",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q181",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q182",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q183",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q184",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q185",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q186",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q187",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q188",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q189",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q190",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q191",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q192",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q193",
+      "positive": true,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q194",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q195",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q196",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q197",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q198",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q199",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q200",
+      "positive": false,
+      "expected_rank": null,
+      "accepted": true,
+      "abstained": false,
+      "correct": false
+    },
+    {
+      "id": "q201",
+      "positive": true,
+      "expected_rank": 1,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    },
+    {
+      "id": "q202",
+      "positive": true,
+      "expected_rank": 2,
+      "accepted": true,
+      "abstained": false,
+      "correct": true
+    }
+  ]
+}

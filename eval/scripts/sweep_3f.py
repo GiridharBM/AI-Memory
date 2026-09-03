@@ -18,9 +18,9 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from eval.run_eval import run_evaluation
+from eval.scripts.run_eval import run_evaluation
 
 
 THRESHOLDS = [0.05, 0.10, 0.12, 0.125, 0.15, 0.20]

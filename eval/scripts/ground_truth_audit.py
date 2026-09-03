@@ -17,8 +17,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-EVAL_DIR = Path(__file__).resolve().parent
-DATASET_PATH = EVAL_DIR / "dataset.json"
+EVAL_DIR = Path(__file__).resolve().parent.parent
+DATASET_PATH = EVAL_DIR / "datasets" / "dataset.json"
 
 VALID_CATEGORIES = {"factoid", "comparison", "negative", "cross_document", "tricky"}
 VALID_DIFFICULTIES = {"easy", "medium", "hard"}
@@ -153,7 +153,7 @@ def audit(dataset_path: Path = DATASET_PATH) -> dict:
     print(f"\nResult: {'PASS' if result['passed'] else 'FAIL'}")
 
     # Save report
-    report_path = EVAL_DIR / "ground_truth_audit_report.json"
+    report_path = EVAL_DIR / "reports" / "ground_truth_audit_report.json"
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
     print(f"\nReport saved to: {report_path}")

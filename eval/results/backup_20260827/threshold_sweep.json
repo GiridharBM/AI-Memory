@@ -1,0 +1,834 @@
+{
+  "metadata": {
+    "date": "2026-08-20 22:53:24",
+    "dataset": "D:\\Projects\\Personal AI Memory\\eval\\dataset.json",
+    "thresholds_evaluated": [
+      0.0,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.4381,
+      0.45,
+      0.4615,
+      0.4756,
+      0.4802,
+      0.4838,
+      0.4911,
+      0.4937,
+      0.4993,
+      0.5,
+      0.5125,
+      0.5394,
+      0.5412,
+      0.5431,
+      0.55,
+      0.5575,
+      0.5596,
+      0.5633,
+      0.5953,
+      0.5962,
+      0.6
+    ]
+  },
+  "cosine_distribution": [
+    {
+      "id": "q032",
+      "query": "What is the capital of France?",
+      "is_positive": false,
+      "cosine": 0.344417
+    },
+    {
+      "id": "q045",
+      "query": "What topics are NOT covered in the knowledge base?",
+      "is_positive": false,
+      "cosine": 0.438101
+    },
+    {
+      "id": "q028",
+      "query": "Which documents mention the MIT license?",
+      "is_positive": true,
+      "cosine": 0.461459
+    },
+    {
+      "id": "q024",
+      "query": "What is the sigmamusicart song about?",
+      "is_positive": true,
+      "cosine": 0.475615
+    },
+    {
+      "id": "q049",
+      "query": "What is the main theme of the sigmamusicart song?",
+      "is_positive": true,
+      "cosine": 0.480179
+    },
+    {
+      "id": "q039",
+      "query": "Which documents discuss education or learning?",
+      "is_positive": true,
+      "cosine": 0.483786
+    },
+    {
+      "id": "q034",
+      "query": "What is the latest version of Python?",
+      "is_positive": false,
+      "cosine": 0.491053
+    },
+    {
+      "id": "q050",
+      "query": "How many questions does the DAA assignment contain?",
+      "is_positive": true,
+      "cosine": 0.493734
+    },
+    {
+      "id": "q018",
+      "query": "What is the DAA assignment about?",
+      "is_positive": true,
+      "cosine": 0.499273
+    },
+    {
+      "id": "q040",
+      "query": "What content in the knowledge base was created by Giridhar B",
+      "is_positive": true,
+      "cosine": 0.512514
+    },
+    {
+      "id": "q035",
+      "query": "Tell me about quantum computing applications in medicine.",
+      "is_positive": false,
+      "cosine": 0.539407
+    },
+    {
+      "id": "q041",
+      "query": "Does the knowledge base contain information about mobile app",
+      "is_positive": false,
+      "cosine": 0.54121
+    },
+    {
+      "id": "q036",
+      "query": "What Docker configuration does PAM use?",
+      "is_positive": false,
+      "cosine": 0.543118
+    },
+    {
+      "id": "q033",
+      "query": "How does PAM handle email attachments?",
+      "is_positive": false,
+      "cosine": 0.557546
+    },
+    {
+      "id": "q031",
+      "query": "What programming-related topics are covered across all docum",
+      "is_positive": true,
+      "cosine": 0.55961
+    },
+    {
+      "id": "q037",
+      "query": "Summarize all engineering-related topics in the knowledge ba",
+      "is_positive": true,
+      "cosine": 0.563342
+    },
+    {
+      "id": "q005",
+      "query": "What are Utthunga's core values?",
+      "is_positive": true,
+      "cosine": 0.59528
+    },
+    {
+      "id": "q004",
+      "query": "What ISO certifications does Utthunga hold?",
+      "is_positive": true,
+      "cosine": 0.596206
+    },
+    {
+      "id": "q022",
+      "query": "What is the main argument of the LeetCode article?",
+      "is_positive": true,
+      "cosine": 0.609637
+    },
+    {
+      "id": "q009",
+      "query": "What was OpenHands previously called?",
+      "is_positive": true,
+      "cosine": 0.611244
+    },
+    {
+      "id": "q043",
+      "query": "What are the limitations of LeetCode according to the articl",
+      "is_positive": true,
+      "cosine": 0.619006
+    },
+    {
+      "id": "q007",
+      "query": "What is OpenHands' license type?",
+      "is_positive": true,
+      "cosine": 0.625456
+    },
+    {
+      "id": "q008",
+      "query": "How many contributors does OpenHands have?",
+      "is_positive": true,
+      "cosine": 0.628952
+    },
+    {
+      "id": "q001",
+      "query": "When was Utthunga founded?",
+      "is_positive": true,
+      "cosine": 0.658941
+    },
+    {
+      "id": "q046",
+      "query": "What is the maximum charging current of the IP2312 battery c",
+      "is_positive": true,
+      "cosine": 0.659032
+    },
+    {
+      "id": "q029",
+      "query": "Compare the number of contributors to OpenHands versus the n",
+      "is_positive": true,
+      "cosine": 0.660889
+    },
+    {
+      "id": "q016",
+      "query": "What is the IP2312 an upgrade from according to the PCB guid",
+      "is_positive": true,
+      "cosine": 0.664162
+    },
+    {
+      "id": "q010",
+      "query": "What benchmarks does OpenHands evaluate on?",
+      "is_positive": true,
+      "cosine": 0.669637
+    },
+    {
+      "id": "q030",
+      "query": "Which documents are about electronics or hardware design?",
+      "is_positive": true,
+      "cosine": 0.672394
+    },
+    {
+      "id": "q003",
+      "query": "How many global offices does Utthunga operate?",
+      "is_positive": true,
+      "cosine": 0.672493
+    },
+    {
+      "id": "q023",
+      "query": "What book does the LeetCode article reference for learning c",
+      "is_positive": true,
+      "cosine": 0.673466
+    },
+    {
+      "id": "q047",
+      "query": "How many tasks does OpenHands evaluate across in its benchma",
+      "is_positive": true,
+      "cosine": 0.676099
+    },
+    {
+      "id": "q015",
+      "query": "What EDA tool is recommended in the PCB design guide?",
+      "is_positive": true,
+      "cosine": 0.683415
+    },
+    {
+      "id": "q027",
+      "query": "Which documents discuss artificial intelligence topics?",
+      "is_positive": true,
+      "cosine": 0.691664
+    },
+    {
+      "id": "q048",
+      "query": "What type of content does the neural network video use to ex",
+      "is_positive": true,
+      "cosine": 0.698482
+    },
+    {
+      "id": "q025",
+      "query": "What is the Jharkhand protest about?",
+      "is_positive": true,
+      "cosine": 0.704214
+    },
+    {
+      "id": "q044",
+      "query": "Is the PCB design guide for advanced or beginner designers?",
+      "is_positive": true,
+      "cosine": 0.705436
+    },
+    {
+      "id": "q026",
+      "query": "What was the Jharkhand protest on its 21st day?",
+      "is_positive": true,
+      "cosine": 0.709892
+    },
+    {
+      "id": "q019",
+      "query": "What topics does the neural network video cover?",
+      "is_positive": true,
+      "cosine": 0.712027
+    },
+    {
+      "id": "q006",
+      "query": "What industries does Utthunga serve?",
+      "is_positive": true,
+      "cosine": 0.726706
+    },
+    {
+      "id": "q002",
+      "query": "How many engineers does Utthunga have?",
+      "is_positive": true,
+      "cosine": 0.729901
+    },
+    {
+      "id": "q011",
+      "query": "What type of game does GPT-5.6 build in the demo?",
+      "is_positive": true,
+      "cosine": 0.730474
+    },
+    {
+      "id": "q038",
+      "query": "What are all the AI-related tools and platforms mentioned ac",
+      "is_positive": true,
+      "cosine": 0.737647
+    },
+    {
+      "id": "q014",
+      "query": "What is the IP2312 chip used for in the PCB design guide?",
+      "is_positive": true,
+      "cosine": 0.73983
+    },
+    {
+      "id": "q012",
+      "query": "What tool does GPT-5.6 use for game development in the demo?",
+      "is_positive": true,
+      "cosine": 0.750954
+    },
+    {
+      "id": "q013",
+      "query": "What capabilities does GPT-5.6 demonstrate in the demo besid",
+      "is_positive": true,
+      "cosine": 0.75116
+    },
+    {
+      "id": "q017",
+      "query": "What are the key steps in PCB design according to the guide?",
+      "is_positive": true,
+      "cosine": 0.755259
+    },
+    {
+      "id": "q020",
+      "query": "What are the three types of layers in a neural network discu",
+      "is_positive": true,
+      "cosine": 0.760539
+    },
+    {
+      "id": "q042",
+      "query": "What is the relationship between weights and biases in neura",
+      "is_positive": true,
+      "cosine": 0.769078
+    },
+    {
+      "id": "q021",
+      "query": "What is TiHAN at IIT Hyderabad?",
+      "is_positive": true,
+      "cosine": 0.778314
+    }
+  ],
+  "sweep_results": [
+    {
+      "threshold": 0.0,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 1.0,
+      "fnr": 0.0,
+      "abstention_rate": 0.0,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.0,
+      "abstained_count": 0,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 0,
+      "avg_latency_ms": 45.1
+    },
+    {
+      "threshold": 0.1,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 1.0,
+      "fnr": 0.0,
+      "abstention_rate": 0.0,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.0,
+      "abstained_count": 0,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 0,
+      "avg_latency_ms": 57.5
+    },
+    {
+      "threshold": 0.15,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 1.0,
+      "fnr": 0.0,
+      "abstention_rate": 0.0,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.0,
+      "abstained_count": 0,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 0,
+      "avg_latency_ms": 59.9
+    },
+    {
+      "threshold": 0.2,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 1.0,
+      "fnr": 0.0,
+      "abstention_rate": 0.0,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.0,
+      "abstained_count": 0,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 0,
+      "avg_latency_ms": 61.6
+    },
+    {
+      "threshold": 0.25,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 1.0,
+      "fnr": 0.0,
+      "abstention_rate": 0.0,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.0,
+      "abstained_count": 0,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 0,
+      "avg_latency_ms": 60.7
+    },
+    {
+      "threshold": 0.3,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 1.0,
+      "fnr": 0.0,
+      "abstention_rate": 0.0,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.0,
+      "abstained_count": 0,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 0,
+      "avg_latency_ms": 58.5
+    },
+    {
+      "threshold": 0.35,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 0.8571,
+      "fnr": 0.0,
+      "abstention_rate": 0.02,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.1429,
+      "abstained_count": 1,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 1,
+      "avg_latency_ms": 55.1
+    },
+    {
+      "threshold": 0.4,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 0.8571,
+      "fnr": 0.0,
+      "abstention_rate": 0.02,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.1429,
+      "abstained_count": 1,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 1,
+      "avg_latency_ms": 57.5
+    },
+    {
+      "threshold": 0.4381,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 0.8571,
+      "fnr": 0.0,
+      "abstention_rate": 0.02,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.1429,
+      "abstained_count": 1,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 1,
+      "avg_latency_ms": 56.9
+    },
+    {
+      "threshold": 0.45,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 0.7143,
+      "fnr": 0.0,
+      "abstention_rate": 0.04,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.2857,
+      "abstained_count": 2,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 2,
+      "avg_latency_ms": 62.4
+    },
+    {
+      "threshold": 0.4615,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 0.7143,
+      "fnr": 0.0,
+      "abstention_rate": 0.04,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.2857,
+      "abstained_count": 2,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 2,
+      "avg_latency_ms": 61.0
+    },
+    {
+      "threshold": 0.4756,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 0.7143,
+      "fnr": 0.0,
+      "abstention_rate": 0.04,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.2857,
+      "abstained_count": 2,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 2,
+      "avg_latency_ms": 50.4
+    },
+    {
+      "threshold": 0.4802,
+      "hit_rate@1": 0.907,
+      "hit_rate@5": 0.9535,
+      "recall@5": 0.9264,
+      "recall@10": 0.9264,
+      "mrr": 0.9302,
+      "fpr": 0.7143,
+      "fnr": 0.0,
+      "abstention_rate": 0.04,
+      "pos_acceptance": 1.0,
+      "neg_rejection": 0.2857,
+      "abstained_count": 2,
+      "pos_rejected_count": 0,
+      "neg_rejected_count": 2,
+      "avg_latency_ms": 57.7
+    },
+    {
+      "threshold": 0.4838,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.7143,
+      "fnr": 0.0233,
+      "abstention_rate": 0.06,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.2857,
+      "abstained_count": 3,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 2,
+      "avg_latency_ms": 60.1
+    },
+    {
+      "threshold": 0.4911,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.5714,
+      "fnr": 0.0233,
+      "abstention_rate": 0.08,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.4286,
+      "abstained_count": 4,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 3,
+      "avg_latency_ms": 60.4
+    },
+    {
+      "threshold": 0.4937,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.5714,
+      "fnr": 0.0233,
+      "abstention_rate": 0.08,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.4286,
+      "abstained_count": 4,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 3,
+      "avg_latency_ms": 62.3
+    },
+    {
+      "threshold": 0.4993,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.5714,
+      "fnr": 0.0233,
+      "abstention_rate": 0.08,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.4286,
+      "abstained_count": 4,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 3,
+      "avg_latency_ms": 60.1
+    },
+    {
+      "threshold": 0.5,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.5714,
+      "fnr": 0.0233,
+      "abstention_rate": 0.08,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.4286,
+      "abstained_count": 4,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 3,
+      "avg_latency_ms": 58.3
+    },
+    {
+      "threshold": 0.5125,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.5714,
+      "fnr": 0.0233,
+      "abstention_rate": 0.08,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.4286,
+      "abstained_count": 4,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 3,
+      "avg_latency_ms": 56.2
+    },
+    {
+      "threshold": 0.5394,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.5714,
+      "fnr": 0.0233,
+      "abstention_rate": 0.08,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.4286,
+      "abstained_count": 4,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 3,
+      "avg_latency_ms": 53.1
+    },
+    {
+      "threshold": 0.5412,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.4286,
+      "fnr": 0.0233,
+      "abstention_rate": 0.1,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.5714,
+      "abstained_count": 5,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 4,
+      "avg_latency_ms": 52.5
+    },
+    {
+      "threshold": 0.5431,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.4286,
+      "fnr": 0.0233,
+      "abstention_rate": 0.1,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.5714,
+      "abstained_count": 5,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 4,
+      "avg_latency_ms": 53.7
+    },
+    {
+      "threshold": 0.55,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.2857,
+      "fnr": 0.0233,
+      "abstention_rate": 0.12,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.7143,
+      "abstained_count": 6,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 5,
+      "avg_latency_ms": 53.1
+    },
+    {
+      "threshold": 0.5575,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.2857,
+      "fnr": 0.0233,
+      "abstention_rate": 0.12,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.7143,
+      "abstained_count": 6,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 5,
+      "avg_latency_ms": 56.7
+    },
+    {
+      "threshold": 0.5596,
+      "hit_rate@1": 0.9048,
+      "hit_rate@5": 0.9524,
+      "recall@5": 0.9246,
+      "recall@10": 0.9246,
+      "mrr": 0.9286,
+      "fpr": 0.1429,
+      "fnr": 0.0233,
+      "abstention_rate": 0.14,
+      "pos_acceptance": 0.9767,
+      "neg_rejection": 0.8571,
+      "abstained_count": 7,
+      "pos_rejected_count": 1,
+      "neg_rejected_count": 6,
+      "avg_latency_ms": 57.0
+    },
+    {
+      "threshold": 0.5633,
+      "hit_rate@1": 0.9268,
+      "hit_rate@5": 0.9512,
+      "recall@5": 0.935,
+      "recall@10": 0.935,
+      "mrr": 0.939,
+      "fpr": 0.1429,
+      "fnr": 0.0465,
+      "abstention_rate": 0.16,
+      "pos_acceptance": 0.9535,
+      "neg_rejection": 0.8571,
+      "abstained_count": 8,
+      "pos_rejected_count": 2,
+      "neg_rejected_count": 6,
+      "avg_latency_ms": 55.1
+    },
+    {
+      "threshold": 0.5953,
+      "hit_rate@1": 0.9268,
+      "hit_rate@5": 0.9512,
+      "recall@5": 0.935,
+      "recall@10": 0.935,
+      "mrr": 0.939,
+      "fpr": 0.1429,
+      "fnr": 0.0465,
+      "abstention_rate": 0.16,
+      "pos_acceptance": 0.9535,
+      "neg_rejection": 0.8571,
+      "abstained_count": 8,
+      "pos_rejected_count": 2,
+      "neg_rejected_count": 6,
+      "avg_latency_ms": 52.3
+    },
+    {
+      "threshold": 0.5962,
+      "hit_rate@1": 0.9268,
+      "hit_rate@5": 0.9512,
+      "recall@5": 0.935,
+      "recall@10": 0.935,
+      "mrr": 0.939,
+      "fpr": 0.1429,
+      "fnr": 0.0465,
+      "abstention_rate": 0.16,
+      "pos_acceptance": 0.9535,
+      "neg_rejection": 0.8571,
+      "abstained_count": 8,
+      "pos_rejected_count": 2,
+      "neg_rejected_count": 6,
+      "avg_latency_ms": 52.0
+    },
+    {
+      "threshold": 0.6,
+      "hit_rate@1": 0.9268,
+      "hit_rate@5": 0.9512,
+      "recall@5": 0.935,
+      "recall@10": 0.935,
+      "mrr": 0.939,
+      "fpr": 0.1429,
+      "fnr": 0.0465,
+      "abstention_rate": 0.16,
+      "pos_acceptance": 0.9535,
+      "neg_rejection": 0.8571,
+      "abstained_count": 8,
+      "pos_rejected_count": 2,
+      "neg_rejected_count": 6,
+      "avg_latency_ms": 53.5
+    }
+  ]
+}

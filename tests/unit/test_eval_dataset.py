@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 EVAL_DIR = Path(__file__).resolve().parent.parent.parent / "eval"
-DATASET_PATH = EVAL_DIR / "dataset.json"
-FROZEN_V1_PATH = EVAL_DIR / "dataset_v1_frozen.json"
+DATASET_PATH = EVAL_DIR / "datasets" / "dataset.json"
+FROZEN_V1_PATH = EVAL_DIR / "datasets" / "dataset_v1_frozen.json"
 
 # Source matching (inlined from run_eval.py to avoid heavy PAM imports)
 SOURCE_KEY_TO_FILENAME = {

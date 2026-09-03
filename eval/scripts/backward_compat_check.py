@@ -8,14 +8,14 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from app.core.config import load_settings
 from app.infrastructure.search import SearchService
 from app.application.qa_workflow import AbstentionGate
 
-EVAL_DIR = Path(__file__).resolve().parent
-FROZEN_DATASET = EVAL_DIR / "dataset_v1_frozen.json"
+EVAL_DIR = Path(__file__).resolve().parent.parent
+FROZEN_DATASET = EVAL_DIR / "datasets" / "dataset_v1_frozen.json"
 
 SOURCE_KEY_TO_FILENAME = {
     "neural_networks": "But what is a neural network",

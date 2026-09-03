@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 # ── Load PAM infrastructure (no modifications) ──────────────────────────
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from app.core.config import load_settings  # noqa: E402
 from app.infrastructure.search import SearchService  # noqa: E402
@@ -24,13 +24,16 @@ from app.infrastructure.search import SearchService  # noqa: E402
 # Abstention gate (imported for per-query evaluation)
 from app.application.qa_workflow import AbstentionGate  # noqa: E402
 
+# Answerability gate (Phase 3G-B)
+from app.infrastructure.answerability import AnswerabilityGate  # noqa: E402
+
 # Reranker (optional)
 from app.infrastructure.reranker import CrossEncoderReranker, RerankerConfig  # noqa: E402
 
 
 # ── Paths ───────────────────────────────────────────────────────────────
-EVAL_DIR = Path(__file__).resolve().parent
-DATASET_PATH = EVAL_DIR / "dataset.json"
+EVAL_DIR = Path(__file__).resolve().parent.parent
+DATASET_PATH = EVAL_DIR / "datasets" / "dataset.json"
 RESULTS_DIR = EVAL_DIR / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
@@ -188,6 +191,7 @@ def run_evaluation(
     reranker: bool = False,
     reranker_model: str | None = None,
     min_rerank_score: float = 0.0,
+    answerability: bool = False,
 ) -> dict:
     """Run full evaluation against the dataset.
 
@@ -226,11 +230,26 @@ def run_evaluation(
         elif min_rerank_score > 0.0:
             gate = AbstentionGate(min_cosine=0.0, min_rerank_score=min_rerank_score)
 
+    # Answerability gate setup (Phase 3G-B)
+    answerability_gate: AnswerabilityGate | None = None
+    if answerability:
+        from app.infrastructure.llm import OllamaClient  # noqa: E402
+        _settings_for_llm = load_settings()
+        _ollama_for_answerability = OllamaClient(_settings_for_llm.ollama)
+        answerability_gate = AnswerabilityGate(
+            _ollama_for_answerability,
+            model=_settings_for_llm.answerability.model,
+            timeout_seconds=_settings_for_llm.answerability.timeout_seconds,
+            max_evidence_chunks=_settings_for_llm.answerability.max_evidence_chunks,
+        )
+
     mode_str = " — BASELINE"
     if gate_enabled:
         mode_str = " — ABSTENTION GATE"
     if reranker_cfg:
         mode_str += " + RERANKER"
+    if answerability_gate is not None:
+        mode_str += " + ANSWERABILITY"
 
     print("=" * 70)
     print("PAM V1 Retrieval Evaluation" + mode_str)
@@ -272,6 +291,7 @@ def run_evaluation(
     results = []
     rerank_latencies = []
     retrieval_latencies = []
+    answerability_latencies = []
     start_time = time.time()
 
     for i, q in enumerate(queries, 1):
@@ -324,6 +344,19 @@ def run_evaluation(
             abstained = result.abstain
             abstention_reason = result.reason
 
+        # Answerability gate (Phase 3G-B): only runs if abstention gate accepted
+        answerability_verdict = None
+        answerability_latency_ms = 0.0
+        if answerability_gate is not None and not abstained:
+            a_start = time.time()
+            evidence_result = answerability_gate.verify(q["query"], hits)
+            answerability_latency_ms = (time.time() - a_start) * 1000
+            answerability_verdict = evidence_result.reason
+            answerability_latencies.append(answerability_latency_ms)
+            if not evidence_result.sufficient:
+                abstained = True
+                abstention_reason = evidence_result.reason
+
         status = "HIT" if matched else ("NEG" if not q["expected_sources"] else "MISS")
         if abstained:
             status = "ABSTAIN"
@@ -343,6 +376,8 @@ def run_evaluation(
             "notes": q.get("notes", ""),
             "abstained": abstained,
             "abstention_reason": abstention_reason,
+            "answerability_verdict": answerability_verdict,
+            "answerability_latency_ms": round(answerability_latency_ms, 1),
         }
         results.append(result)
 
@@ -375,6 +410,14 @@ def run_evaluation(
         metrics["reranker_enabled"] = True
     else:
         metrics["reranker_enabled"] = False
+
+    if answerability_latencies:
+        metrics["avg_answerability_latency_ms"] = round(
+            sum(answerability_latencies) / len(answerability_latencies), 1
+        )
+        metrics["answerability_enabled"] = True
+    else:
+        metrics["answerability_enabled"] = False
 
     # Abstention metrics
     positive_results = [r for r in results if r["expected_sources"]]
@@ -450,6 +493,18 @@ def run_evaluation(
         print("\n  Abstention gate: DISABLED (baseline mode)")
         print("    (Raw cosine/bm25 scores collected for threshold calibration)")
 
+    if metrics.get("answerability_enabled"):
+        print(
+            f"\n  Answerability Gate "
+            f"(avg {metrics.get('avg_answerability_latency_ms', 'N/A')}ms):"
+        )
+        a_count = sum(1 for r in results if r.get("answerability_verdict"))
+        a_abstained = sum(
+            1 for r in results if r.get("answerability_verdict") == "answerability_insufficient_evidence"
+        )
+        print(f"    Queries evaluated: {a_count}")
+        print(f"    INSUFFICIENT_EVIDENCE: {a_abstained}")
+
     print("\nPer-category breakdown:")
     for cat, data in metrics.get("per_category", {}).items():
         print(
@@ -481,11 +536,13 @@ def run_evaluation(
             "reranker_enabled": reranker_cfg is not None,
             "reranker_model": reranker_cfg.model_name if reranker_cfg else None,
             "min_rerank_score": min_rerank_score,
+            "answerability_enabled": answerability_gate is not None,
             "source_code_modified": False,
             "notes": (
                 f"{'ABSTENTION GATE' if gate_enabled else 'BASELINE'} evaluation"
                 f" — min_cosine={min_cosine}"
                 f"{' + RERANKER' if reranker_cfg else ''}"
+                f"{' + ANSWERABILITY' if answerability_gate else ''}"
             ),
         },
         "metrics": metrics,
@@ -493,7 +550,9 @@ def run_evaluation(
     }
 
     # Save detailed results
-    if reranker_cfg:
+    if answerability_gate:
+        result_filename = "answerability_eval.json"
+    elif reranker_cfg:
         result_filename = "reranker_eval.json"
     elif gate_enabled:
         result_filename = "abstention_gate.json"
@@ -535,6 +594,11 @@ if __name__ == "__main__":
         default=0.0,
         help="Reranker abstention threshold (0.0 = no reranker gating)",
     )
+    parser.add_argument(
+        "--answerability",
+        action="store_true",
+        help="Enable answerability/evidence gate (Phase 3G-B)",
+    )
     args = parser.parse_args()
     run_evaluation(
         top_k=args.top_k,
@@ -542,4 +606,5 @@ if __name__ == "__main__":
         reranker=args.reranker,
         reranker_model=args.reranker_model,
         min_rerank_score=args.min_rerank_score,
+        answerability=args.answerability,
     )

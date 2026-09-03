@@ -2,7 +2,17 @@
 
 This directory is the consolidated documentation for **LLM-Wiki / Personal AI Memory (PAM)** — a local-first, offline AI system that turns documents, code, audio, images, and web content into a connected Obsidian knowledge base with semantic and hybrid search.
 
-**Project status:** ✅ **COMPLETE** — **V1.0.0** (Stable Local MVP, frozen). Six roadmap phases plus RAG question answering (`pam ask`) are delivered and verified against the code. See [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) for the authoritative status and [`PHASE_6_FINAL_APPROVAL.md`](./PHASE_6_FINAL_APPROVAL.md) for the Phase-6 approval record.
+**Current published release:** ✅ **V1.1.0** is the current release. Earlier V1.0.0 status records are preserved below but should not be interpreted as the current system state.
+
+---
+
+## Documentation structure
+
+- [`phases/`](./phases/) — historical phase engineering records (numbered `NN_*.md`), including investigation, experiment, audit, and sign-off reports. Preserved for provenance; they reflect the state of the project when each phase was written, not the current release.
+- [`releases/`](./releases/) — release / sign-off / provenance records (e.g. `PLAN.md`, `VERSION_1_COMPLETE_FINAL_REPORT.md`, `POST_V1_VERIFICATION.md`).
+- Top-level files below — current canonical architecture / development / testing documentation.
+
+> **Note:** Historical phase and release reports are preserved for provenance. They record intermediate state and SHAs and should not be read as describing the current V1.1.0 system. See the root `README.md` and the current canonical docs in this directory for current state.
 
 ---
 

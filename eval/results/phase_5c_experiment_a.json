@@ -1,0 +1,4262 @@
+{
+  "metadata": {
+    "phase": "5C",
+    "dataset_label": "157 historical valid queries (q001-q091, q095-q160)",
+    "evaluation_date": "2026-08-27 19:42:36",
+    "corpus": {
+      "sources": 24,
+      "chunks": 195
+    },
+    "config": {
+      "top_k": 5,
+      "min_cosine": 0.45,
+      "reranker_enabled": false,
+      "hyde_enabled": false,
+      "answerability_enabled": false
+    },
+    "source_code_modified": false
+  },
+  "metrics": {
+    "experiment": "A",
+    "top_k": 5,
+    "min_cosine": 0.45,
+    "total_queries": 157,
+    "queries_with_ground_truth": 120,
+    "negative_queries": 37,
+    "hit_rate@1": 0.8166666666666667,
+    "hit_rate@3": 0.8916666666666667,
+    "hit_rate@5": 0.9083333333333333,
+    "hit_rate@10": 0.9083333333333333,
+    "mrr": 0.8561111111111112,
+    "mrr_positive_only": 0.8561111111111112,
+    "abstention": {
+      "gate_enabled": true,
+      "min_cosine": 0.45,
+      "false_positive_rate": 0.8378378378378378,
+      "false_negative_rate": 0.0,
+      "abstention_rate": 0.03821656050955414,
+      "positive_acceptance_rate": 1.0,
+      "negative_rejection_rate": 0.16216216216216217,
+      "abstained_positive_count": 0,
+      "abstained_negative_count": 6
+    },
+    "latency": {
+      "avg_ms": 180.4,
+      "p50_ms": 43.6,
+      "p95_ms": 72.5,
+      "max_ms": 20775.3
+    },
+    "total_time_seconds": 28.34
+  },
+  "queries": [
+    {
+      "id": "q001",
+      "query": "When was Utthunga founded?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.658941,
+      "top_bm25": 6.72757,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 20775.29
+    },
+    {
+      "id": "q002",
+      "query": "How many engineers does Utthunga have?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.729901,
+      "top_bm25": 8.039402,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 88.99
+    },
+    {
+      "id": "q003",
+      "query": "How many global offices does Utthunga operate?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.672493,
+      "top_bm25": 8.539626,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 361.62
+    },
+    {
+      "id": "q004",
+      "query": "What ISO certifications does Utthunga hold?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.596206,
+      "top_bm25": 9.74056,
+      "top_rrf": 0.031746,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 57.14
+    },
+    {
+      "id": "q005",
+      "query": "What are Utthunga's core values?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.59528,
+      "top_bm25": 6.643035,
+      "top_rrf": 0.031778,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.2
+    },
+    {
+      "id": "q006",
+      "query": "What industries does Utthunga serve?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.726706,
+      "top_bm25": 8.279779,
+      "top_rrf": 0.032002,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 72.48
+    },
+    {
+      "id": "q007",
+      "query": "What is OpenHands' license type?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.625456,
+      "top_bm25": 2.441224,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.44
+    },
+    {
+      "id": "q008",
+      "query": "How many contributors does OpenHands have?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.628952,
+      "top_bm25": 3.576192,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 36.68
+    },
+    {
+      "id": "q009",
+      "query": "What was OpenHands previously called?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Meet _GPT-5.6 2.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.611244,
+      "top_bm25": 2.968151,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.22
+    },
+    {
+      "id": "q010",
+      "query": "What benchmarks does OpenHands evaluate on?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.669637,
+      "top_bm25": 3.509179,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.1
+    },
+    {
+      "id": "q011",
+      "query": "What type of game does GPT-5.6 build in the demo?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.730474,
+      "top_bm25": 8.317429,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 200.46
+    },
+    {
+      "id": "q012",
+      "query": "What tool does GPT-5.6 use for game development in the demo?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.750954,
+      "top_bm25": 8.345349,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.01
+    },
+    {
+      "id": "q013",
+      "query": "What capabilities does GPT-5.6 demonstrate in the demo besides code generation?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.75116,
+      "top_bm25": 9.309581,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.46
+    },
+    {
+      "id": "q014",
+      "query": "What is the IP2312 chip used for in the PCB design guide?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.73983,
+      "top_bm25": 4.523714,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.21
+    },
+    {
+      "id": "q015",
+      "query": "What EDA tool is recommended in the PCB design guide?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.683415,
+      "top_bm25": 3.476984,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 80.21
+    },
+    {
+      "id": "q016",
+      "query": "What is the IP2312 an upgrade from according to the PCB guide?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.664162,
+      "top_bm25": 4.80726,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 51.3
+    },
+    {
+      "id": "q017",
+      "query": "What are the key steps in PCB design according to the guide?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.799124,
+      "top_bm25": 5.16983,
+      "top_rrf": 0.032258,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 89.05
+    },
+    {
+      "id": "q018",
+      "query": "What is the DAA assignment about?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "Our Organization.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.499273,
+      "top_bm25": 3.045726,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.36
+    },
+    {
+      "id": "q019",
+      "query": "What topics does the neural network video cover?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.670014,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.46
+    },
+    {
+      "id": "q020",
+      "query": "What are the three types of layers in a neural network discussed in the video?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.760539,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.52
+    },
+    {
+      "id": "q021",
+      "query": "What is TiHAN at IIT Hyderabad?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "tihan"
+      ],
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "Meet _GPT-5.6 2.md",
+        "What I Learned From LeetCode.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.778314,
+      "top_bm25": 2.337887,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.24
+    },
+    {
+      "id": "q022",
+      "query": "What is the main argument of the LeetCode article?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.609637,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032018,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 82.11
+    },
+    {
+      "id": "q023",
+      "query": "What book does the LeetCode article reference for learning computer science?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.673466,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031545,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.64
+    },
+    {
+      "id": "q024",
+      "query": "What is the sigmamusicart song about?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.475615,
+      "top_bm25": 3.938754,
+      "top_rrf": 0.032018,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 43.74
+    },
+    {
+      "id": "q025",
+      "query": "What is the Jharkhand protest about?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.704214,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 43.58
+    },
+    {
+      "id": "q026",
+      "query": "What was the Jharkhand protest on its 21st day?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.709892,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.65
+    },
+    {
+      "id": "q027",
+      "query": "Which documents discuss artificial intelligence topics?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "openhands",
+        "gpt56_demo",
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.691664,
+      "top_bm25": 2.797447,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 78.37
+    },
+    {
+      "id": "q028",
+      "query": "Which documents mention the MIT license?",
+      "category": "comparison",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md"
+      ],
+      "top_cosine": 0.561082,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032018,
+      "expected_rank": 5,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.55
+    },
+    {
+      "id": "q029",
+      "query": "Compare the number of contributors to OpenHands versus the number of Utthunga engineers.",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "openhands",
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.660889,
+      "top_bm25": 4.220607,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.72
+    },
+    {
+      "id": "q030",
+      "query": "Which documents are about electronics or hardware design?",
+      "category": "comparison",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.672394,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 38.4
+    },
+    {
+      "id": "q031",
+      "query": "What programming-related topics are covered across all documents?",
+      "category": "comparison",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "daa_assignment",
+        "openhands",
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.585534,
+      "top_bm25": 0.0,
+      "top_rrf": 0.03125,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 43.22
+    },
+    {
+      "id": "q032",
+      "query": "What is the capital of France?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.344417,
+      "top_bm25": 0.0,
+      "top_rrf": 0.025488,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": false,
+      "abstained": true,
+      "abstention_reason": "cosine_below_threshold (0.3444 < 0.45)",
+      "correct": true,
+      "latency_ms": 43.45
+    },
+    {
+      "id": "q033",
+      "query": "How does PAM handle email attachments?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.578651,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030478,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 47.35
+    },
+    {
+      "id": "q034",
+      "query": "What is the latest version of Python?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "python for data science.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.548823,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 44.9
+    },
+    {
+      "id": "q035",
+      "query": "Tell me about quantum computing applications in medicine.",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg"
+      ],
+      "top_cosine": 0.539407,
+      "top_bm25": 0.0,
+      "top_rrf": 0.029287,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 41.87
+    },
+    {
+      "id": "q036",
+      "query": "What Docker configuration does PAM use?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.555388,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031778,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.25
+    },
+    {
+      "id": "q037",
+      "query": "Summarize all engineering-related topics in the knowledge base.",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "pcb_design",
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.563342,
+      "top_bm25": 7.323255,
+      "top_rrf": 0.031319,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.9
+    },
+    {
+      "id": "q038",
+      "query": "What are all the AI-related tools and platforms mentioned across the documents?",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "openhands",
+        "gpt56_demo",
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.682031,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031778,
+      "expected_rank": 2,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 59.72
+    },
+    {
+      "id": "q039",
+      "query": "Which documents discuss education or learning?",
+      "category": "cross_document",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "neural_networks",
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.553291,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030092,
+      "expected_rank": 5,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.05
+    },
+    {
+      "id": "q040",
+      "query": "What content in the knowledge base was created by Giridhar BM?",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "AWS Foundations Getting Started.pdf",
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.575733,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031514,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 54.24
+    },
+    {
+      "id": "q041",
+      "query": "Does the knowledge base contain information about mobile app development?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.559392,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032002,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 46.43
+    },
+    {
+      "id": "q042",
+      "query": "What is the relationship between weights and biases in neural networks?",
+      "category": "tricky",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.769078,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032018,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.38
+    },
+    {
+      "id": "q043",
+      "query": "What are the limitations of LeetCode according to the article?",
+      "category": "tricky",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.606096,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031545,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.13
+    },
+    {
+      "id": "q044",
+      "query": "Is the PCB design guide for advanced or beginner designers?",
+      "category": "tricky",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.756739,
+      "top_bm25": 3.694029,
+      "top_rrf": 0.031778,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 40.26
+    },
+    {
+      "id": "q045",
+      "query": "What topics are NOT covered in the knowledge base?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.505865,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032002,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 48.29
+    },
+    {
+      "id": "q046",
+      "query": "What is the maximum charging current of the IP2312 battery charger?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.659032,
+      "top_bm25": 3.020791,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.89
+    },
+    {
+      "id": "q047",
+      "query": "How many tasks does OpenHands evaluate across in its benchmark?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.676099,
+      "top_bm25": 4.630468,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.43
+    },
+    {
+      "id": "q048",
+      "query": "What type of content does the neural network video use to explain concepts?",
+      "category": "tricky",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.698482,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.42
+    },
+    {
+      "id": "q049",
+      "query": "What is the main theme of the sigmamusicart song?",
+      "category": "tricky",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.480179,
+      "top_bm25": 3.348681,
+      "top_rrf": 0.032002,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 44.44
+    },
+    {
+      "id": "q050",
+      "query": "How many questions does the DAA assignment contain?",
+      "category": "tricky",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.493734,
+      "top_bm25": 3.615498,
+      "top_rrf": 0.032018,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 39.12
+    },
+    {
+      "id": "q051",
+      "query": "Who is the CEO of Utthunga?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.703052,
+      "top_bm25": 6.760072,
+      "top_rrf": 0.032002,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 38.97
+    },
+    {
+      "id": "q052",
+      "query": "How many clients does Utthunga serve?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.632711,
+      "top_bm25": 7.002618,
+      "top_rrf": 0.032258,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 35.66
+    },
+    {
+      "id": "q053",
+      "query": "How many years of expertise does Utthunga have?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.67788,
+      "top_bm25": 9.362115,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 40.19
+    },
+    {
+      "id": "q054",
+      "query": "What countries does Utthunga have offices in?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.643358,
+      "top_bm25": 6.075733,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.42
+    },
+    {
+      "id": "q055",
+      "query": "What type of company is Utthunga?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.645919,
+      "top_bm25": 6.3678,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.44
+    },
+    {
+      "id": "q056",
+      "query": "What services does Utthunga offer?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.670987,
+      "top_bm25": 6.760072,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.95
+    },
+    {
+      "id": "q057",
+      "query": "What is Utthunga's mission?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.719934,
+      "top_bm25": 4.811856,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.81
+    },
+    {
+      "id": "q058",
+      "query": "On what platform is the OpenHands paper published?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.639075,
+      "top_bm25": 3.700557,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 43.09
+    },
+    {
+      "id": "q059",
+      "query": "When was the OpenHands paper created?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.588403,
+      "top_bm25": 3.305996,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 38.71
+    },
+    {
+      "id": "q060",
+      "query": "What version is the OpenHands paper?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Meet _GPT-5.6 2.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.598106,
+      "top_bm25": 2.684481,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.96
+    },
+    {
+      "id": "q061",
+      "query": "Who is the first author of the OpenHands paper?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.655514,
+      "top_bm25": 3.751473,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 40.66
+    },
+    {
+      "id": "q062",
+      "query": "What platform hosts the game built by GPT-5.6 in the demo?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.736404,
+      "top_bm25": 8.220734,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.58
+    },
+    {
+      "id": "q063",
+      "query": "How many models does the GPT-5.6 API offer?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.719322,
+      "top_bm25": 6.840481,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 40.48
+    },
+    {
+      "id": "q064",
+      "query": "What reasoning level is Max Reasoning in the GPT-5.6 demo?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.692291,
+      "top_bm25": 6.896749,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.15
+    },
+    {
+      "id": "q065",
+      "query": "What is the efficiency of the IP2312 at 2A according to the PCB guide?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.729869,
+      "top_bm25": 3.980212,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.73
+    },
+    {
+      "id": "q066",
+      "query": "What trace width is needed for 3A on 1 oz copper in the PCB guide?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.758929,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.35
+    },
+    {
+      "id": "q067",
+      "query": "What is the form factor of the PCB in the design guide?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.710738,
+      "top_bm25": 4.350716,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.63
+    },
+    {
+      "id": "q068",
+      "query": "What PCB manufacturer is mentioned in the design guide?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.662422,
+      "top_bm25": 3.06823,
+      "top_rrf": 0.032018,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.8
+    },
+    {
+      "id": "q069",
+      "query": "What workflow step comes after DRC in the PCB design process?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.753672,
+      "top_bm25": 3.940856,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.96
+    },
+    {
+      "id": "q070",
+      "query": "What is the maximum charging current of the TP4056 according to the PCB guide?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.700855,
+      "top_bm25": 3.575677,
+      "top_rrf": 0.032258,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.95
+    },
+    {
+      "id": "q071",
+      "query": "What board thickness range is recommended in the PCB guide?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.62719,
+      "top_bm25": 3.123458,
+      "top_rrf": 0.031258,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.55
+    },
+    {
+      "id": "q072",
+      "query": "How many layers does the PCB board have in the design guide?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.691006,
+      "top_bm25": 5.756467,
+      "top_rrf": 0.032002,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.27
+    },
+    {
+      "id": "q073",
+      "query": "What is the time complexity of the Bellman-Ford algorithm?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.688469,
+      "top_bm25": 3.889162,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.55
+    },
+    {
+      "id": "q074",
+      "query": "What is the time complexity of Dijkstra's algorithm?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.696978,
+      "top_bm25": 4.842688,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 39.84
+    },
+    {
+      "id": "q075",
+      "query": "What is the time complexity of the Floyd-Warshall algorithm?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.659071,
+      "top_bm25": 3.889162,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 35.64
+    },
+    {
+      "id": "q076",
+      "query": "Which algorithm in the DAA assignment can detect negative cycles?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.610071,
+      "top_bm25": 3.688155,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.74
+    },
+    {
+      "id": "q077",
+      "query": "What type of knapsack does greedy algorithm fail on according to the DAA assignment?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.793066,
+      "top_bm25": 5.657014,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.09
+    },
+    {
+      "id": "q078",
+      "query": "What student ID does Girishwar BM have in the DAA assignment?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "AWS Foundations Getting Started.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "AWS CloudFormation.pdf"
+      ],
+      "top_cosine": 0.567998,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030077,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 43.82
+    },
+    {
+      "id": "q079",
+      "query": "What student ID does Girishkumar have in the DAA assignment?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.645129,
+      "top_bm25": 4.099174,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.34
+    },
+    {
+      "id": "q080",
+      "query": "Which activation function does the neural network video favor for modern deep networks?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.626416,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031746,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 39.57
+    },
+    {
+      "id": "q081",
+      "query": "What range of values do neurons hold in the neural network video?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.67212,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 37.82
+    },
+    {
+      "id": "q082",
+      "query": "Who created the neural network video discussed in the knowledge base?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.653066,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 43.95
+    },
+    {
+      "id": "q083",
+      "query": "What Python animation library is mentioned in the neural network notes?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.623426,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032002,
+      "expected_rank": 2,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 39.71
+    },
+    {
+      "id": "q084",
+      "query": "What problem does the neural network video use as a demonstration?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.717557,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 35.93
+    },
+    {
+      "id": "q085",
+      "query": "What book by Goodfellow, Bengio, and Courville is referenced in the neural network notes?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.649687,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.34
+    },
+    {
+      "id": "q086",
+      "query": "What does the LeetCode article call algorithmic interviews?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.723897,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.52
+    },
+    {
+      "id": "q087",
+      "query": "What mathematical book by Knuth is referenced alongside The Art of Computer Programming in the LeetCode article?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.761389,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.1
+    },
+    {
+      "id": "q088",
+      "query": "Which district administration was criticised by Jharkhand protestors?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.748542,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.3
+    },
+    {
+      "id": "q089",
+      "query": "On what date was the march that led to the FIR in the Jharkhand protest?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.725099,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.67
+    },
+    {
+      "id": "q090",
+      "query": "What genre is the sigmamusicart song?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.459237,
+      "top_bm25": 2.62958,
+      "top_rrf": 0.031545,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 47.92
+    },
+    {
+      "id": "q091",
+      "query": "What is the processing confidence of the sigmamusicart song analysis?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.537197,
+      "top_bm25": 0.0,
+      "top_rrf": 0.029857,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 44.76
+    },
+    {
+      "id": "q095",
+      "query": "What type of testbed is TiHAN described as?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "tihan"
+      ],
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.703667,
+      "top_bm25": 3.238845,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 63.66
+    },
+    {
+      "id": "q096",
+      "query": "Which documents in the knowledge base discuss algorithms or data structures?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment",
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.58586,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031281,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 54.2
+    },
+    {
+      "id": "q097",
+      "query": "Which documents mention specific companies or organizations by name?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "openhands",
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.464543,
+      "top_bm25": 6.803595,
+      "top_rrf": 0.026154,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 51.32
+    },
+    {
+      "id": "q098",
+      "query": "Which documents discuss music, art, or creative content?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart",
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.530247,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032018,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 45.2
+    },
+    {
+      "id": "q099",
+      "query": "Which documents mention specific people by name?",
+      "category": "comparison",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment",
+        "neural_networks",
+        "leetcode",
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.490028,
+      "top_bm25": 0.0,
+      "top_rrf": 0.028778,
+      "expected_rank": 3,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.51
+    },
+    {
+      "id": "q100",
+      "query": "Which documents discuss topics relevant to electrical or electronics engineering?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design",
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md"
+      ],
+      "top_cosine": 0.586478,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031778,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.53
+    },
+    {
+      "id": "q101",
+      "query": "Which documents discuss news or current events?",
+      "category": "comparison",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.476782,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030092,
+      "expected_rank": 1,
+      "matched_source": "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.43
+    },
+    {
+      "id": "q102",
+      "query": "Which documents discuss the concept of learning or education?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "neural_networks",
+        "pcb_design",
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.531893,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030886,
+      "expected_rank": 2,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.54
+    },
+    {
+      "id": "q103",
+      "query": "Which documents are about Indian companies, events, or institutions?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "jharkhand_protest",
+        "tihan"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Our Organization.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.52978,
+      "top_bm25": 6.17579,
+      "top_rrf": 0.029877,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.02
+    },
+    {
+      "id": "q104",
+      "query": "Which documents discuss open-source software?",
+      "category": "comparison",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.581603,
+      "top_bm25": 0.0,
+      "top_rrf": 0.03055,
+      "expected_rank": 2,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.47
+    },
+    {
+      "id": "q105",
+      "query": "Which documents discuss the topic of batteries or power supply?",
+      "category": "comparison",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.616676,
+      "top_bm25": 3.985916,
+      "top_rrf": 0.030679,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.51
+    },
+    {
+      "id": "q106",
+      "query": "What Indian organizations or institutions are mentioned across all documents in the knowledge base?",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "jharkhand_protest",
+        "tihan"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.538397,
+      "top_bm25": 0.0,
+      "top_rrf": 0.029643,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 43.62
+    },
+    {
+      "id": "q107",
+      "query": "Which documents mention or reference specific mathematical or computational concepts?",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment",
+        "neural_networks",
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.604541,
+      "top_bm25": 0.0,
+      "top_rrf": 0.029387,
+      "expected_rank": 2,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 40.06
+    },
+    {
+      "id": "q108",
+      "query": "Which documents discuss topics relevant to software development or programming?",
+      "category": "cross_document",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "daa_assignment",
+        "openhands",
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.602716,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031258,
+      "expected_rank": 2,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.91
+    },
+    {
+      "id": "q109",
+      "query": "What different types of media or content formats are represented in the knowledge base?",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks",
+        "sigmamusicart",
+        "tihan",
+        "daa_assignment",
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.54404,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030835,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 47.73
+    },
+    {
+      "id": "q110",
+      "query": "Which documents discuss topics related to job markets, interviews, or employment?",
+      "category": "cross_document",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "jharkhand_protest",
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.571393,
+      "top_bm25": 0.0,
+      "top_rrf": 0.02938,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.26
+    },
+    {
+      "id": "q111",
+      "query": "Which documents discuss topics related to reviews, opinions, or subjective analysis?",
+      "category": "cross_document",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "sigmamusicart",
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.539295,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030679,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 45.24
+    },
+    {
+      "id": "q112",
+      "query": "Why does the DAA assignment say greedy algorithms fail on the 0/1 knapsack problem?",
+      "category": "tricky",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.794511,
+      "top_bm25": 5.667172,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 49.89
+    },
+    {
+      "id": "q113",
+      "query": "What is the difference between how the LeetCode article and the DAA assignment discuss algorithms?",
+      "category": "tricky",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "DAA assignment-4.pdf"
+      ],
+      "top_cosine": 0.647923,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.92
+    },
+    {
+      "id": "q114",
+      "query": "What is the current price of Bitcoin?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.468763,
+      "top_bm25": 2.835924,
+      "top_rrf": 0.032018,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.47
+    },
+    {
+      "id": "q115",
+      "query": "Who won the 2026 FIFA World Cup?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "AWS Foundations Getting Started.pdf",
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.485295,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030798,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 42.82
+    },
+    {
+      "id": "q116",
+      "query": "What are the symptoms of dengue fever?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.433,
+      "top_bm25": 0.0,
+      "top_rrf": 0.02837,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": false,
+      "abstained": true,
+      "abstention_reason": "cosine_below_threshold (0.4330 < 0.45)",
+      "correct": true,
+      "latency_ms": 39.03
+    },
+    {
+      "id": "q117",
+      "query": "How do I make sourdough bread at home?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "Meet _GPT-5.6 2.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.421887,
+      "top_bm25": 0.0,
+      "top_rrf": 0.026289,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": false,
+      "abstained": true,
+      "abstention_reason": "cosine_below_threshold (0.4219 < 0.45)",
+      "correct": true,
+      "latency_ms": 42.92
+    },
+    {
+      "id": "q118",
+      "query": "What is Utthunga's annual revenue?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.605613,
+      "top_bm25": 6.075733,
+      "top_rrf": 0.032018,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.0
+    },
+    {
+      "id": "q119",
+      "query": "What programming languages does OpenHands support?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "What I Learned From LeetCode.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.696674,
+      "top_bm25": 3.531838,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 45.99
+    },
+    {
+      "id": "q120",
+      "query": "How many layers does the neural network in the video actually have?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.713913,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031099,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 41.54
+    },
+    {
+      "id": "q121",
+      "query": "What is the exact width in millimeters of the PCB traces in the example project?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.709953,
+      "top_bm25": 5.269933,
+      "top_rrf": 0.032787,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 45.3
+    },
+    {
+      "id": "q122",
+      "query": "What is the name of the song by sigmamusicart?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "sigmamusicart-song-english-edm-296526.mp3",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.51097,
+      "top_bm25": 4.08761,
+      "top_rrf": 0.032522,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 39.46
+    },
+    {
+      "id": "q123",
+      "query": "What is the exact date the Jharkhand protest started?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.701073,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 39.5
+    },
+    {
+      "id": "q124",
+      "query": "What is the stock price of OpenAI?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.48681,
+      "top_bm25": 3.348681,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.35
+    },
+    {
+      "id": "q125",
+      "query": "What is the IP2312 chip's operating voltage range?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.652203,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 41.07
+    },
+    {
+      "id": "q126",
+      "query": "How does the TiHAN testbed handle vehicle communication protocols?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.698478,
+      "top_bm25": 2.463961,
+      "top_rrf": 0.032787,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 41.1
+    },
+    {
+      "id": "q127",
+      "query": "What machine learning framework does Utthunga use for its engineering projects?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.685378,
+      "top_bm25": 10.960778,
+      "top_rrf": 0.031099,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 44.76
+    },
+    {
+      "id": "q128",
+      "query": "How many documents are in the knowledge base?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.598246,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.02
+    },
+    {
+      "id": "q129",
+      "query": "What version of the knowledge base is currently loaded?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.558389,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032018,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 41.36
+    },
+    {
+      "id": "q130",
+      "query": "When was the knowledge base last updated?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.553152,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.37
+    },
+    {
+      "id": "q131",
+      "query": "What database does PAM use for storing embeddings?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.588693,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031778,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.03
+    },
+    {
+      "id": "q132",
+      "query": "What is the maximum file size PAM can process?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.637275,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 41.64
+    },
+    {
+      "id": "q133",
+      "query": "How does PAM handle multiple languages?",
+      "category": "negative",
+      "difficulty": "medium",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.546214,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031545,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 36.28
+    },
+    {
+      "id": "q134",
+      "query": "What is the accuracy rate of the OpenHands code generation?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.679163,
+      "top_bm25": 4.607647,
+      "top_rrf": 0.032522,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 42.36
+    },
+    {
+      "id": "q135",
+      "query": "What are the best practices for REST API design?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Web Module 5 notes.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.526594,
+      "top_bm25": 4.609597,
+      "top_rrf": 0.030478,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 39.91
+    },
+    {
+      "id": "q136",
+      "query": "How do I configure a Kubernetes cluster?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "What I Learned From LeetCode.md",
+        "Module 5-Graph Theory.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.419649,
+      "top_bm25": 0.0,
+      "top_rrf": 0.023256,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": false,
+      "abstained": true,
+      "abstention_reason": "cosine_below_threshold (0.4196 < 0.45)",
+      "correct": true,
+      "latency_ms": 40.24
+    },
+    {
+      "id": "q137",
+      "query": "What is the difference between SQL and NoSQL databases?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.454706,
+      "top_bm25": 0.0,
+      "top_rrf": 0.026671,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.55
+    },
+    {
+      "id": "q138",
+      "query": "What are the health benefits of meditation?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.417747,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": false,
+      "abstained": true,
+      "abstention_reason": "cosine_below_threshold (0.4177 < 0.45)",
+      "correct": true,
+      "latency_ms": 38.46
+    },
+    {
+      "id": "q139",
+      "query": "How does photosynthesis work in plants?",
+      "category": "negative",
+      "difficulty": "easy",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Meet _GPT-5.6 2.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.427783,
+      "top_bm25": 3.263428,
+      "top_rrf": 0.030886,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": false,
+      "abstained": true,
+      "abstention_reason": "cosine_below_threshold (0.4278 < 0.45)",
+      "correct": true,
+      "latency_ms": 43.48
+    },
+    {
+      "id": "q140",
+      "query": "What does Utthunga's One Team core value represent?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.656071,
+      "top_bm25": 8.145739,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.58
+    },
+    {
+      "id": "q141",
+      "query": "Does Utthunga hold ISO 27001 certification?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "AWS Foundations Getting Started.pdf",
+        "AWS CloudFormation.pdf",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.568372,
+      "top_bm25": 4.523917,
+      "top_rrf": 0.031319,
+      "expected_rank": 1,
+      "matched_source": "Our Organization.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.36
+    },
+    {
+      "id": "q142",
+      "query": "What two benchmarks are used to evaluate OpenHands?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.654351,
+      "top_bm25": 3.794435,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.55
+    },
+    {
+      "id": "q143",
+      "query": "What does DRC stand for in PCB design?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.755373,
+      "top_bm25": 3.384826,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.88
+    },
+    {
+      "id": "q144",
+      "query": "What type of charging IC is the IP2312 described as?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.725397,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.94
+    },
+    {
+      "id": "q145",
+      "query": "What role do ground planes play in PCB design according to the guide?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.677228,
+      "top_bm25": 5.010538,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 53.13
+    },
+    {
+      "id": "q146",
+      "query": "What algorithm does the DAA assignment say is suited for dense graphs?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Module 5-Graph Theory.pdf"
+      ],
+      "top_cosine": 0.649101,
+      "top_bm25": 4.760523,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.57
+    },
+    {
+      "id": "q147",
+      "query": "What data structure does Dijkstra algorithm use according to the DAA assignment?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.562736,
+      "top_bm25": 5.799484,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.21
+    },
+    {
+      "id": "q148",
+      "query": "What requirement must a problem have for greedy algorithms to work according to the DAA assignment?",
+      "category": "factoid",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.769799,
+      "top_bm25": 5.669511,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.81
+    },
+    {
+      "id": "q149",
+      "query": "What issue does ReLU help mitigate according to the neural network notes?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.697618,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.95
+    },
+    {
+      "id": "q150",
+      "query": "What role does linear algebra play in neural networks according to the video?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.761342,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "But what is a neural network  Deep learning chapter 1.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 41.93
+    },
+    {
+      "id": "q151",
+      "query": "What pattern does the LeetCode article compare the retry-and-resubmit cycle to?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.586402,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031025,
+      "expected_rank": 2,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 43.65
+    },
+    {
+      "id": "q152",
+      "query": "What does GPT-5.6 use to execute tools in the demo?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.72234,
+      "top_bm25": 7.987826,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 44.66
+    },
+    {
+      "id": "q153",
+      "query": "What kind of task distribution does GPT-5.6 use in the demo?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.702349,
+      "top_bm25": 7.630909,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Meet _GPT-5.6 2.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 55.93
+    },
+    {
+      "id": "q154",
+      "query": "Which documents discuss hardware or physical devices?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design",
+        "tihan"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.584144,
+      "top_bm25": 0.0,
+      "top_rrf": 0.030622,
+      "expected_rank": 2,
+      "matched_source": "PCB Board Design A Step-by-Step Guide for Beginners.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 38.71
+    },
+    {
+      "id": "q155",
+      "query": "Which documents discuss optimization or efficiency in their respective domains?",
+      "category": "cross_document",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design",
+        "daa_assignment",
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Web Module 5 notes.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.593024,
+      "top_bm25": 4.622396,
+      "top_rrf": 0.028898,
+      "expected_rank": 1,
+      "matched_source": "DAA assignment-4.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 42.04
+    },
+    {
+      "id": "q156",
+      "query": "The LeetCode article references both criticism and endorsement of algorithmic interviews. How does it reconcile these?",
+      "category": "tricky",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.73103,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "What I Learned From LeetCode.md",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 45.74
+    },
+    {
+      "id": "q157",
+      "query": "What is the cost of a JLCPCB PCB fabrication order?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.604247,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031754,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 47.46
+    },
+    {
+      "id": "q158",
+      "query": "What specific model of webcam does TiHAN use for autonomous navigation?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.690654,
+      "top_bm25": 4.900607,
+      "top_rrf": 0.032787,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.94
+    },
+    {
+      "id": "q159",
+      "query": "How many GitHub stars does the OpenHands repository have?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.616105,
+      "top_bm25": 4.87114,
+      "top_rrf": 0.032258,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 40.5
+    },
+    {
+      "id": "q160",
+      "query": "What is the refresh rate of the display used in the GPT-5.6 demo?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.625185,
+      "top_bm25": 9.36356,
+      "top_rrf": 0.032787,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 45.93
+    }
+  ]
+}

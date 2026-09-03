@@ -1,0 +1,1177 @@
+{
+  "metadata": {
+    "phase": "5C",
+    "dataset_label": "42 new real-corpus queries (q161-q202)",
+    "evaluation_date": "2026-08-27 19:42:40",
+    "corpus": {
+      "sources": 24,
+      "chunks": 195
+    },
+    "config": {
+      "top_k": 5,
+      "min_cosine": 0.45,
+      "reranker_enabled": false,
+      "hyde_enabled": false,
+      "answerability_enabled": false
+    },
+    "source_code_modified": false
+  },
+  "metrics": {
+    "experiment": "B",
+    "top_k": 5,
+    "min_cosine": 0.45,
+    "total_queries": 42,
+    "queries_with_ground_truth": 37,
+    "negative_queries": 5,
+    "hit_rate@1": 0.918918918918919,
+    "hit_rate@3": 0.972972972972973,
+    "hit_rate@5": 0.972972972972973,
+    "hit_rate@10": 0.972972972972973,
+    "mrr": 0.9459459459459459,
+    "mrr_positive_only": 0.9459459459459459,
+    "abstention": {
+      "gate_enabled": true,
+      "min_cosine": 0.45,
+      "false_positive_rate": 1.0,
+      "false_negative_rate": 0.0,
+      "abstention_rate": 0.0,
+      "positive_acceptance_rate": 1.0,
+      "negative_rejection_rate": 0.0,
+      "abstained_positive_count": 0,
+      "abstained_negative_count": 0
+    },
+    "latency": {
+      "avg_ms": 101.1,
+      "p50_ms": 50.4,
+      "p95_ms": 59.5,
+      "max_ms": 2130.7
+    },
+    "total_time_seconds": 4.25
+  },
+  "queries": [
+    {
+      "id": "q161",
+      "query": "What is the RRF constant k used by PAM's hybrid search merge?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.733858,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 2130.73
+    },
+    {
+      "id": "q162",
+      "query": "Which embedding model produces the vectors stored by PAM, and how many dimensions do they have?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.738693,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.22
+    },
+    {
+      "id": "q163",
+      "query": "What are the default chunk size and overlap settings of PAM's SemanticChunker?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.73218,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.5
+    },
+    {
+      "id": "q164",
+      "query": "What is the default text model PAM sends to Ollama for document analysis and QA?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.720469,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.72
+    },
+    {
+      "id": "q165",
+      "query": "How many document kinds, concrete ingestors, and processors does PAM route to?",
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.672166,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.1
+    },
+    {
+      "id": "q166",
+      "query": "What abstention threshold does the Auto Testing project's frozen Phase 3B configuration use?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.627934,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Auto_Testing_Faculty_Explanation.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.92
+    },
+    {
+      "id": "q167",
+      "query": "Which local LLM generates the final answers in the Auto Testing project?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "What I Learned From LeetCode.md",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.697534,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Auto_Testing_Faculty_Explanation.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 46.97
+    },
+    {
+      "id": "q168",
+      "query": "Which two GPU environments does the GPU testing platform use for local development and larger experiments?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.669171,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.53
+    },
+    {
+      "id": "q169",
+      "query": "Which languages does the GPU platform support for test generation initially?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.712773,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.86
+    },
+    {
+      "id": "q170",
+      "query": "What are the two primary types of React components described in the Web Module 5 notes?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.678388,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Web Module 5 notes.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.78
+    },
+    {
+      "id": "q171",
+      "query": "Which ReactDOM API is the modern way to define the root DOM element in React 18+, replacing the legacy render() method?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.769043,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Web Module 5 notes.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 59.45
+    },
+    {
+      "id": "q172",
+      "query": "Define 'source' and 'sink' in a directed graph.",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "graph_theory"
+      ],
+      "retrieved_sources": [
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.714983,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Module 5-Graph Theory.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.63
+    },
+    {
+      "id": "q173",
+      "query": "What is the formal 7-tuple definition of a Turing Machine M?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "retrieved_sources": [
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.727222,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "FLAT MODULE 5 NOTES .pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 49.85
+    },
+    {
+      "id": "q174",
+      "query": "Which docker command lists all local containers, both running and stopped?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "docker_cheatsheet"
+      ],
+      "retrieved_sources": [
+        "Docker CheatSheet ApnaCollege.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.774118,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Docker CheatSheet ApnaCollege.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.23
+    },
+    {
+      "id": "q175",
+      "query": "How are in-degree and out-degree of a vertex defined in a directed graph?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "graph_theory"
+      ],
+      "retrieved_sources": [
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "FLAT MODULE 5 NOTES .pdf"
+      ],
+      "top_cosine": 0.841566,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Module 5-Graph Theory.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 49.21
+    },
+    {
+      "id": "q176",
+      "query": "What are the stages of PAM's ingestion pipeline, in order from a new file in data/inbox/ to the file moved to data/processed/?",
+      "category": "multi_chunk",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.690987,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 93.89
+    },
+    {
+      "id": "q177",
+      "query": "What are the two hard context limits PAM enforces when building the LLM prompt for pam ask?",
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.68458,
+      "top_bm25": 0.0,
+      "top_rrf": 0.031754,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 51.33
+    },
+    {
+      "id": "q178",
+      "query": "Describe the Auto Testing project's full runtime flow, from user query to final answer.",
+      "category": "multi_chunk",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.750074,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Auto_Testing_Faculty_Explanation.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 53.76
+    },
+    {
+      "id": "q179",
+      "query": "What are the steps of the GPU platform's end-to-end workflow, from project ingestion to the final report?",
+      "category": "multi_chunk",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.656378,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.96
+    },
+    {
+      "id": "q180",
+      "query": "How does the React Color Organizer manage application state, and how does data flow down and back up the component tree?",
+      "category": "multi_chunk",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.780808,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Web Module 5 notes.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 49.26
+    },
+    {
+      "id": "q181",
+      "query": "What does an undefined entry in a Turing Machine transition table mean?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "retrieved_sources": [
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.746146,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "FLAT MODULE 5 NOTES .pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.89
+    },
+    {
+      "id": "q182",
+      "query": "Compare the Real DOM and the React Virtual DOM: how does each handle updates, and who uses them?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.827866,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "Web Module 5 notes.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 51.17
+    },
+    {
+      "id": "q183",
+      "query": "Why does PAM run both vector search and BM25, and what does hybrid search add?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.702607,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 51.49
+    },
+    {
+      "id": "q184",
+      "query": "What are the three system configurations compared in the GPU platform's evaluation strategy?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.641392,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 55.56
+    },
+    {
+      "id": "q185",
+      "query": "Why does the Auto Testing system use both semantic retrieval and BM25, and why RRF for fusion?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.722948,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Auto_Testing_Faculty_Explanation.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 55.92
+    },
+    {
+      "id": "q186",
+      "query": "In PAM's RRF worked example, which of chunks A, B, C wins, and why?",
+      "category": "precise_detail",
+      "difficulty": "hard",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.713545,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 57.37
+    },
+    {
+      "id": "q187",
+      "query": "What is the pool_size formula PAM uses to widen the retrieval pool before fusion?",
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.69956,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 53.09
+    },
+    {
+      "id": "q188",
+      "query": "What are PAM's BM25 parameters k1 and b, and what does each tune?",
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.608282,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 1,
+      "matched_source": "PAM_V1_LEARNING_GUIDE.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.07
+    },
+    {
+      "id": "q189",
+      "query": "What are the domain and range of the transition function delta in the Turing Machine definition?",
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "retrieved_sources": [
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.727762,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "FLAT MODULE 5 NOTES .pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 53.45
+    },
+    {
+      "id": "q190",
+      "query": "In the React ingredients-list example, why does each element need a key property, and what was used as the key?",
+      "category": "precise_detail",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.788069,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Web Module 5 notes.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 48.85
+    },
+    {
+      "id": "q191",
+      "query": "Which AWS certificate was completed on August 06, 2026, by Giridhar BM?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "cert_devops_aws"
+      ],
+      "retrieved_sources": [
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Docker_Introduction.pdf",
+        "Introduction to Cloud.pdf"
+      ],
+      "top_cosine": 0.835152,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": 2,
+      "matched_source": "Getting Started with DevOps on AWS.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 49.49
+    },
+    {
+      "id": "q192",
+      "query": "Which Cognitive Class certificate refers to CC0101EN?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "cert_intro_cloud"
+      ],
+      "retrieved_sources": [
+        "Introduction to Cloud.pdf",
+        "Docker_Introduction.pdf",
+        "python for data science.pdf",
+        "AWS CloudFormation.pdf",
+        "AWS Foundations Getting Started.pdf"
+      ],
+      "top_cosine": 0.836932,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Introduction to Cloud.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 52.84
+    },
+    {
+      "id": "q193",
+      "query": "Who is listed as Senior Data Scientist on the Data Analysis with Python certificate?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "cert_data_analysis"
+      ],
+      "retrieved_sources": [
+        "python for data science.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Docker_Introduction.pdf"
+      ],
+      "top_cosine": 0.639548,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 48.06
+    },
+    {
+      "id": "q194",
+      "query": "Which certificate covers 'Docker Essentials: A Developer Introduction'?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "cert_docker_intro"
+      ],
+      "retrieved_sources": [
+        "Docker_Introduction.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Introduction to Cloud.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "python for data science.pdf"
+      ],
+      "top_cosine": 0.729266,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "Docker_Introduction.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 47.79
+    },
+    {
+      "id": "q195",
+      "query": "What is the verification URL on the Python 101 for Data Science certificate?",
+      "category": "factoid",
+      "difficulty": "medium",
+      "positive": true,
+      "expected_sources": [
+        "cert_python_ds"
+      ],
+      "retrieved_sources": [
+        "python for data science.pdf",
+        "Introduction to Cloud.pdf",
+        "Docker_Introduction.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Getting Started with DevOps on AWS.pdf"
+      ],
+      "top_cosine": 0.70975,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "python for data science.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 51.19
+    },
+    {
+      "id": "q196",
+      "query": "How much RAM does PAM require to run its vector store?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.622914,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 47.6
+    },
+    {
+      "id": "q197",
+      "query": "Which version of Node.js is required to run the React examples in the Web Module 5 notes?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.609459,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032002,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 52.48
+    },
+    {
+      "id": "q198",
+      "query": "What is the total cost estimate to build the GPU testing platform, including the RTX 5060 hardware?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.598606,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 47.84
+    },
+    {
+      "id": "q199",
+      "query": "What is the full name of the institution abbreviated as SNPSU in the Web Module 5 notes?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.551697,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 51.83
+    },
+    {
+      "id": "q200",
+      "query": "Which container orchestration platform does the Docker CheatSheet recommend for production deployments?",
+      "category": "negative",
+      "difficulty": "hard",
+      "positive": false,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "Docker CheatSheet ApnaCollege.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.586597,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032522,
+      "expected_rank": null,
+      "matched_source": null,
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": false,
+      "latency_ms": 47.57
+    },
+    {
+      "id": "q201",
+      "query": "Which AWS certificate was completed on August 07, 2026?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "cert_cloudformation"
+      ],
+      "retrieved_sources": [
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Docker_Introduction.pdf",
+        "Introduction to Cloud.pdf"
+      ],
+      "top_cosine": 0.815318,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032787,
+      "expected_rank": 1,
+      "matched_source": "AWS CloudFormation.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 50.43
+    },
+    {
+      "id": "q202",
+      "query": "Which AWS certificate was completed on August 08, 2026?",
+      "category": "factoid",
+      "difficulty": "easy",
+      "positive": true,
+      "expected_sources": [
+        "cert_aws_foundations"
+      ],
+      "retrieved_sources": [
+        "AWS CloudFormation.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "Docker_Introduction.pdf",
+        "Introduction to Cloud.pdf"
+      ],
+      "top_cosine": 0.80642,
+      "top_bm25": 0.0,
+      "top_rrf": 0.032266,
+      "expected_rank": 2,
+      "matched_source": "AWS Foundations Getting Started.pdf",
+      "accepted": true,
+      "abstained": false,
+      "abstention_reason": null,
+      "correct": true,
+      "latency_ms": 49.63
+    }
+  ]
+}

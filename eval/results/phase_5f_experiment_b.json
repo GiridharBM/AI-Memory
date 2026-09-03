@@ -1,0 +1,5096 @@
+{
+  "metadata": {
+    "phase": "5F Experiment B",
+    "dataset": "v3.0 frozen (199 queries)",
+    "evaluation_date": "2026-08-28 20:48:32",
+    "config": {
+      "top_k": 5,
+      "min_cosine": 0.45,
+      "banded_verifier": true,
+      "band": [
+        0.45,
+        0.64
+      ],
+      "timeout_seconds": 10.0,
+      "max_evidence_chunks": 5,
+      "model": "qwen3:8b"
+    },
+    "verifier_invocations": 78,
+    "retrieval_latency_ms": {
+      "avg": 891.3,
+      "p50": 31.6,
+      "p95": 2347.0
+    },
+    "verifier_latency_ms": {
+      "avg": 14110.8,
+      "p50": 14008.6,
+      "p95": 17296.9,
+      "p99": 18187.8,
+      "max": 18274.8
+    },
+    "source_code_modified": false
+  },
+  "queries": [
+    {
+      "id": "q001",
+      "query": "When was Utthunga founded?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.658941,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.0,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q002",
+      "query": "How many engineers does Utthunga have?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.729901,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 34.05,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q003",
+      "query": "How many global offices does Utthunga operate?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.672493,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 28.52,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q004",
+      "query": "What ISO certifications does Utthunga hold?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.596206,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        2
+      ],
+      "reason": "Chunk 2 explicitly states Utthunga is ISO 9001:2015 and ISO 27001:2013 certified.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.86,
+      "verifier_latency_ms": 15328.5
+    },
+    {
+      "id": "q005",
+      "query": "What are Utthunga's core values?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.59528,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.95,
+      "supporting_chunk_indices": [
+        1,
+        2
+      ],
+      "reason": "Chunks 1 and 2 explicitly list Utthunga's core values as Innovation with Purpose, Integrity and Ownership, Relentless Learning, Respect and Care, and a One Team mindset.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2260.11,
+      "verifier_latency_ms": 17296.9
+    },
+    {
+      "id": "q006",
+      "query": "What industries does Utthunga serve?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.726706,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2206.63,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q007",
+      "query": "What is OpenHands' license type?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.625456,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 explicitly states that OpenHands is released under the MIT license.",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.92,
+      "verifier_latency_ms": 13967.0
+    },
+    {
+      "id": "q008",
+      "query": "How many contributors does OpenHands have?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.628952,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 explicitly states that OpenHands has over 188 contributors.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2234.83,
+      "verifier_latency_ms": 13567.0
+    },
+    {
+      "id": "q009",
+      "query": "What was OpenHands previously called?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Meet _GPT-5.6 2.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.611244,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 states that OpenHands was previously called OpenDevin.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2445.6,
+      "verifier_latency_ms": 13416.9
+    },
+    {
+      "id": "q010",
+      "query": "What benchmarks does OpenHands evaluate on?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.669637,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2351.05,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q011",
+      "query": "What type of game does GPT-5.6 build in the demo?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.730474,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 22.22,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q012",
+      "query": "What tool does GPT-5.6 use for game development in the demo?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.750954,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 23.31,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q013",
+      "query": "What capabilities does GPT-5.6 demonstrate in the demo besides code generation?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.75116,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.41,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q014",
+      "query": "What is the IP2312 chip used for in the PCB design guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.73983,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.48,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q015",
+      "query": "What EDA tool is recommended in the PCB design guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.683415,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.15,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q016",
+      "query": "What is the IP2312 an upgrade from according to the PCB guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.664162,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.77,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q017",
+      "query": "What are the key steps in PCB design according to the guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.799124,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.28,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q018",
+      "query": "What is the DAA assignment about?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "Our Organization.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.499273,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.95,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 directly addresses the DAA assignment topic by explaining the focus on analyzing why the greedy approach fails in optimization problems.",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.5,
+      "verifier_latency_ms": 13481.4
+    },
+    {
+      "id": "q019",
+      "query": "What topics does the neural network video cover?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.670014,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2320.16,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q020",
+      "query": "What are the three types of layers in a neural network discussed in the video?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.760539,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.94,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q021",
+      "query": "What is TiHAN at IIT Hyderabad?",
+      "positive": true,
+      "expected_sources": [
+        "tihan"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "Meet _GPT-5.6 2.md",
+        "What I Learned From LeetCode.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.778314,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.76,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q022",
+      "query": "What is the main argument of the LeetCode article?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.609637,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1,
+        5
+      ],
+      "reason": "Chunks 1 and 5 describe LeetCode's purpose and the author's critical perspective on its role in developer hiring processes.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.72,
+      "verifier_latency_ms": 14810.8
+    },
+    {
+      "id": "q023",
+      "query": "What book does the LeetCode article reference for learning computer science?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.673466,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2382.09,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q024",
+      "query": "What is the sigmamusicart song about?",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.475615,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the retrieved chunks provide information about the sigmamusicart song.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.85,
+      "verifier_latency_ms": 12794.6
+    },
+    {
+      "id": "q025",
+      "query": "What is the Jharkhand protest about?",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.704214,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2397.19,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q026",
+      "query": "What was the Jharkhand protest on its 21st day?",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.709892,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 33.51,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q027",
+      "query": "Which documents discuss artificial intelligence topics?",
+      "positive": true,
+      "expected_sources": [
+        "openhands",
+        "gpt56_demo",
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.691664,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 33.06,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q028",
+      "query": "Which documents mention the MIT license?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 5,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md"
+      ],
+      "top_cosine": 0.561082,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        5
+      ],
+      "reason": "Chunk 5 explicitly mentions the MIT license in the context of the OpenHands project.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.29,
+      "verifier_latency_ms": 13485.0
+    },
+    {
+      "id": "q029",
+      "query": "Compare the number of contributors to OpenHands versus the number of Utthunga engineers.",
+      "positive": true,
+      "expected_sources": [
+        "openhands",
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.660889,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2234.91,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q030",
+      "query": "Which documents are about electronics or hardware design?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.672394,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.2,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q031",
+      "query": "What programming-related topics are covered across all documents?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "daa_assignment",
+        "openhands",
+        "gpt56_demo"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.585534,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The chunks discuss systems and processes related to AI memory and project management but do not mention specific programming topics covered in the documents.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.95,
+      "verifier_latency_ms": 15673.2
+    },
+    {
+      "id": "q032",
+      "query": "What is the capital of France?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.344417,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "gate disabled or below band",
+      "fallback": "none",
+      "retrieval_latency_ms": 2347.0,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q033",
+      "query": "How does PAM handle email attachments?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.578651,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention how PAM handles email attachments specifically.",
+      "fallback": "none",
+      "retrieval_latency_ms": 22.51,
+      "verifier_latency_ms": 14638.7
+    },
+    {
+      "id": "q034",
+      "query": "What is the latest version of Python?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "python for data science.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.548823,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the retrieved chunks mention the latest version of Python.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2264.01,
+      "verifier_latency_ms": 14011.4
+    },
+    {
+      "id": "q035",
+      "query": "Tell me about quantum computing applications in medicine.",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg"
+      ],
+      "top_cosine": 0.539407,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not contain any information about quantum computing applications in medicine.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2435.61,
+      "verifier_latency_ms": 14945.7
+    },
+    {
+      "id": "q036",
+      "query": "What Docker configuration does PAM use?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.555388,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The chunks do not mention Docker configuration used by PAM.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2237.73,
+      "verifier_latency_ms": 13836.9
+    },
+    {
+      "id": "q037",
+      "query": "Summarize all engineering-related topics in the knowledge base.",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "pcb_design",
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.563342,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The chunks do not contain any engineering-related topics or information.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2324.73,
+      "verifier_latency_ms": 13943.3
+    },
+    {
+      "id": "q038",
+      "query": "What are all the AI-related tools and platforms mentioned across the documents?",
+      "positive": true,
+      "expected_sources": [
+        "openhands",
+        "gpt56_demo",
+        "neural_networks"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.682031,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2338.68,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q039",
+      "query": "Which documents discuss education or learning?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "neural_networks",
+        "pcb_design"
+      ],
+      "expected_rank": 5,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.553291,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reason": "All chunks mention education or learning in the context of AI, ML, DL, and the PAM V1 Learning Guide.",
+      "fallback": "none",
+      "retrieval_latency_ms": 30.35,
+      "verifier_latency_ms": 18161.2
+    },
+    {
+      "id": "q040",
+      "query": "What content in the knowledge base was created by Giridhar BM?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "AWS Foundations Getting Started.pdf",
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.575733,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        2,
+        3
+      ],
+      "reason": "Chunks 1, 2, and 3 mention Giridhar BM as the recipient of completion certificates for AWS training courses, indicating he created the content in the knowledge base.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2230.6,
+      "verifier_latency_ms": 17200.3
+    },
+    {
+      "id": "q041",
+      "query": "Does the knowledge base contain information about mobile app development?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.559392,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        3
+      ],
+      "reason": "Chunk 3 explicitly mentions the system answers questions from a controlled document knowledge base, implying the knowledge base contains information relevant to mobile app development.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2175.77,
+      "verifier_latency_ms": 15038.9
+    },
+    {
+      "id": "q042",
+      "query": "What is the relationship between weights and biases in neural networks?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.769078,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2242.55,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q043",
+      "query": "What are the limitations of LeetCode according to the article?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.606096,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        2,
+        5
+      ],
+      "reason": "The chunks mention that LeetCode is a big timesink and that it's primarily intended for elimination rather than selection, indicating its limitations.",
+      "fallback": "none",
+      "retrieval_latency_ms": 27.06,
+      "verifier_latency_ms": 16319.9
+    },
+    {
+      "id": "q044",
+      "query": "Is the PCB design guide for advanced or beginner designers?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.756739,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2247.65,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q045",
+      "query": "What topics are NOT covered in the knowledge base?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.505865,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.95,
+      "supporting_chunk_indices": [
+        4,
+        5
+      ],
+      "reason": "The knowledge base does not cover topics mentioned in the roadmap for V2, which are not implemented in V1.",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.2,
+      "verifier_latency_ms": 17142.5
+    },
+    {
+      "id": "q046",
+      "query": "What is the maximum charging current of the IP2312 battery charger?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.659032,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2206.74,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q047",
+      "query": "How many tasks does OpenHands evaluate across in its benchmark?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.676099,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.96,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q048",
+      "query": "What type of content does the neural network video use to explain concepts?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.698482,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.56,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q049",
+      "query": "What is the main theme of the sigmamusicart song?",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.480179,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the retrieved chunks mention the main theme of the sigmamusicart song.",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.09,
+      "verifier_latency_ms": 14516.7
+    },
+    {
+      "id": "q050",
+      "query": "How many questions does the DAA assignment contain?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.493734,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention the number of questions in the DAA assignment.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2287.77,
+      "verifier_latency_ms": 12368.4
+    },
+    {
+      "id": "q051",
+      "query": "Who is the CEO of Utthunga?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.703052,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2332.78,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q052",
+      "query": "How many clients does Utthunga serve?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.632711,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        2
+      ],
+      "reason": "Chunks 1 and 2 both mention Utthunga serves 150+ clients.",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.98,
+      "verifier_latency_ms": 13446.1
+    },
+    {
+      "id": "q053",
+      "query": "How many years of expertise does Utthunga have?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.67788,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2556.44,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q054",
+      "query": "What countries does Utthunga have offices in?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.643358,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 36.76,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q055",
+      "query": "What type of company is Utthunga?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.645919,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 22.58,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q056",
+      "query": "What services does Utthunga offer?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.670987,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 18.31,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q057",
+      "query": "What is Utthunga's mission?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.719934,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 17.18,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q058",
+      "query": "On what platform is the OpenHands paper published?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.639075,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        2
+      ],
+      "reason": "The paper's submission history on arXiv.org indicates it was published on arXiv.",
+      "fallback": "none",
+      "retrieval_latency_ms": 27.02,
+      "verifier_latency_ms": 13107.8
+    },
+    {
+      "id": "q059",
+      "query": "When was the OpenHands paper created?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.588403,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        2
+      ],
+      "reason": "Chunk 2 indicates the paper was submitted with version v1 on July 23, 2024.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2226.95,
+      "verifier_latency_ms": 15881.4
+    },
+    {
+      "id": "q060",
+      "query": "What version is the OpenHands paper?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Meet _GPT-5.6 2.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.598106,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        2
+      ],
+      "reason": "The paper has three versions: v1, v2, and v3, with the latest being v3.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2177.99,
+      "verifier_latency_ms": 16798.9
+    },
+    {
+      "id": "q061",
+      "query": "Who is the first author of the OpenHands paper?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.655514,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2155.32,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q062",
+      "query": "What platform hosts the game built by GPT-5.6 in the demo?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.736404,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 38.18,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q063",
+      "query": "How many models does the GPT-5.6 API offer?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.719322,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 30.55,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q064",
+      "query": "What reasoning level is Max Reasoning in the GPT-5.6 demo?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.692291,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.33,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q065",
+      "query": "What is the efficiency of the IP2312 at 2A according to the PCB guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.729869,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 28.09,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q066",
+      "query": "What trace width is needed for 3A on 1 oz copper in the PCB guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.758929,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 32.44,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q067",
+      "query": "What is the form factor of the PCB in the design guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.710738,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.1,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q068",
+      "query": "What PCB manufacturer is mentioned in the design guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.662422,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.63,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q069",
+      "query": "What workflow step comes after DRC in the PCB design process?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.753672,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.03,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q070",
+      "query": "What is the maximum charging current of the TP4056 according to the PCB guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.700855,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.32,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q071",
+      "query": "What board thickness range is recommended in the PCB guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.62719,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 explicitly mentions the recommended board thickness range of 1.0–1.6 mm.",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.39,
+      "verifier_latency_ms": 11818.3
+    },
+    {
+      "id": "q072",
+      "query": "How many layers does the PCB board have in the design guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.691006,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2120.07,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q073",
+      "query": "What is the time complexity of the Bellman-Ford algorithm?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.688469,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.47,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q074",
+      "query": "What is the time complexity of Dijkstra's algorithm?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.696978,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.86,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q075",
+      "query": "What is the time complexity of the Floyd-Warshall algorithm?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.659071,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 19.32,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q076",
+      "query": "Which algorithm in the DAA assignment can detect negative cycles?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.610071,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        2
+      ],
+      "reason": "Bellman-Ford algorithm can detect negative cycles.",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.86,
+      "verifier_latency_ms": 12416.3
+    },
+    {
+      "id": "q077",
+      "query": "What type of knapsack does greedy algorithm fail on according to the DAA assignment?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.793066,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2146.13,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q078",
+      "query": "What student ID does Girishwar BM have in the DAA assignment?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "AWS Foundations Getting Started.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "AWS CloudFormation.pdf"
+      ],
+      "top_cosine": 0.567998,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention Girishwar BM or any student ID related to DAA assignment.",
+      "fallback": "none",
+      "retrieval_latency_ms": 32.04,
+      "verifier_latency_ms": 13609.7
+    },
+    {
+      "id": "q079",
+      "query": "What student ID does Girishkumar have in the DAA assignment?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.645129,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2131.52,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q080",
+      "query": "Which activation function does the neural network video favor for modern deep networks?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.626416,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 explicitly states that ReLU is favored over sigmoid for modern deep networks.",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.89,
+      "verifier_latency_ms": 14008.6
+    },
+    {
+      "id": "q081",
+      "query": "What range of values do neurons hold in the neural network video?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.67212,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2277.43,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q082",
+      "query": "Who created the neural network video discussed in the knowledge base?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.653066,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 22.84,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q083",
+      "query": "What Python animation library is mentioned in the neural network notes?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.623426,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        5
+      ],
+      "reason": "Chunk 5 mentions the use of manim, a Python library for animations, in the context of neural network explanations.",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.96,
+      "verifier_latency_ms": 14619.0
+    },
+    {
+      "id": "q084",
+      "query": "What problem does the neural network video use as a demonstration?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.717557,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2221.73,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q085",
+      "query": "What book by Goodfellow, Bengio, and Courville is referenced in the neural network notes?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.649687,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 38.85,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q086",
+      "query": "What does the LeetCode article call algorithmic interviews?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.723897,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.47,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q087",
+      "query": "What mathematical book by Knuth is referenced alongside The Art of Computer Programming in the LeetCode article?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.761389,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 38.22,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q088",
+      "query": "Which district administration was criticised by Jharkhand protestors?",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.748542,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.76,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q089",
+      "query": "On what date was the march that led to the FIR in the Jharkhand protest?",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.725099,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.8,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q090",
+      "query": "What genre is the sigmamusicart song?",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.459237,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the retrieved chunks mention the genre of the song 'sigmamusicart'.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.71,
+      "verifier_latency_ms": 14884.8
+    },
+    {
+      "id": "q091",
+      "query": "What is the processing confidence of the sigmamusicart song analysis?",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.537197,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The chunks do not mention anything about the processing confidence of the sigmamusicart song analysis.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2110.47,
+      "verifier_latency_ms": 14589.4
+    },
+    {
+      "id": "q095",
+      "query": "What type of testbed is TiHAN described as?",
+      "positive": true,
+      "expected_sources": [
+        "tihan"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.703667,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2113.07,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q096",
+      "query": "Which documents in the knowledge base discuss algorithms or data structures?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment",
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.58586,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1,
+        2
+      ],
+      "reason": "Chunks 1 and 2 discuss data structures like dynamic programming and disjoint sets, and mention algorithms through the context of problem-solving on platforms like LeetCode.",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.25,
+      "verifier_latency_ms": 15669.8
+    },
+    {
+      "id": "q097",
+      "query": "Which documents mention specific companies or organizations by name?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "openhands",
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.464543,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 explicitly mentions Utthunga and lists industries and organizations it serves, including OEMs, ISVs, MSPs, and specific industries.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2209.54,
+      "verifier_latency_ms": 15926.9
+    },
+    {
+      "id": "q098",
+      "query": "Which documents discuss music, art, or creative content?",
+      "positive": true,
+      "expected_sources": [
+        "sigmamusicart",
+        "gpt56_demo"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.530247,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1,
+        2
+      ],
+      "reason": "Chunk 1 mentions music by Vincent Rubinetti and Chunk 2 discusses art and creative content through the knowledge graph entities.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2230.99,
+      "verifier_latency_ms": 15462.7
+    },
+    {
+      "id": "q099",
+      "query": "Which documents mention specific people by name?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment",
+        "neural_networks",
+        "leetcode",
+        "utthunga"
+      ],
+      "expected_rank": 3,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.490028,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        2
+      ],
+      "reason": "Chunks 1 and 2 mention specific people by name, such as Devendra Nath Mahto and unnamed protesters.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2520.62,
+      "verifier_latency_ms": 15008.8
+    },
+    {
+      "id": "q100",
+      "query": "Which documents discuss topics relevant to electrical or electronics engineering?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design",
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md"
+      ],
+      "top_cosine": 0.586478,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        2
+      ],
+      "reason": "Chunks 1 and 2 contain multiple articles related to PCB design, electrical schematics, electronic components, and circuit symbols, all of which are directly relevant to electrical or electronics engineering.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2324.1,
+      "verifier_latency_ms": 16750.8
+    },
+    {
+      "id": "q101",
+      "query": "Which documents discuss news or current events?",
+      "positive": true,
+      "expected_sources": [
+        "jharkhand_protest"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.476782,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        4,
+        5
+      ],
+      "reason": "Chunks 1, 4, and 5 discuss news events related to protests and political issues in Jharkhand, indicating they are current events.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2180.15,
+      "verifier_latency_ms": 18187.8
+    },
+    {
+      "id": "q102",
+      "query": "Which documents discuss the concept of learning or education?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "neural_networks",
+        "pcb_design",
+        "openhands"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.531893,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1,
+        2,
+        5
+      ],
+      "reason": "Chunks 1, 2, and 5 discuss learning, education, and related concepts.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2190.21,
+      "verifier_latency_ms": 14451.5
+    },
+    {
+      "id": "q103",
+      "query": "Which documents are about Indian companies, events, or institutions?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "jharkhand_protest",
+        "tihan"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Our Organization.md",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.52978,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the chunks mention Indian companies, events, or institutions.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2243.53,
+      "verifier_latency_ms": 12059.8
+    },
+    {
+      "id": "q104",
+      "query": "Which documents discuss open-source software?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.581603,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        2,
+        3
+      ],
+      "reason": "Chunk 2 and 3 mention open-source projects and open-source software in their contexts.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2234.67,
+      "verifier_latency_ms": 14720.6
+    },
+    {
+      "id": "q105",
+      "query": "Which documents discuss the topic of batteries or power supply?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.616676,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "reason": "Multiple chunks mention batteries or power supply in the context of PCB design and charging modules.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2213.26,
+      "verifier_latency_ms": 15338.1
+    },
+    {
+      "id": "q106",
+      "query": "What Indian organizations or institutions are mentioned across all documents in the knowledge base?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga",
+        "jharkhand_protest",
+        "tihan"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.538397,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        4,
+        2
+      ],
+      "reason": "Chunks 2 and 4 mention GeeksForGeeks and LeetCode as Indian organizations or institutions.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2167.7,
+      "verifier_latency_ms": 15515.6
+    },
+    {
+      "id": "q107",
+      "query": "Which documents mention or reference specific mathematical or computational concepts?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment",
+        "neural_networks",
+        "pcb_design"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.604541,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1,
+        3,
+        4,
+        5
+      ],
+      "reason": "Multiple chunks mention mathematical and computational concepts like neural networks, algorithms, data structures, and specific references to books like Concrete Mathematics and The Art of Computer Programming.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2334.29,
+      "verifier_latency_ms": 18057.9
+    },
+    {
+      "id": "q108",
+      "query": "Which documents discuss topics relevant to software development or programming?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "daa_assignment",
+        "openhands",
+        "gpt56_demo"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.602716,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "reason": "Multiple chunks discuss software development topics like AI agents, test generation, code analysis, and programming languages.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2255.99,
+      "verifier_latency_ms": 15379.5
+    },
+    {
+      "id": "q109",
+      "query": "What different types of media or content formats are represented in the knowledge base?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks",
+        "sigmamusicart",
+        "tihan",
+        "daa_assignment",
+        "pcb_design"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.54404,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention any specific media or content formats.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2246.35,
+      "verifier_latency_ms": 12708.3
+    },
+    {
+      "id": "q110",
+      "query": "Which documents discuss topics related to job markets, interviews, or employment?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "jharkhand_protest",
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.571393,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 discusses LeetCode, which is related to job markets and interviews for developers.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2324.0,
+      "verifier_latency_ms": 11953.3
+    },
+    {
+      "id": "q111",
+      "query": "Which documents discuss topics related to reviews, opinions, or subjective analysis?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "sigmamusicart",
+        "neural_networks"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.539295,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1,
+        5
+      ],
+      "reason": "Chunk 1 and 5 mention 'Code Reviews' and 'What I Learned From LeetCode' which are examples of reviews and opinions.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2183.53,
+      "verifier_latency_ms": 15406.6
+    },
+    {
+      "id": "q112",
+      "query": "Why does the DAA assignment say greedy algorithms fail on the 0/1 knapsack problem?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.794511,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2354.89,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q113",
+      "query": "What is the difference between how the LeetCode article and the DAA assignment discuss algorithms?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode",
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "DAA assignment-4.pdf"
+      ],
+      "top_cosine": 0.647923,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 32.74,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q114",
+      "query": "What is the current price of Bitcoin?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.468763,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the retrieved chunks provide information about the current price of Bitcoin.",
+      "fallback": "none",
+      "retrieval_latency_ms": 35.23,
+      "verifier_latency_ms": 11450.0
+    },
+    {
+      "id": "q115",
+      "query": "Who won the 2026 FIFA World Cup?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "AWS Foundations Getting Started.pdf",
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.485295,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention the winner of the 2026 FIFA World Cup.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2364.92,
+      "verifier_latency_ms": 11886.8
+    },
+    {
+      "id": "q116",
+      "query": "What are the symptoms of dengue fever?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.433,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "gate disabled or below band",
+      "fallback": "none",
+      "retrieval_latency_ms": 2177.44,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q117",
+      "query": "How do I make sourdough bread at home?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "Meet _GPT-5.6 2.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.421887,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "gate disabled or below band",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.73,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q118",
+      "query": "What is Utthunga's annual revenue?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.605613,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention Utthunga's annual revenue.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.77,
+      "verifier_latency_ms": 10186.0
+    },
+    {
+      "id": "q119",
+      "query": "What programming languages does OpenHands support?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "What I Learned From LeetCode.md",
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.696674,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2153.34,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q120",
+      "query": "How many layers does the neural network in the video actually have?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.713913,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.59,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q121",
+      "query": "What is the exact width in millimeters of the PCB traces in the example project?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.709953,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 27.63,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q122",
+      "query": "What is the name of the song by sigmamusicart?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "sigmamusicart-song-english-edm-296526.mp3",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.51097,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the retrieved chunks contain the name of a song by sigmamusicart.",
+      "fallback": "none",
+      "retrieval_latency_ms": 28.32,
+      "verifier_latency_ms": 14230.6
+    },
+    {
+      "id": "q123",
+      "query": "What is the exact date the Jharkhand protest started?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md"
+      ],
+      "top_cosine": 0.701073,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2405.33,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q124",
+      "query": "What is the stock price of OpenAI?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.48681,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention the stock price of OpenAI.",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.74,
+      "verifier_latency_ms": 11588.4
+    },
+    {
+      "id": "q125",
+      "query": "What is the IP2312 chip's operating voltage range?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.652203,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2182.26,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q126",
+      "query": "How does the TiHAN testbed handle vehicle communication protocols?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.698478,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.57,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q127",
+      "query": "What machine learning framework does Utthunga use for its engineering projects?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.685378,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 28.27,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q128",
+      "query": "How many documents are in the knowledge base?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.598246,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention the total number of documents in the knowledge base.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.47,
+      "verifier_latency_ms": 12180.2
+    },
+    {
+      "id": "q129",
+      "query": "What version of the knowledge base is currently loaded?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.558389,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 explicitly states that V1 is implemented and V2 is on the roadmap, indicating the current loaded version is V1.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2332.73,
+      "verifier_latency_ms": 14804.8
+    },
+    {
+      "id": "q130",
+      "query": "When was the knowledge base last updated?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.553152,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention the last update date of the knowledge base.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2225.5,
+      "verifier_latency_ms": 14410.0
+    },
+    {
+      "id": "q131",
+      "query": "What database does PAM use for storing embeddings?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.588693,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.95,
+      "supporting_chunk_indices": [
+        2,
+        4
+      ],
+      "reason": "Chunk 2 explicitly states PAM uses the nomic-embed-text model for embeddings, and Chunk 4 mentions the vector store as part of the infrastructure where embeddings are stored.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2316.5,
+      "verifier_latency_ms": 18274.8
+    },
+    {
+      "id": "q132",
+      "query": "What is the maximum file size PAM can process?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.637275,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention anything about the maximum file size PAM can process.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2192.94,
+      "verifier_latency_ms": 12652.1
+    },
+    {
+      "id": "q133",
+      "query": "How does PAM handle multiple languages?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.546214,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention anything about PAM handling multiple languages.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2209.84,
+      "verifier_latency_ms": 13960.0
+    },
+    {
+      "id": "q134",
+      "query": "What is the accuracy rate of the OpenHands code generation?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.679163,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2223.3,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q135",
+      "query": "What are the best practices for REST API design?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Web Module 5 notes.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.526594,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not contain information about REST API design best practices.",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.69,
+      "verifier_latency_ms": 12669.6
+    },
+    {
+      "id": "q136",
+      "query": "How do I configure a Kubernetes cluster?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "What I Learned From LeetCode.md",
+        "Module 5-Graph Theory.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.419649,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "gate disabled or below band",
+      "fallback": "none",
+      "retrieval_latency_ms": 2252.08,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q137",
+      "query": "What is the difference between SQL and NoSQL databases?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.454706,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not contain information about SQL and NoSQL databases.",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.36,
+      "verifier_latency_ms": 12237.9
+    },
+    {
+      "id": "q138",
+      "query": "What are the health benefits of meditation?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.417747,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "gate disabled or below band",
+      "fallback": "none",
+      "retrieval_latency_ms": 2189.38,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q139",
+      "query": "How does photosynthesis work in plants?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Meet _GPT-5.6 2.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.427783,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "gate disabled or below band",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.2,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q140",
+      "query": "What does Utthunga's One Team core value represent?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.656071,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.62,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q141",
+      "query": "Does Utthunga hold ISO 27001 certification?",
+      "positive": true,
+      "expected_sources": [
+        "utthunga"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Our Organization.md",
+        "Our Organization.md",
+        "AWS Foundations Getting Started.pdf",
+        "AWS CloudFormation.pdf",
+        "Our Organization.md"
+      ],
+      "top_cosine": 0.568372,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1
+      ],
+      "reason": "Chunk 1 explicitly states that Utthunga is ISO 27001:2013 certified.",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.1,
+      "verifier_latency_ms": 12560.8
+    },
+    {
+      "id": "q142",
+      "query": "What two benchmarks are used to evaluate OpenHands?",
+      "positive": true,
+      "expected_sources": [
+        "openhands"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.654351,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2110.36,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q143",
+      "query": "What does DRC stand for in PCB design?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.755373,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 23.94,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q144",
+      "query": "What type of charging IC is the IP2312 described as?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.725397,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.72,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q145",
+      "query": "What role do ground planes play in PCB design according to the guide?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.677228,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 32.91,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q146",
+      "query": "What algorithm does the DAA assignment say is suited for dense graphs?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Module 5-Graph Theory.pdf"
+      ],
+      "top_cosine": 0.649101,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.26,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q147",
+      "query": "What data structure does Dijkstra algorithm use according to the DAA assignment?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.562736,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        2
+      ],
+      "reason": "Chunk 2 explicitly mentions that Dijkstra's algorithm uses a priority queue.",
+      "fallback": "none",
+      "retrieval_latency_ms": 29.15,
+      "verifier_latency_ms": 13993.5
+    },
+    {
+      "id": "q148",
+      "query": "What requirement must a problem have for greedy algorithms to work according to the DAA assignment?",
+      "positive": true,
+      "expected_sources": [
+        "daa_assignment"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "DAA assignment-4.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.769799,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2169.71,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q149",
+      "query": "What issue does ReLU help mitigate according to the neural network notes?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.697618,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 42.65,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q150",
+      "query": "What role does linear algebra play in neural networks according to the video?",
+      "positive": true,
+      "expected_sources": [
+        "neural_networks"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.761342,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 37.98,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q151",
+      "query": "What pattern does the LeetCode article compare the retry-and-resubmit cycle to?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.586402,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The chunks do not mention a pattern comparison made by the LeetCode article.",
+      "fallback": "none",
+      "retrieval_latency_ms": 43.09,
+      "verifier_latency_ms": 13838.3
+    },
+    {
+      "id": "q152",
+      "query": "What does GPT-5.6 use to execute tools in the demo?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.72234,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2137.6,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q153",
+      "query": "What kind of task distribution does GPT-5.6 use in the demo?",
+      "positive": true,
+      "expected_sources": [
+        "gpt56_demo"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.702349,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 31.67,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q154",
+      "query": "Which documents discuss hardware or physical devices?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design",
+        "tihan"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.584144,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "reason": "Chunks 2-5 discuss PCB design, components, layout, and thermal management, which are physical devices and hardware-related.",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.25,
+      "verifier_latency_ms": 15355.9
+    },
+    {
+      "id": "q155",
+      "query": "Which documents discuss optimization or efficiency in their respective domains?",
+      "positive": true,
+      "expected_sources": [
+        "pcb_design",
+        "daa_assignment",
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "DAA assignment-4.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Web Module 5 notes.pdf",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.593024,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 0.9,
+      "supporting_chunk_indices": [
+        1,
+        3
+      ],
+      "reason": "Chunk 1 discusses optimization problems and the greedy approach, while Chunk 3 explains the virtual DOM's performance optimization.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2180.23,
+      "verifier_latency_ms": 15201.1
+    },
+    {
+      "id": "q156",
+      "query": "The LeetCode article references both criticism and endorsement of algorithmic interviews. How does it reconcile these?",
+      "positive": true,
+      "expected_sources": [
+        "leetcode"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md",
+        "What I Learned From LeetCode.md"
+      ],
+      "top_cosine": 0.73103,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2245.97,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q157",
+      "query": "What is the cost of a JLCPCB PCB fabrication order?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md",
+        "PCB Board Design A Step-by-Step Guide for Beginners.md"
+      ],
+      "top_cosine": 0.604247,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention the cost of a JLCPCB PCB fabrication order.",
+      "fallback": "none",
+      "retrieval_latency_ms": 34.74,
+      "verifier_latency_ms": 13587.1
+    },
+    {
+      "id": "q158",
+      "query": "What specific model of webcam does TiHAN use for autonomous navigation?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "But what is a neural network  Deep learning chapter 1.md",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.690654,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2123.92,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q159",
+      "query": "How many GitHub stars does the OpenHands repository have?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "OpenHands An Open Platform for AI Software Developers as Generalist Agents.md",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.616105,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention the number of GitHub stars for the OpenHands repository.",
+      "fallback": "none",
+      "retrieval_latency_ms": 35.03,
+      "verifier_latency_ms": 13814.2
+    },
+    {
+      "id": "q160",
+      "query": "What is the refresh rate of the display used in the GPT-5.6 demo?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md",
+        "Meet _GPT-5.6 2.md"
+      ],
+      "top_cosine": 0.625185,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention the refresh rate of the display used in the GPT-5.6 demo.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2132.38,
+      "verifier_latency_ms": 13312.6
+    },
+    {
+      "id": "q161",
+      "query": "What is the RRF constant k used by PAM's hybrid search merge?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.733858,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2140.81,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q162",
+      "query": "Which embedding model produces the vectors stored by PAM, and how many dimensions do they have?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.738693,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.11,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q163",
+      "query": "What are the default chunk size and overlap settings of PAM's SemanticChunker?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.73218,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.99,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q164",
+      "query": "What is the default text model PAM sends to Ollama for document analysis and QA?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.720469,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.19,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q165",
+      "query": "How many document kinds, concrete ingestors, and processors does PAM route to?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.672166,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.16,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q166",
+      "query": "What abstention threshold does the Auto Testing project's frozen Phase 3B configuration use?",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.627934,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        5
+      ],
+      "reason": "Chunk 1 and Chunk 5 explicitly mention the 0.45 abstention threshold used in the frozen Phase 3B configuration.",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.61,
+      "verifier_latency_ms": 13555.4
+    },
+    {
+      "id": "q167",
+      "query": "Which local LLM generates the final answers in the Auto Testing project?",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "What I Learned From LeetCode.md",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.697534,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2092.9,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q168",
+      "query": "Which two GPU environments does the GPU testing platform use for local development and larger experiments?",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.669171,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.45,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q169",
+      "query": "Which languages does the GPU platform support for test generation initially?",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.712773,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.6,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q170",
+      "query": "What are the two primary types of React components described in the Web Module 5 notes?",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.678388,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.09,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q171",
+      "query": "Which ReactDOM API is the modern way to define the root DOM element in React 18+, replacing the legacy render() method?",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.769043,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.11,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q172",
+      "query": "Define 'source' and 'sink' in a directed graph.",
+      "positive": true,
+      "expected_sources": [
+        "graph_theory"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.714983,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 19.12,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q173",
+      "query": "What is the formal 7-tuple definition of a Turing Machine M?",
+      "positive": true,
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.727222,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 19.82,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q174",
+      "query": "Which docker command lists all local containers, both running and stopped?",
+      "positive": true,
+      "expected_sources": [
+        "docker_cheatsheet"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Docker CheatSheet ApnaCollege.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.774118,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 22.91,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q175",
+      "query": "How are in-degree and out-degree of a vertex defined in a directed graph?",
+      "positive": true,
+      "expected_sources": [
+        "graph_theory"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "Module 5-Graph Theory.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "FLAT MODULE 5 NOTES .pdf"
+      ],
+      "top_cosine": 0.841566,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.12,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q176",
+      "query": "What are the stages of PAM's ingestion pipeline, in order from a new file in data/inbox/ to the file moved to data/processed/?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.690987,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.8,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q177",
+      "query": "What are the two hard context limits PAM enforces when building the LLM prompt for pam ask?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.68458,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.78,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q178",
+      "query": "Describe the Auto Testing project's full runtime flow, from user query to final answer.",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.750074,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.32,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q179",
+      "query": "What are the steps of the GPU platform's end-to-end workflow, from project ingestion to the final report?",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.656378,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.44,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q180",
+      "query": "How does the React Color Organizer manage application state, and how does data flow down and back up the component tree?",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.780808,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 23.8,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q181",
+      "query": "What does an undefined entry in a Turing Machine transition table mean?",
+      "positive": true,
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.746146,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.31,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q182",
+      "query": "Compare the Real DOM and the React Virtual DOM: how does each handle updates, and who uses them?",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.827866,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 25.51,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q183",
+      "query": "Why does PAM run both vector search and BM25, and what does hybrid search add?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf"
+      ],
+      "top_cosine": 0.702607,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.79,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q184",
+      "query": "What are the three system configurations compared in the GPU platform's evaluation strategy?",
+      "positive": true,
+      "expected_sources": [
+        "gpu_report"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.641392,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 24.52,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q185",
+      "query": "Why does the Auto Testing system use both semantic retrieval and BM25, and why RRF for fusion?",
+      "positive": true,
+      "expected_sources": [
+        "auto_testing"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.722948,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.49,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q186",
+      "query": "In PAM's RRF worked example, which of chunks A, B, C wins, and why?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.713545,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 27.05,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q187",
+      "query": "What is the pool_size formula PAM uses to widen the retrieval pool before fusion?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Auto_Testing_Faculty_Explanation.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.69956,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 20.73,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q188",
+      "query": "What are PAM's BM25 parameters k1 and b, and what does each tune?",
+      "positive": true,
+      "expected_sources": [
+        "pam_guide"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.608282,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        1,
+        4
+      ],
+      "reason": "Chunk 1 states PAM's BM25 defaults are k1=1.5 and b=0.75, with k1 tuning term-frequency saturation and b tuning length normalization strength.",
+      "fallback": "none",
+      "retrieval_latency_ms": 23.38,
+      "verifier_latency_ms": 17272.9
+    },
+    {
+      "id": "q189",
+      "query": "What are the domain and range of the transition function delta in the Turing Machine definition?",
+      "positive": true,
+      "expected_sources": [
+        "flat_tm"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "FLAT MODULE 5 NOTES .pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "But what is a neural network  Deep learning chapter 1.md"
+      ],
+      "top_cosine": 0.727762,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2061.16,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q190",
+      "query": "In the React ingredients-list example, why does each element need a key property, and what was used as the key?",
+      "positive": true,
+      "expected_sources": [
+        "web_module5"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.788069,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.42,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q191",
+      "query": "Which AWS certificate was completed on August 06, 2026, by Giridhar BM?",
+      "positive": true,
+      "expected_sources": [
+        "cert_devops_aws"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Docker_Introduction.pdf",
+        "Introduction to Cloud.pdf"
+      ],
+      "top_cosine": 0.835152,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 21.61,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q192",
+      "query": "Which Cognitive Class certificate refers to CC0101EN?",
+      "positive": true,
+      "expected_sources": [
+        "cert_intro_cloud"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Introduction to Cloud.pdf",
+        "Docker_Introduction.pdf",
+        "python for data science.pdf",
+        "AWS CloudFormation.pdf",
+        "AWS Foundations Getting Started.pdf"
+      ],
+      "top_cosine": 0.836932,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 22.02,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q193",
+      "query": "Who is listed as Senior Data Scientist on the Data Analysis with Python certificate?",
+      "positive": true,
+      "expected_sources": [
+        "cert_data_analysis"
+      ],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "python for data science.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Docker_Introduction.pdf"
+      ],
+      "top_cosine": 0.639548,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "None of the provided chunks mention a Senior Data Scientist listed on the Data Analysis with Python certificate.",
+      "fallback": "none",
+      "retrieval_latency_ms": 22.17,
+      "verifier_latency_ms": 11542.0
+    },
+    {
+      "id": "q194",
+      "query": "Which certificate covers 'Docker Essentials: A Developer Introduction'?",
+      "positive": true,
+      "expected_sources": [
+        "cert_docker_intro"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "Docker_Introduction.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Introduction to Cloud.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "python for data science.pdf"
+      ],
+      "top_cosine": 0.729266,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2061.41,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q195",
+      "query": "What is the verification URL on the Python 101 for Data Science certificate?",
+      "positive": true,
+      "expected_sources": [
+        "cert_python_ds"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "python for data science.pdf",
+        "Introduction to Cloud.pdf",
+        "Docker_Introduction.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Getting Started with DevOps on AWS.pdf"
+      ],
+      "top_cosine": 0.70975,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 26.25,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q196",
+      "query": "How much RAM does PAM require to run its vector store?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.622914,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention anything about the RAM requirements for PAM's vector store.",
+      "fallback": "none",
+      "retrieval_latency_ms": 19.49,
+      "verifier_latency_ms": 12503.8
+    },
+    {
+      "id": "q197",
+      "query": "Which version of Node.js is required to run the React examples in the Web Module 5 notes?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf",
+        "Web Module 5 notes.pdf"
+      ],
+      "top_cosine": 0.609459,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks discuss React concepts like Virtual DOM, rendering processes, and JSX but do not mention any specific Node.js version requirements.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2068.47,
+      "verifier_latency_ms": 12451.8
+    },
+    {
+      "id": "q198",
+      "query": "What is the total cost estimate to build the GPU testing platform, including the RTX 5060 hardware?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.598606,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The retrieved chunks do not mention any cost estimates for building the GPU testing platform, including the RTX 5060 hardware.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2117.97,
+      "verifier_latency_ms": 10195.0
+    },
+    {
+      "id": "q199",
+      "query": "What is the full name of the institution abbreviated as SNPSU in the Web Module 5 notes?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "Web Module 5 notes.pdf",
+        "What I Learned From LeetCode.md",
+        "PAM_V1_LEARNING_GUIDE.pdf",
+        "PAM_V1_LEARNING_GUIDE.pdf"
+      ],
+      "top_cosine": 0.551697,
+      "verifier_invoked": true,
+      "vote": "SUPPORTED",
+      "confidence": 1.0,
+      "supporting_chunk_indices": [
+        2
+      ],
+      "reason": "Chunk 2 explicitly mentions SNPSU as the institution in the Web Module 5 notes.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2082.71,
+      "verifier_latency_ms": 8681.9
+    },
+    {
+      "id": "q200",
+      "query": "Which container orchestration platform does the Docker CheatSheet recommend for production deployments?",
+      "positive": false,
+      "expected_sources": [],
+      "expected_rank": null,
+      "retrieved_sources": [
+        "Docker CheatSheet ApnaCollege.pdf",
+        "Docker CheatSheet ApnaCollege.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf",
+        "GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf"
+      ],
+      "top_cosine": 0.586597,
+      "verifier_invoked": true,
+      "vote": "INSUFFICIENT_EVIDENCE",
+      "confidence": 0.0,
+      "supporting_chunk_indices": [],
+      "reason": "The chunks do not mention any container orchestration platform recommended by Docker CheatSheet for production deployments.",
+      "fallback": "none",
+      "retrieval_latency_ms": 2097.74,
+      "verifier_latency_ms": 8521.2
+    },
+    {
+      "id": "q201",
+      "query": "Which AWS certificate was completed on August 07, 2026?",
+      "positive": true,
+      "expected_sources": [
+        "cert_cloudformation"
+      ],
+      "expected_rank": 1,
+      "retrieved_sources": [
+        "AWS CloudFormation.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Docker_Introduction.pdf",
+        "Introduction to Cloud.pdf"
+      ],
+      "top_cosine": 0.815318,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 2104.15,
+      "verifier_latency_ms": null
+    },
+    {
+      "id": "q202",
+      "query": "Which AWS certificate was completed on August 08, 2026?",
+      "positive": true,
+      "expected_sources": [
+        "cert_aws_foundations"
+      ],
+      "expected_rank": 2,
+      "retrieved_sources": [
+        "AWS CloudFormation.pdf",
+        "AWS Foundations Getting Started.pdf",
+        "Getting Started with DevOps on AWS.pdf",
+        "Docker_Introduction.pdf",
+        "Introduction to Cloud.pdf"
+      ],
+      "top_cosine": 0.80642,
+      "verifier_invoked": false,
+      "vote": null,
+      "confidence": null,
+      "supporting_chunk_indices": [],
+      "reason": "outside band (above band_high)",
+      "fallback": "none",
+      "retrieval_latency_ms": 38.75,
+      "verifier_latency_ms": null
+    }
+  ]
+}
