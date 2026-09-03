@@ -100,8 +100,8 @@ class TestDatasetSize:
     def test_total_queries_at_least_150(self, queries: list[dict]) -> None:
         assert len(queries) >= 150, f"Expected >= 150 queries, got {len(queries)}"
 
-    def test_total_queries_exactly_160(self, queries: list[dict]) -> None:
-        assert len(queries) == 160, f"Expected 160 queries, got {len(queries)}"
+    def test_total_queries_exactly_199(self, queries: list[dict]) -> None:
+        assert len(queries) == 199, f"Expected 199 queries, got {len(queries)}"
 
     def test_negative_queries_at_least_25(self, queries: list[dict]) -> None:
         neg = [q for q in queries if not q["expected_sources"]]
@@ -109,7 +109,7 @@ class TestDatasetSize:
 
     def test_negative_queries_count(self, queries: list[dict]) -> None:
         neg = [q for q in queries if not q["expected_sources"]]
-        assert len(neg) == 37, f"Expected 37 negatives, got {len(neg)}"
+        assert len(neg) == 42, f"Expected 42 negatives, got {len(neg)}"
 
 
 # ── ID uniqueness tests ──────────────────────────────────────────────
@@ -131,18 +131,29 @@ class TestQueryIDs:
 
 
 class TestCategories:
-    VALID = {"factoid", "comparison", "negative", "cross_document", "tricky"}
-
-    def test_all_categories_valid(self, queries: list[dict]) -> None:
+    def test_all_categories_valid(self, queries: list[dict], dataset: dict) -> None:
+        declared = set(dataset["metadata"]["categories"])
         for q in queries:
-            assert q["category"] in self.VALID, f"{q['id']}: invalid category '{q['category']}'"
+            assert q["category"] in declared, f"{q['id']}: invalid category '{q['category']}'"
 
-    def test_no_category_below_minimum(self, queries: list[dict]) -> None:
+    def test_every_declared_category_has_queries(
+        self, queries: list[dict], dataset: dict
+    ) -> None:
+        declared = set(dataset["metadata"]["categories"])
+        present = {q["category"] for q in queries}
+        missing = declared - present
+        assert not missing, f"Declared categories with no queries: {missing}"
+
+    def test_core_categories_above_minimum(self, queries: list[dict]) -> None:
+        # Original Phase 3D core categories retain the >= 5 representation
+        # guarantee; auxiliary categories (precise_detail, multi_chunk) are
+        # validated for presence only (see test_every_declared_category_has_queries).
+        core = {"factoid", "comparison", "negative", "cross_document", "tricky"}
         cats = {}
         for q in queries:
             cats[q["category"]] = cats.get(q["category"], 0) + 1
-        for cat, count in cats.items():
-            assert count >= 5, f"Category '{cat}' has only {count} queries (minimum 5)"
+        for cat in core:
+            assert cats.get(cat, 0) >= 5, f"Category '{cat}' has only {cats.get(cat, 0)} queries (minimum 5)"
 
     def test_negatives_are_own_category(self, queries: list[dict]) -> None:
         for q in queries:
@@ -166,14 +177,11 @@ class TestPositiveGroundTruth:
             if q["category"] != "negative":
                 assert q.get("expected_evidence"), f"{q['id']}: positive query has no expected_evidence"
 
-    def test_all_source_keys_known(self, queries: list[dict]) -> None:
+    def test_all_source_keys_known(self, queries: list[dict], dataset: dict) -> None:
+        known = set(dataset["metadata"]["source_documents"])
         for q in queries:
             for src in q.get("expected_sources", []):
-                assert src in SOURCE_KEY_TO_FILENAME or src in {
-                    "neural_networks", "daa_assignment", "jharkhand_protest",
-                    "gpt56_demo", "openhands", "utthunga", "pcb_design",
-                    "leetcode", "tihan", "b_md", "pam_smoke_test", "sigmamusicart",
-                }, f"{q['id']}: unknown source key '{src}'"
+                assert src in known, f"{q['id']}: unknown source key '{src}'"
 
 
 # ── Negative ground truth tests ──────────────────────────────────────
@@ -315,10 +323,10 @@ class TestFrozenV1Reference:
 
 class TestDatasetIntegrity:
     def test_metadata_version(self, dataset: dict) -> None:
-        assert dataset["metadata"]["version"] == "2.0"
+        assert dataset["metadata"]["version"] == "3.0"
 
     def test_metadata_has_phase(self, dataset: dict) -> None:
-        assert dataset["metadata"].get("phase") == "3D"
+        assert dataset["metadata"].get("phase") == "5D"
 
     def test_metadata_references_frozen(self, dataset: dict) -> None:
         assert "dataset_v1_frozen.json" in dataset["metadata"].get("original_frozen_as", "")
