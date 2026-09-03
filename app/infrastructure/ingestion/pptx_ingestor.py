@@ -73,8 +73,9 @@ class PptxIngestor(BaseIngestor):
 
     def _extract_odp(self, path: Path) -> str:
         try:
+            from odf import draw, teletype  # type: ignore[import-untyped]
+            from odf import text as odf_text
             from odf.opendocument import load  # type: ignore[import-untyped]
-            from odf import draw, text as odf_text, teletype  # type: ignore[import-untyped]
 
             doc = load(str(path))
             texts: list[str] = []

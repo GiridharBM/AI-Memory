@@ -79,8 +79,9 @@ class SpreadsheetIngestor(BaseIngestor):
 
     def _extract_ods(self, path: Path) -> str:
         try:
+            from odf import table, teletype  # type: ignore[import-untyped]
+            from odf import text as odf_text
             from odf.opendocument import load  # type: ignore[import-untyped]
-            from odf import table, text as odf_text, teletype  # type: ignore[import-untyped]
 
             doc = load(str(path))
             texts: list[str] = []

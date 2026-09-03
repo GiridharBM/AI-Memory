@@ -10,7 +10,6 @@ import pytest
 
 from app.application.qa_workflow import ORIGIN_SYSTEM, OUTCOME_ANSWERED, QAAnswer, QAWorkflow
 from app.application.system_facts import (
-    SUPPORTED_INGESTION_TYPES,
     Intent,
     SystemFactsRouter,
     SystemFactsService,
@@ -212,7 +211,9 @@ class FakeOllamaClient:
         raise AssertionError("LLM must not be called for system facts")
 
 
-def _workflow_with_system_facts(tmp_path: Path) -> tuple[QAWorkflow, FakeSearchService, FakeOllamaClient]:
+def _workflow_with_system_facts(
+    tmp_path: Path,
+) -> tuple[QAWorkflow, FakeSearchService, FakeOllamaClient]:
     _write_pyproject(tmp_path)
     _write_vector_store(tmp_path, [{"source": "a.md"}])
     svc = SystemFactsService(_fake_settings(tmp_path))

@@ -66,7 +66,11 @@ def compute_metrics(results: list[dict], ks: list[int] | None = None) -> dict:
                 hit_rates[k] += 1
         mrr_scores.append(1.0 / found_at_rank if found_at_rank else 0.0)
     n_pos = len(positive_results)
-    metrics: dict = {"total_queries": total, "queries_with_ground_truth": n_pos, "negative_queries": len(negative_results)}
+    metrics: dict = {
+        "total_queries": total,
+        "queries_with_ground_truth": n_pos,
+        "negative_queries": len(negative_results),
+    }
     for k in ks:
         metrics[f"hit_rate@{k}"] = hit_rates[k] / n_pos if n_pos else 0
     metrics["mrr"] = sum(mrr_scores) / len(mrr_scores) if mrr_scores else 0
@@ -153,7 +157,8 @@ class TestCategories:
         for q in queries:
             cats[q["category"]] = cats.get(q["category"], 0) + 1
         for cat in core:
-            assert cats.get(cat, 0) >= 5, f"Category '{cat}' has only {cats.get(cat, 0)} queries (minimum 5)"
+            count = cats.get(cat, 0)
+            assert count >= 5, f"Category '{cat}' has only {count} queries (minimum 5)"
 
     def test_negatives_are_own_category(self, queries: list[dict]) -> None:
         for q in queries:
@@ -175,7 +180,9 @@ class TestPositiveGroundTruth:
     def test_positive_queries_have_evidence(self, queries: list[dict]) -> None:
         for q in queries:
             if q["category"] != "negative":
-                assert q.get("expected_evidence"), f"{q['id']}: positive query has no expected_evidence"
+                assert q.get("expected_evidence"), (
+                    f"{q['id']}: positive query has no expected_evidence"
+                )
 
     def test_all_source_keys_known(self, queries: list[dict], dataset: dict) -> None:
         known = set(dataset["metadata"]["source_documents"])
@@ -332,7 +339,14 @@ class TestDatasetIntegrity:
         assert "dataset_v1_frozen.json" in dataset["metadata"].get("original_frozen_as", "")
 
     def test_all_queries_have_required_fields(self, queries: list[dict]) -> None:
-        required = {"id", "query", "expected_sources", "category", "difficulty", "ground_truth_reliable"}
+        required = {
+            "id",
+            "query",
+            "expected_sources",
+            "category",
+            "difficulty",
+            "ground_truth_reliable",
+        }
         for q in queries:
             missing = required - set(q.keys())
             assert not missing, f"{q.get('id', '?')}: missing fields {missing}"

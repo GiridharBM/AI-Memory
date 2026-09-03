@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from app.core.config import Settings
 from app.core.logging import get_logger
 from app.domain.vector_store import SearchResult, VectorEntry
 from app.infrastructure.bm25 import BM25Index
 from app.infrastructure.vector_store import VectorStore
+
+if TYPE_CHECKING:
+    from app.infrastructure.hyde import HyDETransform
 
 logger = get_logger(__name__)
 
@@ -210,7 +214,9 @@ class HybridSearch:
             fused_ids = []
 
         vector_score_map = {r.entry.id: r.score for r in dense}
-        bm25_score_map = {ids[i]: score for i, (doc_idx, score) in enumerate(lexical) if doc_idx < len(ids)}
+        bm25_score_map = {
+            ids[i]: score for i, (doc_idx, score) in enumerate(lexical) if doc_idx < len(ids)
+        }
 
         fused = _rrf_fuse(
             [r.entry.id for r in dense],
@@ -250,7 +256,7 @@ class SearchService:
         store: VectorStore,
         embed: Callable[[str], list[float] | None],
         *,
-        hyde: "HyDETransform | None" = None,
+        hyde: HyDETransform | None = None,
     ) -> None:
         self._store = store
         self._embed = embed

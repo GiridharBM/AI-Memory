@@ -28,9 +28,9 @@ from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
+from app.application.system_facts import SystemFactsRouter, SystemFactsService
 from app.core.config import Settings
 from app.core.logging import get_logger
-from app.application.system_facts import SystemFactsRouter, SystemFactsService
 from app.infrastructure.answerability import AnswerabilityGate, AnswerabilityResult
 from app.infrastructure.llm import (
     OllamaClient,

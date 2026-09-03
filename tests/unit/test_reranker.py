@@ -7,20 +7,14 @@ regression when reranker is off.
 
 from __future__ import annotations
 
-import pytest
-
-from app.infrastructure.reranker import CrossEncoderReranker, RerankerConfig
-from app.infrastructure.search import SearchHit
 from app.application.qa_workflow import (
     ABSTENTION_MESSAGE,
     AbstentionGate,
-    AbstentionResult,
-    QAAnswer,
-    QAError,
     QAWorkflow,
     build_context,
 )
-
+from app.infrastructure.reranker import CrossEncoderReranker, RerankerConfig
+from app.infrastructure.search import SearchHit
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 

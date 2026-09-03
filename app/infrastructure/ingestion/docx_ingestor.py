@@ -63,8 +63,9 @@ class DocxIngestor(BaseIngestor):
 
     def _extract_odt(self, path: Path) -> str:
         try:
+            from odf import teletype
+            from odf import text as odf_text  # type: ignore[import-untyped]
             from odf.opendocument import load  # type: ignore[import-untyped]
-            from odf import text as odf_text, teletype  # type: ignore[import-untyped]
 
             doc = load(str(path))
             parts = [

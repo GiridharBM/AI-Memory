@@ -81,7 +81,7 @@ class _SuccessWorkflow:
     path: Path | None = None
 
     @classmethod
-    def create_default(cls, settings: object, **_: object) -> "_SuccessWorkflow":
+    def create_default(cls, settings: object, **_: object) -> _SuccessWorkflow:
         return cls()
 
     def run(self, source_arg: str | Path, **_: object) -> SimpleNamespace:

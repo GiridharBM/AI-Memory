@@ -744,12 +744,16 @@ def test_cli_status_shows_durable_ledger_counts(
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text("# x", encoding="utf-8")
     (vault / "A.md").write_text(
-        "---\ntitle: A\nsource: " + str(source).replace("\\", "\\\\") + "\nsource_type: markdown\n---\n# A",
+        "---\ntitle: A\nsource: "
+        + str(source).replace("\\", "\\\\")
+        + "\nsource_type: markdown\n---\n# A",
         encoding="utf-8",
     )
     digest = manager.hash_for_path(source)
     manager.add_processed_file(path=source, sha256=digest, extension=".md")
-    manager.add_processed_file(path=source, sha256=digest, extension=".md", status="skipped_duplicate")
+    manager.add_processed_file(
+        path=source, sha256=digest, extension=".md", status="skipped_duplicate"
+    )
     manager.add_failed_file(path=source, sha256=digest, extension=".md", error_reason="boom")
     manager.save()
     (tmp_path / "manifests" / "vector_store.json").write_text(

@@ -14,8 +14,6 @@ import json
 import re
 import tomllib
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Literal
 
 from app.core.config import Settings
 from app.core.logging import get_logger
@@ -110,7 +108,10 @@ class SystemFactsRouter:
             # "what version ... running?" is a system-facts query; "what
             # version of X supports Y" (a knowledge question) does not mention
             # the running PAM instance and stays with normal QA.
-            return any(t in q for t in ("running", "pam", "app", "system", "installed", "current", "you on"))
+            return any(
+                t in q
+                for t in ("running", "pam", "app", "system", "installed", "current", "you on")
+            )
         return ("pam version" in q) or ("version of pam" in q)
 
     def _match_feature(self, q: str) -> bool:
@@ -121,26 +122,45 @@ class SystemFactsRouter:
     def _match_qa_model(self, q: str) -> bool:
         if "model" not in q:
             return False
-        if any(t in q for t in ("what model", "which model", "model answers", "model do you", "model are you")):
+        if any(
+            t in q
+            for t in (
+                "what model", "which model", "model answers", "model do you", "model are you",
+            )
+        ):
             return True
         # "what QA model is PAM using?" reads as "qa model", not "what model".
         # Gate on a self/tool signal so generic knowledge questions about
         # "QA model" (e.g. "What is QA model evaluation?") are not hijacked.
         if "qa model" in q:
-            return any(t in q for t in ("pam", "you", "using", "running", "current", "system", "installed"))
+            return any(
+                t in q for t in ("pam", "you", "using", "running", "current", "system", "installed")
+            )
         return False
 
     def _match_capabilities(self, q: str) -> bool:
         if not any(t in q for t in ("ingest", "support", "process")):
             return False
-        return any(t in q for t in ("types", "formats", "extensions", "file types", "what can", "files do"))
+        return any(
+            t in q for t in ("types", "formats", "extensions", "file types", "what can", "files do")
+        )
 
     def _match_source_count(self, q: str) -> bool:
         if not self._HOW_MANY_RE.search(q):
             return False
         if not re.search(r"\b(documents|sources|files|notes)\b", q):
             return False
-        return any(t in q for t in ("indexed", "ingested", "stored", "loaded", "in the kb", "in the knowledge base"))
+        return any(
+            t in q
+            for t in (
+                "indexed",
+                "ingested",
+                "stored",
+                "loaded",
+                "in the kb",
+                "in the knowledge base",
+            )
+        )
 
     def _match_chunk_count(self, q: str) -> bool:
         if not self._HOW_MANY_RE.search(q):

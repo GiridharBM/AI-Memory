@@ -17,7 +17,6 @@ from app.domain.vector_store import VectorEntry
 from app.infrastructure.embeddings import EmbeddingResult
 from app.infrastructure.ingestion import DocumentIngestionService
 from app.infrastructure.ingestion.service import is_secret_bearing
-from app.infrastructure.semantic_chunking import SemanticChunker
 from app.infrastructure.vector_store import VectorStore
 from app.pipelines.ingest_workflow import IngestionWorkflow
 

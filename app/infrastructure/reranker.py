@@ -167,7 +167,7 @@ class CrossEncoderReranker:
             logger.warning("Reranker inference failed: %s", exc)
             return candidates
 
-        for hit, score in zip(to_rerank, scores):
+        for hit, score in zip(to_rerank, scores, strict=False):
             hit.rerank_score = float(score)
 
         ranked = sorted(to_rerank, key=lambda h: h.rerank_score, reverse=True)
