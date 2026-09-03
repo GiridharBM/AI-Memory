@@ -1,6 +1,6 @@
-# PAM V1 Architecture (source-verified)
+# PAM Architecture (source-verified)
 
-This document describes the architecture that actually exists in the frozen V1.0.0 implementation. It intentionally excludes planned or historical features that are not present in the source tree.
+This document describes the architecture that actually exists in the current **V1.1.0** implementation. It intentionally excludes planned or historical features that are not present in the source tree. The V1.1.0 release did **not** change the frozen retrieval pipeline; it added source management, ingestion safety/UX, truthful status reporting, QA improvements, and system facts on top of the frozen V1.0.0 core.
 
 ## 1. Architecture at a glance
 
@@ -90,6 +90,148 @@ flowchart TD
     AC --> AD[QueueWorker]
     AD --> B
     AD --> AE[ManifestManager + processed-file dedupe]
+```
+
+### 3.1 High-level system overview (V1.1.0)
+
+```mermaid
+flowchart TD
+    subgraph user["User / CLI / Watcher"]
+        U1[`pam ingest ...`]
+        U2[`pam watch`]
+        U3[`pam search` / `pam ask`]
+        U4[`pam status` / `pam sources` / `pam remove` / `pam doctor`]
+    end
+
+    subgraph app["Application / Orchestration"]
+        IO[IngestionWorkflow]
+        QA[QAWorkflow]
+        SM[Source management]
+        SF[SystemFacts]
+    end
+
+    subgraph domain["Domain / Infrastructure"]
+        D[DocumentIngestionService]
+        CL[DocumentClassifier + ProcessorRouter]
+        CH[SemanticChunker]
+        VS[VectorStore]
+        BM[BM25Index]
+        HS[HybridSearch / SearchService]
+        LLM[OllamaClient / model wrappers]
+        KG[KnowledgeGraph]
+        MAN[Manifest / ledger]
+        VAULT[VaultWriter / WikiManager]
+    end
+
+    subgraph storage["Storage"]
+        S1[vault/ notes]
+        S2[data/ vector + BM25 index]
+        S3[data/ knowledge graph]
+        S4[data/ manifest + ledger]
+    end
+
+    U1 --> IO
+    U2 --> IO
+    IO --> D --> CL --> CH --> VS
+    IO --> MAN
+    IO --> KG
+    IO --> VAULT --> S1
+    VS --> S2
+    KG --> S3
+    MAN --> S4
+    U3 --> QA --> HS --> VS
+    HS --> BM
+    QA --> LLM
+    U4 --> SM
+    SM --> VS
+    SM --> KG
+    SM --> MAN
+    U4 --> SF
+```
+
+### 3.2 Ingestion with source management (V1.1.0)
+
+```mermaid
+flowchart TD
+    A[`pam ingest file` / typed subcommand] --> B[IngestionWorkflow.run]
+    B --> C[DocumentIngestionService.ingest]
+    C --> D{Supports type?}
+    D -- no --> E[Structured error - no crash]
+    D -- yes --> F[BaseIngestor chosen by can_ingest]
+    F --> G[SourceDocument]
+    G --> H[Classifier + Router]
+    H --> I[Processor]
+    I --> J[ProcessedDocument]
+    J --> K[SemanticChunker]
+    K --> L[EmbeddingService]
+    L --> M[VectorStore]
+    M --> N[Manifest: hash + ledger entry]
+    N --> O[KnowledgeGraph]
+    O --> P[VaultWriter -> notes]
+```
+
+### 3.3 Source removal / re-ingestion safety (V1.1.0)
+
+```mermaid
+flowchart TD
+    A[`pam remove <source>`] --> B{Exists + unambiguous?}
+    B -- no --> C[Refuse - unknown / ambiguous]
+    B -- yes --> D[De-index vectors for source]
+    D --> E[Remove knowledge-graph nodes + edges]
+    E --> F[Remove manifest / ledger entry]
+    F --> G[Vault notes preserved - never deleted]
+    G --> H[Done - reports what was removed]
+
+    I[Re-ingest existing source] --> J{Paths match?}
+    J -- no --> K[New note / new source]
+    J -- yes --> L[Full successful re-embed + re-index]
+    L --> M{Success?}
+    M -- yes --> N[Atomically replace prior chunks]
+    M -- no --> O[Previous data preserved - no unsafe partial replace]
+```
+
+### 3.4 Query / RAG path (V1.1.0)
+
+```mermaid
+flowchart TD
+    A[`pam search <query>`] --> B[SearchService.search]
+    B --> C[_embed_query]
+    C --> D[HybridSearch.search]
+    D --> E1[VectorStore - dense cosine]
+    D --> E2[BM25Index - lexical]
+    E1 --> F[RRF fusion k=60]
+    E2 --> F
+    F --> G[Filter: top-k / source-type / min-score / metadata]
+    G --> H[SearchHit list]
+
+    I[`pam ask <question>`] --> J[QAWorkflow.ask]
+    J --> B
+    J --> K[build_context - bounded]
+    K --> L[build_qa_user_prompt]
+    L --> M[OllamaClient.generate_text - local model]
+    M --> N[Answer with [SOURCE N] citations]
+```
+
+### 3.5 QA guardrails (V1.1.0)
+
+```mermaid
+flowchart TD
+    A[PAM_SYSTEM_PROMPT] --> B[LLM]
+    A --> C["Abstain when context insufficient"]
+    B --> D{Answer generated?}
+    D -- yes --> E[Configurable timeout default 120s]
+    E --> F[Return QAAnswer with citations]
+    D -- no --> G[QAError - no fabricated answer]
+    C --> B
+```
+
+### 3.6 Development timeline (V1.0.0 → V1.1.0)
+
+```mermaid
+flowchart LR
+    V1[V1.0.0 - Stable Local MVP]<-->V1_1[V1.1.0 - Reliability, Source Mgmt, UX]
+    V1 -.frozen retrieval.-> V1_1
+    V1_1 --> Cur["Current: see PROJECT_STATUS.md"]
 ```
 
 ## 4. What happens when a document enters PAM?
@@ -397,6 +539,27 @@ Examples from source code:
 
 This means the system is local-first and resilient, but it is still intentionally a single-machine, single-worker pipeline over a local filesystem and local Ollama runtime.
 
+## 15.1 V1.1.0 additions: source management, system facts, QA improvements
+
+The V1.1.0 release added features **on top of** the frozen V1.0.0 retrieval core without changing it:
+
+- **Source management** — `pam sources` lists sources with per-source chunk counts and truthful status; `pam remove <source>` de-indexes vectors, removes knowledge-graph nodes/edges, and removes manifest/ledger entries, while **never deleting vault notes** and refusing ambiguous/unknown sources.
+- **Ingestion UX & safety** — `pam ingest file` auto-detect plus typed subcommands (`markdown`, `pdf`, `txt`) and explicit network integrations (`github`, `youtube`); SHA-256 duplicate detection; recoverable failures routed to `failed/` and retried; secret-bearing file blocking.
+- **Re-ingestion reliability** — a re-ingest of an existing source atomically replaces prior chunks only after a full successful re-embed/re-index; on failure the previous data is preserved.
+- **Truthful status** — `pam status` reports processed/skipped/failed counts and queue state truthfully; sources without a ledger match are labeled `indexed (no ledger)`.
+- **QA improvements** — stricter `[SOURCE N]` citation format/resolution, bounded QA timeout (default 120 s), and abstention-before-unnecessary-LLM behavior.
+- **System facts** — `SystemFacts` answers "about the tool" questions (version, source count, feature status, QA model, capabilities) deterministically, without retrieval or an LLM call.
+
+### 15.1.1 Production vs. experimental separation
+
+The shipped, production-enabled configuration is deliberately minimal and frozen:
+
+- **Production (enabled):** local Ollama (`qwen3:8b` for QA, `nomic-embed-text` for embeddings), context `8192`, QA timeout `120 s`, `min_cosine 0.25`, hybrid retrieval as described above.
+- **Frozen for V1.1.0:** retrieval configuration. Historical measurements (Hit@5 ≈ 0.924, MRR ≈ 0.877, FNR = 0.0, p95 ≈ 47 ms) and an elevated FPR (≈ 0.857, mostly content-sufficiency misses — topically relevant but answer-absent — not "wrong answers") drove the decision to freeze retrieval rather than chase experimental gains.
+- **Experimental / disabled (research only):** reranking (`reranker.enabled=false`), HyDE (`hyde.enabled=false`), answerability gating (`answerability.enabled=false`), and banded verification. Their test files and code exist but are not production-gated.
+
+See [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) for the canonical production configuration and limits, and [`KNOWN_LIMITATIONS.md`](./KNOWN_LIMITATIONS.md) for honest limits.
+
 ## 16. Summary
 
 The V1 architecture is a clear local document-intelligence pipeline:
@@ -409,5 +572,7 @@ The V1 architecture is a clear local document-intelligence pipeline:
 - retrieve via hybrid search
 - ground a local LLM answer in the retrieved context
 - write the result back to an Obsidian vault and track progress in manifests and logs
+
+V1.1.0 layered source management, ingestion safety/UX, truthful status, QA hardening, and system facts onto this core **without** altering the frozen retrieval pipeline. The result remains a local-first, single-machine, single-worker document memory system with a deliberately frozen retrieval configuration and clearly separated experimental research features.
 
 Everything above is implemented in the current source tree and is the actual V1 design described in this repository.

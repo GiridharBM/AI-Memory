@@ -1,6 +1,29 @@
 # Testing and Verification
 
-Verification evidence for LLM-Wiki / Personal AI Memory (PAM). The Phase-6 completion evidence is `PHASE_6_FINAL_APPROVAL.md`; per-phase verification records are preserved in `docs/archive/`. **Current V1.0.0 state:** `PROJECT_STATUS.md`.
+Verification evidence for LLM-Wiki / Personal AI Memory (PAM). The Phase-6 completion evidence is `PHASE_6_FINAL_APPROVAL.md`; per-phase verification records are preserved in `docs/archive/`. **Current V1.1.0 state:** `PROJECT_STATUS.md`.
+
+## Current V1.1.0 testing state
+
+The current verified snapshot for the **default unit suite** (`pytest tests/unit`, which excludes `integration`-marked tests) is:
+
+| Suite | Result |
+|-------|--------|
+| **Unit tests (default)** | **1688 passed / 1 deselected / 1 failed** |
+| **Failed** | `test_cli_remove.py::test_remove_one_source_and_unrelated_survives` — a known **logging-isolation flake**; it **passes in isolation** and is a test-hygiene/ordering issue, not a product defect. **Do not fix as part of docs work.** |
+| **Deselected** | 1 `integration`-marked test excluded from the default run |
+| **Evaluation dataset-contract tests** | `tests/unit/test_eval_dataset.py` = **32 passed** (reconciled to the v3.0 dataset contract) |
+| **Evaluation tooling** | `eval/scripts/run_eval.py` and `eval/scripts/ground_truth_audit.py` derive source-keys/categories from dataset metadata and are compatible with the current v3.0 dataset |
+
+**Test categories:**
+- **Unit** (`tests/unit/`, ~71 files) — includes CLI (`test_cli*.py`), pipeline, QA, ingestion, source-management, system-facts, and evaluation-contract tests.
+- **Integration** (`tests/integration/`, 18 files) — `integration`-marked, excluded from the default run; hit live/external services and are run explicitly when required.
+- **Evaluation** — `tests/unit/test_eval_dataset.py` (v3.0 contract, 32 passed); eval scripts under `eval/scripts/`.
+- **Historical/stale** — older evaluation assertions were reconciled; historical numbers are recorded below in the "Final V1.0.0 gate" and "Final state" sections.
+- **Experimental** — testing for disabled research features (e.g. `test_answerability_gate.py`, `test_banded_verifier.py`, `test_qa_measurement.py`) is treated as research/experimental, not production-gating.
+
+> The full historical V1.0 verification records are preserved below for provenance.
+
+---
 
 ## Final V1.0.0 gate (2026-08-11, re-run at finalization)
 

@@ -1,6 +1,19 @@
 # Release Notes
 
-Version history for **LLM-Wiki / Personal AI Memory (PAM)**, current version **V1.0.0** (Stable Local MVP, frozen). Individual milestone release notes are preserved in `docs/archive/release_notes/`.
+Version history for **LLM-Wiki / Personal AI Memory (PAM)**, current version **V1.1.0**. Individual milestone release notes are preserved in `docs/archive/release_notes/`.
+
+## v1.1.0 — current release · Reliability, Source Management & UX
+- **V1.1.0** — the current published release. See [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) for the canonical current state.
+- **Source management** — `pam sources` (read-only listing with per-source chunk counts and truthful status) and `pam remove <source>` (removes vectors, knowledge-graph nodes/edges, and manifest entries; never deletes vault notes; refuses ambiguous/unknown sources).
+- **Ingestion UX & safety** — `pam ingest file` auto-detect plus typed subcommands (`markdown`, `pdf`, `txt`) and explicit network integrations (`github`, `youtube`); SHA-256 duplicate detection; recoverable failures routed to a `failed/` folder and retried; secret-bearing file blocking.
+- **Re-ingestion reliability** — re-ingesting an existing source removes prior chunks only after a full successful re-embed/index, otherwise the previous data is preserved (no unsafe partial replacement).
+- **Status / truthful reporting** — `pam status` reports processed/skipped/failed ingests and queue state truthfully; sources without a ledger match are labeled `indexed (no ledger)`.
+- **QA improvements** — hardened `[SOURCE N]` citation format and resolution, bounded QA timeout (default 120 s), abstention-before-unnecessary-LLM behavior.
+- **System facts** — deterministic answers for "about the tool" questions (version, source count, feature status, QA model, capabilities) without retrieval or an LLM call.
+- **Inspected CLI commands** — `status`, `doctor`, `config`, `watch`, `search`, `ask`, `ingest file/pdf/markdown/txt/github/youtube`, `sources`, `remove` (verified in `app/cli/entry.py`).
+- **Package version alignment** — `pyproject.toml` version aligned to `1.1.0` (commit `14ceaae`).
+- **Evaluation tooling maintenance** — `test_eval_dataset.py` reconciled to the current v3.0 dataset contract (32 passed); `eval/scripts/run_eval.py` and `eval/scripts/ground_truth_audit.py` derive categories/source-keys from dataset metadata.
+- **Documentation** — this documentation set updated to reflect V1.1.0.
 
 ## v1.0.0 — 2026-08-11 · RAG Question Answering (V1.0.0 finalization)
 - **V1.0.0 — Stable Local MVP, frozen.** Canonical release version set in `pyproject.toml`; all active documentation synchronized.

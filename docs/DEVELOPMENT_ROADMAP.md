@@ -2,7 +2,7 @@
 
 Status of every planned and completed item, consolidated from the original `05_Development_Roadmap.md`, the MEDD engineering roadmap, and the phase completion records.
 
-**Project status:** ✅ **COMPLETE** — **V1.0.0 Stable Local MVP, frozen.** All six roadmap phases delivered and approved, plus the RAG QA work shipped as **v1.0.0** (`pam ask`, outside the phase numbering). **There is no Phase 7 and no further implementation work planned.** Current state: `PROJECT_STATUS.md`.
+**Project status:** ✅ **CURRENT RELEASE — V1.1.0.** The six original roadmap phases were delivered and approved (frozen **V1.0.0 Stable Local MVP**), and the additional **V1.1.0** release added reliability, source management, ingestion UX/safety, truthful status, QA improvements, and system facts. V1.1.0 did **not** change the frozen retrieval pipeline. The roadmap below records the delivered work; the canonical current state is [`PROJECT_STATUS.md`](./PROJECT_STATUS.md).
 
 ---
 
@@ -18,6 +18,7 @@ Status of every planned and completed item, consolidated from the original `05_D
 | 5 | Hybrid retrieval | v0.11.0 | ✅ Complete |
 | 6 | Production hardening & final validation | v0.12.0 | ✅ **APPROVED — PROJECT COMPLETE** |
 | — | RAG question answering (`pam ask`) | v1.0.0 | ✅ Shipped — V1.0.0 (see `PROJECT_STATUS.md`) |
+| V1.1 | Reliability, source management, ingestion UX/safety, status, QA | v1.1.0 | ✅ Current release (see `PROJECT_STATUS.md`) |
 
 ## Delivered capabilities
 

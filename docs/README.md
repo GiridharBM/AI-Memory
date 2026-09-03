@@ -16,18 +16,63 @@ This directory is the consolidated documentation for **LLM-Wiki / Personal AI Me
 
 ---
 
+## Navigate the documentation
+
+**START HERE**
+- [Project `README.md`](../README.md) — entry point: what PAM is, install, quick start
+- [Getting Started](./GETTING_STARTED.md) — set up PAM from zero
+- [How to Use](./HOW_TO_USE.md) — command-by-command usage
+
+**UNDERSTAND THE SYSTEM**
+- [Architecture](./architecture.md) — system architecture with Mermaid diagrams
+- [Implementation Guide](./IMPLEMENTATION_GUIDE.md) — how PAM is implemented
+- [Project Status](./PROJECT_STATUS.md) — canonical current-state document
+
+**FOR FACULTY / EVALUATORS**
+- [Faculty Presentation Guide](./FACULTY_PRESENTATION_GUIDE.md) — how to explain the project
+- [Final Project Report](./FINAL_PROJECT_REPORT.md) — end-to-end overview
+- [Testing & Verification](./TESTING_AND_VERIFICATION.md) — how it was verified
+
+**FOR DEVELOPERS**
+- [Implementation Guide](./IMPLEMENTATION_GUIDE.md)
+- [Implementation History](./IMPLEMENTATION_HISTORY.md)
+- [Development Roadmap](./DEVELOPMENT_ROADMAP.md)
+- [Implementation Specification](./IMPLEMENTATION_SPECIFICATION.md)
+
+**EVALUATION**
+- [Evaluation dataset contract tests](./TESTING_AND_VERIFICATION.md) (`test_eval_dataset.py`, 32 passed)
+- Evaluation tooling: `eval/scripts/run_eval.py`, `eval/scripts/ground_truth_audit.py`
+- Historical experiment reports: `docs/archive/`, `docs/phases/`
+
+**RELEASES**
+- [Release Notes](./RELEASE_NOTES.md)
+- Release records: `docs/releases/`
+
+**HISTORICAL**
+- `docs/phases/` — numbered phase engineering records
+- `docs/archive/` — consolidated historical files
+- `docs/releases/` — release/sign-off provenance (e.g. `POST_V1_VERIFICATION.md`)
+
+---
+
 ## Documentation index
 
 | Document | What it is | Start here if you want to… |
 |----------|------------|----------------------------|
 | [**PROJECT_STATUS.md**](./PROJECT_STATUS.md) | **Current canonical status** — V1.1.0 release, production configuration & limitations, testing snapshot, next work | Know the real state of the project today |
+| [**GETTING_STARTED.md**](./GETTING_STARTED.md) | Set up PAM from zero (prerequisites → install → run → first ingest) | Get PAM running for the first time |
+| [**HOW_TO_USE.md**](./HOW_TO_USE.md) | Practical command-by-command usage guide | Use `pam` day to day |
 | [**FINAL_PROJECT_REPORT.md**](./FINAL_PROJECT_REPORT.md) | One clean end-to-end report of the whole project | Understand the project in 10 minutes |
-| [**architecture.md**](./architecture.md) | Authoritative system architecture | Understand how the system is built |
+| [**architecture.md**](./architecture.md) | Authoritative system architecture (with Mermaid diagrams) | Understand how the system is built |
+| [**IMPLEMENTATION_GUIDE.md**](./IMPLEMENTATION_GUIDE.md) | How PAM is implemented, layer by layer | Understand the codebase / contribute |
 | [**IMPLEMENTATION_SPECIFICATION.md**](./IMPLEMENTATION_SPECIFICATION.md) | Technical contracts and data schemas | Build on or modify the pipeline |
 | [**DEVELOPMENT_ROADMAP.md**](./DEVELOPMENT_ROADMAP.md) | What was delivered vs. what was deferred | Know what exists and what doesn't |
 | [**IMPLEMENTATION_HISTORY.md**](./IMPLEMENTATION_HISTORY.md) | Chronological phase/milestone history | Trace how the project evolved |
 | [**TESTING_AND_VERIFICATION.md**](./TESTING_AND_VERIFICATION.md) | Test results, coverage, verification evidence | See how it was verified |
+| [**KNOWN_LIMITATIONS.md**](./KNOWN_LIMITATIONS.md) | Verified limitations, mitigations, future directions | Understand honest limits |
 | [**RELEASE_NOTES.md**](./RELEASE_NOTES.md) | Version-by-version release history | See what changed in each release |
+| [**DOCUMENTATION_GUIDE.md**](./DOCUMENTATION_GUIDE.md) | What documentation exists, why, and what an academic project needs | Navigate/audit the documentation set |
+| [**FACULTY_PRESENTATION_GUIDE.md**](./FACULTY_PRESENTATION_GUIDE.md) | How to explain PAM to faculty (30s/2min/5min) | Prepare a project presentation |
 | [**README.md**](./README.md) | This file | Navigate the documentation |
 
 ## Authoritative reference documents (kept in full)
@@ -49,7 +94,7 @@ app/            Application source (cli, core, domain, infrastructure, pipelines
                 prompts, queue, templates, watcher)
 config/         YAML configuration (default / development / production)
 docs/           This documentation
-tests/          Unit (56 files) and integration (16 files) tests
+tests/          Unit (~71 files) and integration (18 files) tests
 vault/          Generated Obsidian vault
 README.md       Project-level README (usage, install, CLI)
 requirements.txt / pyproject.toml
@@ -59,7 +104,7 @@ requirements.txt / pyproject.toml
 
 - **Version:** V1.1.0 (current release; see `PROJECT_STATUS.md` for the canonical status — V1.1 focus is reliability, source management, ingestion safety, CLI usability, truthful status, local-first)
 - **Runtime:** Python 3.11–3.13 (validated in CI), Ollama, local-first
-- **Suite:** 1375 tests passing / 57 deselected / 0 failed; coverage **89.80%** (floor 80); 56 unit + 16 integration files
+- **Suite:** 1688 unit tests passed / 1 deselected (integration-marker) / 1 known logging-isolation flake (`test_cli_remove.py`, passes in isolation); evaluation dataset-contract tests (`test_eval_dataset.py`) pass (32)
 - **Search:** hybrid (dense cosine + BM25) fused with RRF (k=60), via `pam search`
 - **Ask:** RAG question answering with `[SOURCE N]` citations, via `pam ask`
 - **Completion evidence:** `PROJECT_STATUS.md` (current state) + `PHASE_6_FINAL_APPROVAL.md` (Phase-6 record)

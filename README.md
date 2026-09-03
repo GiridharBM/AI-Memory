@@ -166,7 +166,7 @@ This is a targeted ingestion-safety guard, not a claim of comprehensive general-
 
 PAM has a substantial automated test suite. Verification is reported as a **dated snapshot** rather than a single marketing number. The latest known verification state is documented in the project's testing/release records (`docs/PROJECT_STATUS.md`, `docs/TESTING_AND_VERIFICATION.md`, and the release provenance records in `docs/releases/`).
 
-The most recent verification snapshot reflects ~1703 passed, with 8 known exceptions (7 stale evaluation-dataset assertions and 1 known logging-isolation test flake) that are documented — they are not eight product defects. The current release state and known test exceptions are maintained in the project's status and release documentation, not as a static badge here.
+The most recent verification snapshot reflects **1688 unit tests passed**, with **1 deselected** (integration-marker test) and **1 known logging-isolation flake** (`test_cli_remove.py`, which passes in isolation). The evaluation dataset-contract tests (`test_eval_dataset.py`) pass (32). The current release state and known test exceptions are maintained in the project's status and release documentation, not as a static badge here.
 
 ---
 
@@ -209,6 +209,19 @@ An honest, user-facing summary:
 7. **Platform/environment scope** — validated conservatively: Linux (CI), Windows (local development), with macOS designed to be cross-platform but not independently validated in CI.
 
 PAM depends on a running local Ollama runtime; there is no hosted/cloud answer path.
+
+---
+
+## Documentation
+
+- **[`docs/` hub](./docs/README.md)** — navigation for all current and historical documentation.
+- **[Project status](./docs/PROJECT_STATUS.md)** — canonical current-state document (V1.1.0).
+- **[Architecture](./docs/architecture.md)** — system architecture with Mermaid flowcharts.
+- **[Getting started](./docs/GETTING_STARTED.md)** — set up PAM from zero.
+- **[How to use](./docs/HOW_TO_USE.md)** — command-by-command usage guide.
+- **[Implementation guide](./docs/IMPLEMENTATION_GUIDE.md)** — how PAM is implemented.
+- **[Known limitations](./docs/KNOWN_LIMITATIONS.md)** — verified limitations and mitigations.
+- **[Testing & verification](./docs/TESTING_AND_VERIFICATION.md)** — test results and verification evidence.
 
 ---
 

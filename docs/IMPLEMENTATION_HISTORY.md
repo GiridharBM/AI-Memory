@@ -2,6 +2,8 @@
 
 Chronological record of how LLM-Wiki / Personal AI Memory (PAM) was built, milestone by milestone. Per-task granularity is preserved in `docs/archive/` (original phase/milestone/review files). Completion evidence: `PHASE_6_FINAL_APPROVAL.md`; current state: `PROJECT_STATUS.md`.
 
+> **Current release: V1.1.0.** The timeline below records the historical development up to the V1.1.0 release. The historical record is preserved for provenance; for the current state of the system see [`PROJECT_STATUS.md`](./PROJECT_STATUS.md). V1.1.0 built on the frozen V1.0.0 MVP with reliability, source management, ingestion safety, CLI usability, truthful status, QA improvements, system facts, package-version alignment, and evaluation/maintenance tooling — it did **not** change the frozen retrieval pipeline.
+
 ## Timeline
 
 | Version | Date | Milestone / Phase | Scope |
@@ -18,6 +20,7 @@ Chronological record of how LLM-Wiki / Personal AI Memory (PAM) was built, miles
 | v0.10.0 | 2026-08-08 | **Phase 4 — Knowledge Graph** | EntityExtractor, RelationshipDetector, DocumentGraphBuilder, JSON persistence, query layer, graph docs in notes |
 | v0.11.0 | 2026-08-09 | **Phase 5 — Hybrid Retrieval** | SearchService facade, BM25 (k1=1.5, b=0.75), RRF (k=60), filters, `pam search` |
 | v0.12.0 | 2026-08-09 | **Phase 6 — Hardening & Validation** | Failure isolation, performance optimization, security/config audit, E2E validation → **APPROVED** |
+| **v1.1.0** | post-2026-08-11 | **V1.1.0 release (current)** | Reliability, source management (`sources`/`remove`), ingestion UX & safety, re-ingestion reliability, truthful `status`, QA improvements, system facts, package version 1.1.0 alignment, evaluation tooling maintenance, documentation |
 | v1.0.0 | 2026-08-11 | **RAG Question Answering / V1.0.0 finalization** | `pam ask`: hybrid retrieval → grounded prompt → Ollama → answer + `[SOURCE N]` citations (`qa_workflow.py`, `prompts/qa.py`); canonical version 1.0.0 set → **Stable Local MVP, frozen** |
 
 ## Per-milestone summaries
