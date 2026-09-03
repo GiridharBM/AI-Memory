@@ -1,5 +1,7 @@
 # Final Project Report
 
+> **Historical document:** This report records the PAM V1.0 project state. For the current V1.1.0 implementation, architecture, capabilities, limitations, and verification status, see `docs/PROJECT_STATUS.md`.
+
 **LLM-Wiki / Personal AI Memory (PAM)** — consolidated report. Status: ✅ **COMPLETE** — **V1.0.0** (Stable Local MVP, frozen). Phase 6 record: **APPROVED** (v0.12.0). RAG QA shipped as V1.0.0 (see `PROJECT_STATUS.md`).
 
 ## 1. Overview
