@@ -26,12 +26,12 @@ See [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md) for the current canonic
 
 ## What PAM Does
 
-PAM is a **local-first** personal AI memory system. It ingests your local documents (notes, PDFs, Markdown, code, spreadsheets, and more), chunks and embeds them, stores them in a local vector store, and lets you:
+PAM is a **local-first** personal AI memory system. It ingests your local files (PDF, DOCX, TXT, Markdown, and code/text — the verified core formats; GitHub and YouTube are supported as explicit opt-in network sources), chunks and embeds them, stores them in a local vector store, and lets you:
 
 - **retrieve** relevant knowledge with hybrid (semantic + keyword) search, and
 - **ask grounded questions** against that knowledge with a local LLM.
 
-Everything runs on your machine through a local [Ollama](https://ollama.com) server. No document content leaves your machine.
+Everything runs on your machine through a local [Ollama](https://ollama.com) server. PAM is **local-first**: normal local-file processing and local AI inference run on the user's machine. The explicit GitHub and YouTube ingestion commands are network-source operations and may access external services, so the system does not guarantee that no content ever leaves the machine during those opt-in operations.
 
 ---
 
@@ -166,7 +166,7 @@ This is a targeted ingestion-safety guard, not a claim of comprehensive general-
 
 PAM has a substantial automated test suite. Verification is reported as a **dated snapshot** rather than a single marketing number. The latest known verification state is documented in the project's testing/release records (`docs/PROJECT_STATUS.md`, `docs/TESTING_AND_VERIFICATION.md`, and the release provenance records in `docs/releases/`).
 
-The most recent verification snapshot reflects **1712 tests passed / 57 deselected / 0 failed** (full `pytest tests/` run; the 57 deselected are `integration`-marked). Ruff passes and `mypy app/` reports 0 production errors. The former CLI remove logging-isolation flake was fixed (`ea8a95b — fix: stabilize CLI remove isolation test`). The evaluation dataset-contract tests (`test_eval_dataset.py`) pass (32). The current release state and known test exceptions are maintained in the project's status and release documentation, not as a static badge here.
+The most recent verification snapshot reflects **1712 tests passed / 57 deselected / 0 failed** (full `pytest tests/` run; the 57 deselected are `integration`-marked). Ruff passes and `mypy app/` reports 0 production errors. This snapshot is associated with the final academic state; it was not independently verified against remote GitHub CI (remote CI is not claimed green). The former CLI remove logging-isolation flake was fixed (`ea8a95b — fix: stabilize CLI remove isolation test`). The evaluation dataset-contract tests (`test_eval_dataset.py`) pass (32). The current release state and known test exceptions are maintained in the project's status and release documentation, not as a static badge here.
 
 ---
 
