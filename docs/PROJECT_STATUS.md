@@ -137,8 +137,9 @@ CLI (pam)
 - **Threshold reconciliation** — historical/experimental retrieval threshold work (e.g.
   alternative `min_cosine` candidates around 0.45) was not reconciled into the frozen
   production value (0.25). Documented in evaluation/provenance records.
-- **Known test flake** — a logging-isolation flake (`test_cli_remove.py`) surfaces under
-  specific full-suite test ordering; it is a test-hygiene issue, not a production defect.
+- **Former test flake (FIXED)** — a logging-isolation flake (`test_cli_remove.py`) that
+  surfaced under specific full-suite test ordering was fixed (`ea8a95b`); it was a
+  test-hygiene issue, not a production defect.
 - **Evaluation tooling aligned to v3.0** — `test_eval_dataset.py` and the eval tooling
   (`eval/scripts/run_eval.py`, `eval/scripts/ground_truth_audit.py`) have been reconciled
   to the current v3.0 dataset contract (contract tests pass).
@@ -182,16 +183,14 @@ measurements as a claim about a new run.
 
 Latest known verification snapshot (dated):
 
-- **~1688 passed**
-- **1 deselected** (integration-marker test excluded from the default run)
-- **1 failed** — a known logging-isolation flake (`test_cli_remove.py`, test-hygiene;
-  passes in isolation)
+- **1712 passed / 57 deselected / 0 failed** (full `pytest tests/` run)
+- The **57 deselected** are `integration`-marked and excluded from the default run.
+- **Ruff passes**; **`mypy app/` reports 0 production errors.**
+- The former CLI remove logging-isolation flake was **fixed** (`ea8a95b`).
 - **Evaluation contract tests pass** — `test_eval_dataset.py` (v3.0 contract) = **32 passed**
 
-This single failure is not a product defect. The detailed verification state is maintained in
-the testing/release documentation (`docs/TESTING_AND_VERIFICATION.md`, release
-provenance records in `docs/releases/`). Do not assume "all tests pass"; verify against
-the current release records.
+Remote GitHub CI was not independently verified from this environment; local
+CI-equivalent checks pass.
 
 ---
 
@@ -199,10 +198,9 @@ the current release records.
 
 Verified open items:
 
-1. Logging-isolation test flake (`test_cli_remove.py`) under specific suite ordering.
-2. Retrieval threshold reconciliation (0.25 production vs experimental alternatives).
-3. Vector-store / KG persistence not fully transactional across both stores.
-4. KG shared-node removal semantics.
+1. Vector-store / KG persistence not fully transactional across both stores.
+2. KG shared-node removal semantics.
+3. Retrieval threshold reconciliation (0.25 production vs experimental alternatives).
 
 ---
 
@@ -212,8 +210,7 @@ Conservative categories (no committed V1.2 feature roadmap unless separately
 established):
 
 - **Documentation maintenance** — keep status/testing notes current.
-- **Reliability improvements** — address the known logging-isolation flake and
-  persistence-atomicity items.
+- **Reliability improvements** — continue work on persistence-atomicity items.
 - **Measured retrieval research** — continue retrieval/evaluation work as experiment
   (frozen in V1.1 production).
 - **Faster evidence verification** — progress on answerability/evidence as an

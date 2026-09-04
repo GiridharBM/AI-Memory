@@ -46,7 +46,9 @@ The **verified / core** ingestion set (proven end-to-end) is:
 
 - Secret-bearing files are blocked from ingestion.
 - A corrupted manifest is quarantined and rebuilt rather than crashing the process.
-- One known **logging-isolation test flake** (`test_cli_remove.py::test_remove_one_source_and_unrelated_survives`) passes in isolation but fails in the full suite under certain ordering — a test-hygiene issue, not a product defect. It is not fixed as part of documentation work.
+- The former **logging-isolation test flake** (`test_cli_remove.py::test_remove_one_source_and_unrelated_survives`), a test-hygiene issue rather than a product defect, was **FIXED** (`ea8a95b`).
+- **Random-input test caveat:** `tests/unit/test_mime_detection.py::test_binary_garbage_is_octet_stream` uses random `os.urandom(64)` input and has intermittently shown test-environment nondeterminism in classification; it passed the final verification run and is not a PAM production defect.
+- **Remote CI:** Remote GitHub CI was not independently verified from this environment; local CI-equivalent checks pass.
 
 ## 7. Backwards compatibility
 

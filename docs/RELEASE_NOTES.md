@@ -15,6 +15,19 @@ Version history for **LLM-Wiki / Personal AI Memory (PAM)**, current version **V
 - **Evaluation tooling maintenance** — `test_eval_dataset.py` reconciled to the current v3.0 dataset contract (32 passed); `eval/scripts/run_eval.py` and `eval/scripts/ground_truth_audit.py` derive categories/source-keys from dataset metadata.
 - **Documentation** — this documentation set updated to reflect V1.1.0.
 
+### Post-release maintenance (main branch, after V1.1.0)
+
+Six maintenance commits landed on `main` after the V1.1.0 release. These are **post-release, main-branch maintenance** — they do **not** move, rewrite, or retag the immutable `v1.1.0` tag, and they do **not** create a new release version:
+
+- `07d1c2f` — xlwt test dependency
+- `ea8a95b` — CLI remove isolation test stabilization (fixes the former logging-isolation flake)
+- `1ac4a51` — optional torch/transformers mypy configuration
+- `ecf8ccf` — reranker optional attribute typing
+- `cf885da` — qa_workflow typing
+- `e72ea64` — system-fact `Intent` typing
+
+The post-maintenance verification baseline is **1712 tests passed / 57 deselected / 0 failed**, with Ruff passing and `mypy app/` reporting **0 production errors**.
+
 ## v1.0.0 — 2026-08-11 · RAG Question Answering (V1.0.0 finalization)
 - **V1.0.0 — Stable Local MVP, frozen.** Canonical release version set in `pyproject.toml`; all active documentation synchronized.
 - `pam ask`: retrieval-grounded question answering over the knowledge base — hybrid retrieval (dense + BM25/RRF) → grounded system prompt → local Ollama → answer with `[SOURCE N]` citations.

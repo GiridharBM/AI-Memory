@@ -24,6 +24,9 @@ Status of every planned and completed item, consolidated from the original `05_D
 
 - Local-first, offline architecture; Ollama-powered analysis and embeddings (nomic-embed-text).
 - Ingestion of documents, code (26+ suffixes), notebooks, spreadsheets, presentations, images, diagrams, audio, video, archives, email, databases, research files, web content, GitHub READMEs, and YouTube transcripts.
+
+> **Ingestion scope note:** the broad list above enumerates the parser/backend coverage the plugin architecture can invoke. It is **not** a claim of uniform, verified production support for every format. Verified core formats are PDF, DOCX, TXT, Markdown, and code/text, plus GitHub/YouTube opt-in where supported; PPTX, XLSX, OCR/scanned PDFs, images, audio, and video are not guaranteed end-to-end. See [`KNOWN_LIMITATIONS.md`](./KNOWN_LIMITATIONS.md).
+
 - 21-field document intelligence: summaries, key concepts, definitions, entities, related topics, tags, Q&A, flashcards, MCQs, short/long-answer questions, revision notes, metadata, suggested links.
 - Deep extraction (Phase 2): OCR (vision + optional Tesseract), metadata & language detection, structure analysis, table intelligence, image intelligence, code/notebook intelligence, email attachments.
 - Semantic chunking with heading hierarchy (Phase 3.2), sentence segmentation (Phase 3.1).

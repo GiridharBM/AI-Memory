@@ -48,7 +48,7 @@ Settings groups include `app`, `paths`, `ollama`, `logging`, `watcher`, `queue`,
 
 ## Testing
 
-- Unit tests: `tests/unit/` (~71 files) — run `pytest tests/unit -q` (1688 passed / 1 deselected / 1 known logging-isolation flake as of V1.1.0).
+- Unit tests: `tests/unit/` (~71 files) — run `pytest tests/unit -q` (1712 passed / 57 integrated deselected / 0 failed as of V1.1.0).
 - Evaluation contract: `tests/unit/test_eval_dataset.py` (32 passed).
 - Integration: `tests/integration/` (18 files, `integration`-marked, excluded from the default run).
 

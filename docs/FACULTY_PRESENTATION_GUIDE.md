@@ -22,7 +22,7 @@ How to explain **Personal AI Memory (PAM)** to faculty, in 30 seconds, 2 minutes
 3. **Retrieval:** hybrid — dense cosine + BM25, fused with RRF (k=60), with filters (top-k, source-type, min-score, metadata).
 4. **QA:** `pam ask` grounds the local LLM's answer in retrieved chunks, gives `[SOURCE N]` citations, and abstains when context is insufficient. It also answers "about the tool" questions deterministically via system facts.
 5. **V1.1.0 focus:** source management (`pam sources`/`pam remove`), ingestion UX & safety, truthful `pam status`, and QA hardening — while deliberately freezing retrieval.
-6. **Engineering rigor:** ~1688 unit tests pass, 32 evaluation-contract tests, full verification records, and a clean architecture doc with Mermaid diagrams.
+6. **Engineering rigor:** 1712 tests pass / 57 deselected / 0 failed, 32 evaluation-contract tests, clean Ruff and mypy, and full verification records in [`TESTING_AND_VERIFICATION.md`](./TESTING_AND_VERIFICATION.md).
 
 ## 5 minutes (full walkthrough)
 
@@ -50,7 +50,7 @@ A: Answers are grounded in retrieved chunks and carry `[SOURCE N]` citations; th
 A: Local single-machine/single-worker pipeline; retrieval is deliberately frozen for V1.1.0; not every ingestor (PPTX/XLSX/images/audio/video) is proven end-to-end product support; experimental enhancements are disabled. Full list in [`KNOWN_LIMITATIONS.md`](./KNOWN_LIMITATIONS.md).
 
 **Q: How was it verified?**
-A: ~1688 unit tests pass, plus 32 evaluation-contract tests, integration tests, and a documented verification record — see [`TESTING_AND_VERIFICATION.md`](./TESTING_AND_VERIFICATION.md). One known logging-isolation test flake (passes in isolation) is a test-hygiene issue, not a product defect.
+A: 1712 tests pass / 57 deselected / 0 failed, plus 32 evaluation-contract tests, integration tests, and a documented verification record — see [`TESTING_AND_VERIFICATION.md`](./TESTING_AND_VERIFICATION.md). Ruff passes and `mypy app/` reports 0 production errors. A former logging-isolation test flake was fixed; a separate MIME random-input test has shown occasional environment nondeterminism but passed the final run. (Remote GitHub CI was not independently verified from this environment; local checks pass.)
 
 **Q: What did *you* actually build vs. use a library for?**
 A: The pipeline, chunker, vector store, BM25 index, hybrid retrieval, RAG workflow, source management, and system facts are custom code; OCR/tables/metadata use well-scoped extractor/processor registries; the LLM and embeddings come from local Ollama. See [`IMPLEMENTATION_GUIDE.md`](./IMPLEMENTATION_GUIDE.md).

@@ -8,11 +8,26 @@ The current verified snapshot for the **default unit suite** (`pytest tests/unit
 
 | Suite | Result |
 |-------|--------|
-| **Unit tests (default)** | **1688 passed / 1 deselected / 1 failed** |
-| **Failed** | `test_cli_remove.py::test_remove_one_source_and_unrelated_survives` — a known **logging-isolation flake**; it **passes in isolation** and is a test-hygiene/ordering issue, not a product defect. **Do not fix as part of docs work.** |
-| **Deselected** | 1 `integration`-marked test excluded from the default run |
+| **Unit tests (default)** | **1712 passed / 57 deselected / 0 failed** |
+| **Deselected** | 57 `integration`-marked tests excluded from the default run |
 | **Evaluation dataset-contract tests** | `tests/unit/test_eval_dataset.py` = **32 passed** (reconciled to the v3.0 dataset contract) |
 | **Evaluation tooling** | `eval/scripts/run_eval.py` and `eval/scripts/ground_truth_audit.py` derive source-keys/categories from dataset metadata and are compatible with the current v3.0 dataset |
+
+**Lint/type checks:** Ruff passes; `mypy app/` reports **0 production errors**.
+
+**Former flake (FIXED):** the logging-isolation flake
+`test_cli_remove.py::test_remove_one_source_and_unrelated_survives` was a
+test-hygiene/ordering issue, not a product defect, and was fixed by commit
+`ea8a95b`.
+
+**Observed test caveat:** `tests/unit/test_mime_detection.py::test_binary_garbage_is_octet_stream`
+uses random `os.urandom(64)` input. It has occasionally produced a nondeterministic
+classification failure (test-environment nondeterminism / random-input test caveat,
+observed intermittently), but passed in the clean final verification run. It is not a
+PAM production defect and is not currently failing.
+
+> **Remote CI:** Remote GitHub CI was not independently verified from this environment;
+> local CI-equivalent checks pass. See `PROJECT_STATUS.md`.
 
 **Test categories:**
 - **Unit** (`tests/unit/`, ~71 files) — includes CLI (`test_cli*.py`), pipeline, QA, ingestion, source-management, system-facts, and evaluation-contract tests.
