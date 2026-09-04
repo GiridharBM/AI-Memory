@@ -17,6 +17,7 @@ idempotent repeated remove.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -193,7 +194,12 @@ def test_remove_one_source_and_unrelated_survives(
     assert result.exit_code == 0, result.output
     assert "Source Removed" in result.output
     assert "Vector chunks removed" in result.output
-    assert "0" not in result.output.split("Vector chunks removed")[0]
+    # Seeded source carried exactly 2 chunks: assert the reported removal
+    # count itself instead of scanning raw output for "0", which also matches
+    # unrelated logging timestamps/paths under full-suite runs.
+    chunks_match = re.search(r"Vector chunks removed\D*(\d+)", result.output)
+    assert chunks_match is not None, result.output
+    assert int(chunks_match.group(1)) == 2, result.output
     store, kg, manifest = _reload(tmp_path)
     assert _sources_of(store) == {str(b.resolve())}
     assert {n.source for n in kg.nodes.values()} == {str(b.resolve())}
