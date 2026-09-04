@@ -14,6 +14,7 @@ import json
 import re
 import tomllib
 from dataclasses import dataclass
+from typing import cast
 
 from app.core.config import Settings
 from app.core.logging import get_logger
@@ -38,15 +39,20 @@ OLLAMA_NUM_CTX = 8192
 
 
 class Intent(str):
-    """Supported system-facts intents."""
+    """Supported system-facts intents (closed string vocabulary).
 
-    VERSION = "version"
-    SOURCE_COUNT = "source_count"
-    CHUNK_COUNT = "chunk_count"
-    FEATURE_STATUS = "feature_status"
-    QA_MODEL = "qa_model"
-    CAPABILITIES = "capabilities"
-    STATUS = "status"
+    Members stay plain ``str`` objects at runtime (``cast`` is erased, so
+    equality, ``str()``, JSON, and logging behavior are unchanged); the
+    annotation only tells mypy they form the ``Intent`` vocabulary.
+    """
+
+    VERSION = cast("Intent", "version")
+    SOURCE_COUNT = cast("Intent", "source_count")
+    CHUNK_COUNT = cast("Intent", "chunk_count")
+    FEATURE_STATUS = cast("Intent", "feature_status")
+    QA_MODEL = cast("Intent", "qa_model")
+    CAPABILITIES = cast("Intent", "capabilities")
+    STATUS = cast("Intent", "status")
 
 
 def _normalize(question: str) -> str:
