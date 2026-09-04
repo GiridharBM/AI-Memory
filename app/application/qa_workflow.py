@@ -39,7 +39,7 @@ from app.infrastructure.llm import (
     OllamaTextResponse,
     OllamaTimeoutError,
 )
-from app.infrastructure.reranker import CrossEncoderReranker
+from app.infrastructure.reranker import CrossEncoderReranker, RerankerConfig
 from app.infrastructure.search import SearchHit, SearchService
 from app.prompts.qa import QA_SYSTEM_PROMPT, build_qa_user_prompt
 
@@ -419,7 +419,19 @@ class QAWorkflow:
         reranker: CrossEncoderReranker | None = None
         min_rerank_score = 0.0
         if settings.reranker.enabled:
-            reranker = CrossEncoderReranker(settings.reranker)
+            # RerankerSettings and RerankerConfig carry identical fields;
+            # convert explicitly so the runtime object matches the annotated type.
+            reranker_settings = settings.reranker
+            reranker = CrossEncoderReranker(
+                RerankerConfig(
+                    enabled=reranker_settings.enabled,
+                    model=reranker_settings.model,
+                    top_n=reranker_settings.top_n,
+                    device=reranker_settings.device,
+                    timeout_seconds=reranker_settings.timeout_seconds,
+                    min_score=reranker_settings.min_score,
+                )
+            )
             min_rerank_score = settings.reranker.min_score
 
         answerability_gate: AnswerabilityGate | None = None
@@ -476,8 +488,8 @@ class QAWorkflow:
         # When reranker is active, retrieve extra candidates for reranking
         rerank_top_n = 0
         if self._reranker and self._reranker.is_available:
-            rerank_top_n = getattr(self._reranker, '_config', None)
-            rerank_top_n = rerank_top_n.top_n if rerank_top_n else 20
+            rerank_config: RerankerConfig | None = getattr(self._reranker, "_config", None)
+            rerank_top_n = rerank_config.top_n if rerank_config is not None else 20
 
         search_top_k = max(top_k, rerank_top_n) if rerank_top_n else top_k
         hits = self._search_service.search(
