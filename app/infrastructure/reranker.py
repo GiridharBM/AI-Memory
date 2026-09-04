@@ -15,8 +15,13 @@ Model choice: ``cross-encoder/ms-marco-MiniLM-L-12-v2``
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from app.core.logging import get_logger
+
+if TYPE_CHECKING:
+    import torch
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 logger = get_logger(__name__)
 
@@ -54,9 +59,9 @@ class CrossEncoderReranker:
 
     def __init__(self, config: RerankerConfig | None = None) -> None:
         self._config = config or RerankerConfig()
-        self._model = None  # Lazy-loaded AutoModelForSequenceClassification
-        self._tokenizer = None
-        self._device = None
+        self._model: AutoModelForSequenceClassification | None = None  # Lazy-loaded
+        self._tokenizer: AutoTokenizer | None = None
+        self._device: torch.device | None = None
         self._load_attempted = False
         self._load_error: str | None = None
 
@@ -180,6 +185,9 @@ class CrossEncoderReranker:
         Batches all pairs for efficient inference.
         """
         import torch
+
+        assert self._tokenizer is not None
+        assert self._model is not None
 
         pairs = [(query, hit.text) for hit in candidates]
         texts = [f"{q} [SEP] {d}" for q, d in pairs]
