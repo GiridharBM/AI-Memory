@@ -44,12 +44,16 @@ class EpubIngestor(BaseIngestor):
 
                 # Parse OPF for metadata
                 opf_xml = zf.read(opf_path)
-                opf_tree = ElementTree.fromstring(opf_path)
                 ns_opf = {"opf": "http://www.idpf.org/2007/opf"}
+                ns_dc = {"dc": "http://purl.org/dc/elements/1.1/"}
                 opf_tree = ElementTree.fromstring(opf_xml)
-                title_el = opf_tree.find(".//opf:title", ns_opf)
+                title_el = opf_tree.find(".//dc:title", ns_dc)
+                if title_el is None:
+                    title_el = opf_tree.find(".//opf:title", ns_opf)
                 title = title_el.text if title_el is not None else path.stem
-                creator_el = opf_tree.find(".//opf:creator", ns_opf)
+                creator_el = opf_tree.find(".//dc:creator", ns_dc)
+                if creator_el is None:
+                    creator_el = opf_tree.find(".//opf:creator", ns_opf)
                 author = creator_el.text if creator_el is not None else ""
 
                 # Collect all HTML content
@@ -58,8 +62,8 @@ class EpubIngestor(BaseIngestor):
                     media_type = item.get("media-type", "")
                     href = item.get("href", "")
                     if "html" in media_type or href.endswith((".html", ".xhtml", ".htm")):
-                        base_dir = Path(opf_path).parent
-                        full_href = str(base_dir / href)
+                        base_dir = str(Path(opf_path).parent).replace("\\", "/")
+                        full_href = f"{base_dir}/{href}" if base_dir != "." else href
                         try:
                             html_content = zf.read(full_href).decode("utf-8", errors="replace")
                             # Strip HTML tags for plain text extraction

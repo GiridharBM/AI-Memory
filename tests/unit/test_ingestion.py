@@ -739,3 +739,59 @@ def test_ppt_non_ole_file_fails_gracefully(tmp_path: Path) -> None:
 
     assert not result.succeeded
     assert result.error is not None
+
+
+# ── EPUB tests ───────────────────────────────────────────────────────────────
+
+
+def _write_minimal_epub(path: Path) -> None:
+    import zipfile
+
+    container = (
+        '<?xml version="1.0"?>'
+        '<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">'
+        '<rootfiles><rootfile full-path="OEBPS/content.opf" '
+        'media-type="application/oebps-package+xml"/></rootfiles></container>'
+    )
+    opf = (
+        '<?xml version="1.0"?>'
+        '<package xmlns="http://www.idpf.org/2007/opf" version="2.0">'
+        '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
+        "<dc:title>Smoke</dc:title><dc:creator>Test</dc:creator></metadata>"
+        '<manifest><item id="c1" href="c1.xhtml" media-type="application/xhtml+xml"/></manifest>'
+        '<spine><itemref idref="c1"/></spine></package>'
+    )
+    xhtml = (
+        '<?xml version="1.0"?>'
+        '<html xmlns="http://www.w3.org/1999/xhtml">'
+        "<body><p>Hello epub</p></body></html>"
+    )
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("mimetype", "application/epub+zip")
+        zf.writestr("META-INF/container.xml", container)
+        zf.writestr("OEBPS/content.opf", opf)
+        zf.writestr("OEBPS/c1.xhtml", xhtml)
+
+
+def test_ingests_epub_file(tmp_path: Path) -> None:
+    path = tmp_path / "book.epub"
+    _write_minimal_epub(path)
+
+    result = DocumentIngestionService().ingest(path)
+
+    assert result.succeeded
+    assert result.document is not None
+    assert result.document.source_type == "epub"
+    assert result.document.metadata.title == "Smoke"
+    assert result.document.metadata.author == "Test"
+    assert "Hello epub" in result.document.text
+
+
+def test_epub_non_zip_fails_gracefully(tmp_path: Path) -> None:
+    path = tmp_path / "bad.epub"
+    path.write_bytes(b"not a zip")
+
+    result = DocumentIngestionService().ingest(path)
+
+    assert not result.succeeded
+    assert result.error is not None
