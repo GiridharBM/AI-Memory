@@ -393,6 +393,31 @@ def test_remove_partial_failure_knowledge_graph_corrupt(
     assert _ledger_paths(manifest) == {"a.md"}
 
 
+def test_remove_corrupt_vector_store_is_never_overwritten(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A store that fails to load must not be replaced by an empty one."""
+    a = _write_file(tmp_path, "a.md")
+    _seed(tmp_path, [str(a.resolve())])
+    store_path = tmp_path / "manifests" / "vector_store.json"
+    store_path.write_text("{ this is not valid json", encoding="utf-8")
+    corrupt = store_path.read_text(encoding="utf-8")
+
+    result = _invoke(tmp_path, monkeypatch, str(a.resolve()))
+
+    assert result.exit_code == 1, result.output
+    assert "Remove failed" in result.output
+    assert "Traceback" not in result.output
+    # The corrupt bytes survive verbatim: no silent wipe to {"entries": []}.
+    assert store_path.read_text(encoding="utf-8") == corrupt
+    # The ledger is untouched too, so nothing was mutated on the way out.
+    manifest = ManifestManager(
+        tmp_path / "manifests" / "processed.json",
+        project_root=tmp_path,
+    )
+    assert _ledger_paths(manifest) == {"a.md"}
+
+
 def test_remove_idempotent_second_call_not_found(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

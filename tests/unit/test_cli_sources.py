@@ -120,7 +120,7 @@ class TestAnnotateSourceLedger:
         )
 
         row = entry.SourceRow(source=str(source), type="markdown")
-        entry._annotate_source_ledger([row], leader, tmp_path)
+        entry._annotate_source_ledger([row], leader.list_entries(), tmp_path)
 
         assert row.status == "processed"
         assert row.last_ingested == entry_row.processed_at
@@ -132,7 +132,7 @@ class TestAnnotateSourceLedger:
         leader.add_processed_file(path=source, sha256="abc", extension=".md", status="failed")
 
         row = entry.SourceRow(source=str(source), type="markdown")
-        entry._annotate_source_ledger([row], leader, tmp_path)
+        entry._annotate_source_ledger([row], leader.list_entries(), tmp_path)
 
         assert row.status == "failed"
 
@@ -145,7 +145,7 @@ class TestAnnotateSourceLedger:
         )
 
         row = entry.SourceRow(source=str(source), type="markdown")
-        entry._annotate_source_ledger([row], leader, tmp_path)
+        entry._annotate_source_ledger([row], leader.list_entries(), tmp_path)
 
         assert row.status == "skipped_duplicate"
 
@@ -153,7 +153,7 @@ class TestAnnotateSourceLedger:
         leader = ManifestManager(tmp_path / "manifests" / "processed.json", project_root=tmp_path)
 
         row = entry.SourceRow(source=str(tmp_path / "orphan.pdf"), type="pdf")
-        entry._annotate_source_ledger([row], leader, tmp_path)
+        entry._annotate_source_ledger([row], leader.list_entries(), tmp_path)
 
         assert row.status == "indexed"
         assert row.last_ingested is None
@@ -208,3 +208,45 @@ class TestCliSources:
 
         assert result.exit_code == 1
         assert "unavailable" in result.output.lower()
+
+    def test_does_not_modify_corrupt_ledger(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """A read must not quarantine or recreate a corrupt manifest."""
+        _write_vector_store(
+            tmp_path / "manifests" / "vector_store.json",
+            [_entry("alpha.md", "markdown", 0)],
+        )
+        mp = tmp_path / "manifests" / "processed.json"
+        mp.write_text("{ corrupt", encoding="utf-8")
+        monkeypatch.setenv("PAM_PATHS__PROJECT_ROOT", str(tmp_path))
+        monkeypatch.setenv("PAM_PATHS__MANIFEST_ROOT", str(tmp_path / "manifests"))
+        monkeypatch.setenv("PAM_MANIFEST__PATH", str(mp))
+
+        result = runner.invoke(entry.cli, ["sources"])
+
+        assert result.exit_code == 1
+        assert "unavailable" in result.output.lower()
+        assert "Traceback" not in result.output
+        # Bytes survive: no quarantine, no fresh empty manifest, no rename.
+        assert mp.read_text(encoding="utf-8") == "{ corrupt"
+        assert [p.name for p in mp.parent.glob("processed.json*")] == ["processed.json"]
+
+    def test_does_not_create_missing_ledger(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """An absent manifest is an empty ledger, not a file to be created."""
+        _write_vector_store(
+            tmp_path / "manifests" / "vector_store.json",
+            [_entry("alpha.md", "markdown", 0)],
+        )
+        mp = tmp_path / "manifests" / "processed.json"
+        monkeypatch.setenv("PAM_PATHS__PROJECT_ROOT", str(tmp_path))
+        monkeypatch.setenv("PAM_PATHS__MANIFEST_ROOT", str(tmp_path / "manifests"))
+        monkeypatch.setenv("PAM_MANIFEST__PATH", str(mp))
+
+        result = runner.invoke(entry.cli, ["sources"])
+
+        assert result.exit_code == 0
+        assert "alpha.md" in result.output
+        assert not mp.exists()

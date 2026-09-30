@@ -27,21 +27,31 @@ def source_id(source: str) -> str:
 
 
 def _rows() -> list[Any] | None:
-    """Return ledger-annotated source rows, or ``None`` when the store is unreadable."""
+    """Return ledger-annotated source rows, or ``None`` when the store is unreadable.
 
-    from app.cli.entry import _annotate_source_ledger, _read_vector_store_sources
-    from app.infrastructure.state.manifest import ManifestManager
+    The ledger is read without constructing a ``ManifestManager``: sourcing
+    rows is a read, so a missing or corrupt ledger must not be created,
+    quarantined, or rewritten. An unreadable ledger is a 503 rather than a
+    fabricated empty listing.
+    """
+
+    from app.cli.entry import (
+        _annotate_source_ledger,
+        _read_ledger_entries,
+        _read_vector_store_sources,
+    )
 
     settings = deps.get_settings()
     rows = _read_vector_store_sources(settings)
     if rows is None:
         return None
-    manifest = ManifestManager(
-        settings.manifest.path,
-        project_root=settings.paths.project_root,
-        enabled=settings.manifest.enabled,
-    )
-    _annotate_source_ledger(rows, manifest, settings.paths.project_root)
+    entries = _read_ledger_entries(settings)
+    if entries is None:
+        raise HTTPException(
+            status_code=503,
+            detail="The processed ledger could not be read; source listing is unavailable.",
+        )
+    _annotate_source_ledger(rows, entries, settings.paths.project_root)
     return rows
 
 

@@ -53,6 +53,9 @@ class VectorStore:
         self._norms: dict[str, float] = {}
         self._version = 0
         self._persistence_path = persistence_path
+        # Set when a persisted store exists but could not be read, so callers
+        # that persist can refuse to overwrite it with an empty store.
+        self.load_error: str | None = None
         if persistence_path and persistence_path.exists():
             self._load()
 
@@ -180,10 +183,12 @@ class VectorStore:
             data = json.loads(self._persistence_path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, ValueError, OSError) as exc:
             logger.warning("Failed to load vector store: %s", exc)
+            self.load_error = f"vector store could not be read: {exc}"
             return
         raw_items = data.get("entries", []) if isinstance(data, dict) else []
         if not isinstance(raw_items, list):
             logger.warning("Vector store has no entries list; starting empty.")
+            self.load_error = "vector store has no entries list"
             return
         for item in raw_items:
             if not isinstance(item, dict):

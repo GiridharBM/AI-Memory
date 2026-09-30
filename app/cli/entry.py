@@ -273,12 +273,17 @@ def sources() -> None:
         )
         return
 
-    manifest = ManifestManager(
-        settings.manifest.path,
-        project_root=settings.paths.project_root,
-        enabled=settings.manifest.enabled,
-    )
-    _annotate_source_ledger(rows, manifest, settings.paths.project_root)
+    entries = _read_ledger_entries(settings)
+    if entries is None:
+        console.print(
+            Panel.fit(
+                "The processed ledger could not be read; source listing is unavailable.",
+                title="Sources unavailable",
+                border_style="red",
+            ),
+        )
+        raise typer.Exit(1)
+    _annotate_source_ledger(rows, entries, settings.paths.project_root)
 
     table = Table(title="Indexed Sources", show_header=True, header_style="bold")
     table.add_column("Source")
@@ -345,11 +350,10 @@ def _read_vector_store_sources(settings: Settings) -> list[SourceRow] | None:
 
 def _annotate_source_ledger(
     rows: list[SourceRow],
-    manifest: ManifestManager,
+    entries: list[ManifestEntry],
     project_root: Path,
 ) -> None:
     """Annotate each source row with ledger status and last successful ingest."""
-    entries = manifest.list_entries()
     for row in rows:
         targets = _source_forms(row.source, project_root)
         matched = [
@@ -406,6 +410,16 @@ def remove_source(
     store = VectorStore(
         persistence_path=settings.paths.manifest_root / "vector_store.json",
     )
+    if store.load_error:
+        console.print(
+            Panel.fit(
+                "Could not read the vector store; nothing was removed.",
+                border_style="red",
+                title="Remove failed",
+            ),
+        )
+        logger.error("Vector store read failed during remove: %s", store.load_error)
+        raise typer.Exit(1)
 
     graph_path = settings.paths.manifest_root / "knowledge_graph.json"
     if graph_path.exists():
@@ -1234,6 +1248,26 @@ def _read_manifest_entries(settings: Settings) -> list[dict] | None:
     if not isinstance(files, list):
         return None
     return [entry for entry in files if isinstance(entry, dict)]
+
+
+def _read_ledger_entries(settings: Settings) -> list[ManifestEntry] | None:
+    """Return durable ledger entries read-only, or ``None`` if unreadable.
+
+    Reuses the read-only reader so a read path never creates directories,
+    writes a fresh manifest, or quarantines a recreated one. Unparseable rows
+    are skipped rather than failing the listing; a missing manifest is an
+    empty ledger, a present-but-unreadable one is ``None``.
+    """
+    raw = _read_manifest_entries(settings)
+    if raw is None:
+        return None
+    entries: list[ManifestEntry] = []
+    for data in raw:
+        try:
+            entries.append(ManifestEntry.from_dict(data))
+        except (KeyError, TypeError, ValueError):
+            continue
+    return entries
 
 
 def _ledger_metric(available: bool, value: int) -> str:

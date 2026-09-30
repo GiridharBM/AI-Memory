@@ -202,6 +202,53 @@ class TestSourcesEndpoint:
         assert body["chunk_count"] == 2
         assert [chunk["text"] for chunk in body["chunks"]] == ["first chunk", "second"]
 
+    def test_corrupt_ledger_is_unavailable_and_not_rewritten(
+        self, client: TestClient
+    ) -> None:
+        """A read must not quarantine or recreate a corrupt ledger."""
+        _write_store(deps.get_settings().paths.project_root, [_entry("a.md", "markdown", 0)])
+        manifest = deps.get_settings().manifest.path
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest.write_text("{ broken", encoding="utf-8")
+
+        response = client.get("/api/sources")
+
+        assert response.status_code == 503
+        assert "ledger" in response.json()["detail"].lower()
+        assert manifest.read_text(encoding="utf-8") == "{ broken"
+        assert [p.name for p in manifest.parent.glob(f"{manifest.name}*")] == [
+            manifest.name
+        ]
+
+    def test_corrupt_ledger_does_not_fabricate_a_detail_404(
+        self, client: TestClient
+    ) -> None:
+        _write_store(deps.get_settings().paths.project_root, [_entry("a.md", "markdown", 0)])
+        from app.interfaces.web.routes.knowledge import source_id
+
+        source_id_value = source_id("a.md")
+        manifest = deps.get_settings().manifest.path
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest.write_text("{ broken", encoding="utf-8")
+
+        response = client.get(f"/api/sources/{source_id_value}")
+
+        # 503 (unavailable), never a fabricated 404 "Source not found".
+        assert response.status_code == 503
+
+    def test_missing_ledger_lists_sources_without_creating_it(
+        self, client: TestClient
+    ) -> None:
+        _write_store(deps.get_settings().paths.project_root, [_entry("a.md", "markdown", 0)])
+        manifest = deps.get_settings().manifest.path
+        assert not manifest.exists()
+
+        body = client.get("/api/sources").json()
+
+        assert body["available"] is True
+        assert {s["name"] for s in body["sources"]} == {"a.md"}
+        assert not manifest.exists()
+
     def test_detail_404s_for_unknown_id(self, client: TestClient) -> None:
         _write_store(deps.get_settings().paths.project_root, [])
         assert client.get("/api/sources/deadbeef").status_code == 404
