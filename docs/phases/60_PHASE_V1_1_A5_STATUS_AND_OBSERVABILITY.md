@@ -13,7 +13,7 @@
 | `pam status` as read-only overview | IMPLEMENTED — removed `_ensure_runtime_directories`, all backing reads read-only |
 | Truthful counts (never fabricated zero) | IMPLEMENTED — unavailable vector store / ledger / queue → "unavailable", never "0" |
 | Sources/chunks from vector store | VERIFIED — `_indexed_sources` / `_indexed_chunks` (already correct, kept) |
-| Ingestion counters from durable ledger | IMPLEMENTED — processed / skipped / failed read-only from manifest JSON |
+| Ingestion counters from durable ledger | IMPLEMENTED — recorded **attempt counts** read-only from manifest JSON: every `processed`, `skipped_duplicate`, or `failed` ledger entry is one attempt, so one source may contribute to more than one ingestion row |
 | Remove fabricated "Retryable pending" row | IMPLEMENTED — manifest has no retryable/pending status; row deleted |
 | Queue pending state | IMPLEMENTED — `_queue_waiting`: missing→"0", unreadable→"unavailable", else read-only length |
 | Last-ingestion (durable, truthful empty state) | IMPLEMENTED — from ledger `processed_at`; "never" when empty, "unavailable" when ledger unreadable |
@@ -72,7 +72,7 @@ A5 is presentation-level only. The shared mutating infra (`ManifestManager.__ini
 
 ## 5. Defect 2 — Fabricated "Retryable pending" (FIXED)
 
-The manifest's only statuses are `processed`, `skipped_duplicate`, `failed`. The old `status` computed `retryable_count = count(status == "failed")` and printed a "Retryable pending: N" row duplicating "Failed: N" — a fabricated metric with no backing store. The row is removed. "Failed" alone truthfully reports the durable ledger's failures.
+The manifest's only statuses are `processed`, `skipped_duplicate`, `failed`. The old `status` computed `retryable_count = count(status == "failed")` and printed a "Retryable pending: N" row duplicating "Failed: N" — a fabricated metric with no backing store. The row is removed. "Failed" alone truthfully reports failed ingestion attempts in the durable ledger.
 
 ## 6. Defect 3 — Live Ollama Health Check Can Hang (DEFERRED / bounded)
 
@@ -94,12 +94,31 @@ The old vault row called `_is_writable_directory` → `_check_writable_directory
 |------|--------|-----------------|
 | Knowledge | Sources indexed, Indexed chunks | Vector store |
 | Knowledge | Real notes (generated) | Vault frontmatter scan (durable) |
-| Ingestion | Processed, Skipped, Failed, Manifest entries | Durable ledger |
+| Ingestion | Processed, Skipped, Failed, Manifest entries | Durable ledger (attempt entries) |
 | Ingestion | Last ingestion | Durable ledger `processed_at` (never process-start time / clock / mtime) |
 | Runtime | Items waiting (queue), Queue enabled | Queue state file (read-only) |
 | Runtime | Ollama host, Model | Configuration |
 | Runtime | Vault, Logs | `os.access`, path existence |
 | — | No LLM invocation | VERIFIED + TESTED |
+
+### 9.1 Counting semantics (D4, normative)
+
+Lifecycle ingestion counters are attempt-based durable-ledger counters. They count recorded ingestion attempts, not distinct current sources.
+
+- Manifest entries = total ledger entries.
+- Processed = ledger entries with status `processed`.
+- Skipped duplicates = ledger entries with status `skipped_duplicate`.
+- Failed = ledger entries with status `failed`.
+- Sources indexed = distinct sources currently present in the vector store.
+- Indexed chunks = vector-store chunk/entry count.
+
+These are intentionally different dimensions: ledger rows preserve ingestion history, while the vector store represents the current index. For example, `failed → processed` for one source results in:
+
+- `Failed = 1`
+- `Successful ingests = 1`
+- `Sources indexed = 1`
+
+The retained `Failed = 1` means "one recorded ingestion attempt failed." It does not by itself mean the source is currently broken. Current source state remains separately represented by `Sources indexed` and the per-source status view, whose locked precedence—`failed > processed > skipped_duplicate > indexed`—is unchanged.
 
 ## 10. Unavailable-Store Semantics (never fabricate a zero)
 
@@ -177,7 +196,7 @@ New status rows emit only: `settings.ollama.host` (localhost URL), `settings.oll
 
 1. **Windows vault perms (NOTES):** `os.access(path, os.W_OK)` can report writable on FAT volumes regardless of ACLs; it is a best-effort read-only hint. The authoritative write probe remains in `pam doctor`. `status` is intentionally read-only so it cannot be the authoritative writability test.
 2. **Live Ollama health DEFERRED:** `status` shows configured host/model only; no live connectivity. A cheap health probe is a `pam doctor` concern. Re-enable a live check in status only if given a bounded (e.g. ≤2s) timeout that cannot stall the command.
-3. **Ledger "entries" vs "sources indexed" intentionally differ:** removed-source ledger rows persist, so "Manifest entries" (37) exceeds "Sources indexed" (25). This is expected — the two measure different things (ledger history vs live vector index).
+3. **Ledger "entries" vs "sources indexed" intentionally differ:** removed-source ledger rows persist, and each retry records another ledger entry, so "Manifest entries" (37) may exceed "Sources indexed" (25). This is expected — lifecycle ingestion counters measure recorded attempts, while "Sources indexed" measures the current vector index.
 4. **Readability ≠ trustworthy state:** "0" for queue/missing-vector means the file is genuinely absent; a present-but-stale file still reports its stored value. `status` reports state, not freshness.
 
 ## 19. Files Summary

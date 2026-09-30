@@ -148,7 +148,7 @@ Verified against the report's claims:
 - **No mutation** — removed `_ensure_runtime_directories` from status; read-only smoke (`git status` before/after) identical. PASS
 - **No fabricated zeroes** — unavailable vector/ledger/queue → "unavailable", never "0". PASS
 - **Unavailable state** — distinct `unavailable` string vs genuine `0`. PASS
-- **Truthful durable counters** — processed/skipped/failed/manifest count from read-only ledger JSON; last-ingestion from durable `processed_at`, "never" when empty. PASS
+- **Truthful durable counters** — processed/skipped/failed/manifest are recorded ingestion-attempt counts from read-only ledger JSON; they are not deduplicated into distinct current-source buckets. A source with separate failed and processed attempts therefore contributes once to each applicable counter. Last-ingestion from durable `processed_at`, "never" when empty. PASS
 - **Placeholder exclusion** — `_note_counts` separates real generated vs placeholder vs user; placeholder not counted as real. PASS
 - **No LLM call** — removed the live `_ollama_status`(`ps()`, 300s timeout); row now config-only; test asserts `OllamaClient.is_available` NOT called. PASS
 - **No write probe** — vault check via `os.access`, `.pam_write_test` removed. PASS
