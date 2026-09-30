@@ -34,6 +34,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# GUI transport only. Kept optional so `pip install -e .` and the frozen
+# research environment are unchanged; the adapter in app/interfaces/web/ only
+# reads existing application services and never alters retrieval or QA.
+gui = [
+  "fastapi>=0.115.0",
+  "uvicorn>=0.30.0",
+  "python-multipart>=0.0.9",
+]
 intelligence = [
   "pytesseract>=0.3.10",
   "Pillow>=10.0.0",
@@ -54,6 +62,7 @@ dev = [
 
 [project.scripts]
 pam = "app.cli.entry:main"
+pam-gui = "app.interfaces.web.server:main"
 
 [tool.setuptools]
 include-package-data = true
