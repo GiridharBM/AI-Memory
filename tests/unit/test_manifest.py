@@ -160,3 +160,70 @@ def test_skipped_duplicate_records_ledger_entry(tmp_path: Path) -> None:
 
     assert manager.contains_successful_hash(digest)
     assert manager.list_entries()[0].status == "skipped_duplicate"
+
+
+# -- V1.1.1 D3: path-scoped dedup mirrors hash-scoped dedup ----------------
+# A failed entry must not block a retry, so a previously failed path is only
+# a duplicate once it carries a successful status.
+
+
+def test_contains_successful_path_false_for_failed(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "data" / "manifests" / "processed_files.json"
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+    source = tmp_path / "data" / "inbox" / "notes.xyz"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("blob", encoding="utf-8")
+
+    manager.add_failed_file(path=source, sha256="", extension=".xyz", error_reason="oops")
+
+    assert manager.contains_successful_path(source) is False
+    # The pre-existing status-agnostic lookup is intentionally unchanged.
+    assert manager.contains_path(source) is True
+
+
+def test_contains_successful_path_true_for_processed(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "data" / "manifests" / "processed_files.json"
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+    source = tmp_path / "data" / "inbox" / "notes.xyz"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("blob", encoding="utf-8")
+
+    manager.add_processed_file(path=source, sha256="", extension=".xyz", status="processed")
+
+    assert manager.contains_successful_path(source) is True
+
+
+def test_contains_successful_path_true_for_skipped_duplicate(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "data" / "manifests" / "processed_files.json"
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+    source = tmp_path / "data" / "inbox" / "notes.xyz"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("blob", encoding="utf-8")
+
+    manager.add_processed_file(
+        path=source, sha256="", extension=".xyz", status="skipped_duplicate",
+    )
+
+    assert manager.contains_successful_path(source) is True
+
+
+def test_contains_successful_path_mirrors_hash_semantics_for_failed(tmp_path: Path) -> None:
+    """A failed hashable source is retryable too: both lookups must agree."""
+    manifest_path = tmp_path / "data" / "manifests" / "processed_files.json"
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+    source = tmp_path / "data" / "inbox" / "notes.md"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("# Note", encoding="utf-8")
+    digest = manager.hash_for_path(source)
+
+    manager.add_failed_file(path=source, sha256=digest, extension=".md", error_reason="oops")
+
+    assert manager.contains_successful_hash(digest) is False
+    assert manager.contains_successful_path(source) is False
+
+
+def test_contains_successful_path_false_for_unknown_path(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "data" / "manifests" / "processed_files.json"
+    manager = ManifestManager(manifest_path, project_root=tmp_path)
+
+    assert manager.contains_successful_path(tmp_path / "never-seen.xyz") is False

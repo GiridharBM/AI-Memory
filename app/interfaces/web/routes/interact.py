@@ -273,7 +273,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
                 "skipping. Existing note, index, and knowledge-graph data was left untouched."
             ),
         }
-    if digest is None and manifest.contains_path(ledger_path):
+    if digest is None and manifest.contains_successful_path(ledger_path):
         manifest.add_processed_file(
             path=ledger_path,
             sha256="",

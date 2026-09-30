@@ -108,6 +108,22 @@ class ManifestManager:
         normalized = self._normalize_path(path)
         return any(entry.original_path == normalized for entry in self._state.files)
 
+    def contains_successful_path(self, path: Path) -> bool:
+        """Return true if the path was already processed successfully.
+
+        The path-scoped mirror of :meth:`contains_successful_hash`, for sources
+        that cannot be hashed (URLs, unsupported suffixes).  Failed entries do
+        not count as duplicates here either, so re-submitting a source that
+        previously failed is retried rather than skipped.  A source that was
+        processed or skipped as a duplicate stays protected.
+        """
+
+        normalized = self._normalize_path(path)
+        return any(
+            entry.original_path == normalized and is_successful_status(entry.status)
+            for entry in self._state.files
+        )
+
     def add_entry(self, entry: ManifestEntry) -> None:
         """Add an entry to the cached manifest."""
 

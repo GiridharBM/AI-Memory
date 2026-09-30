@@ -582,3 +582,120 @@ class TestIngestEndpoint:
         assert body["available"] is True
         assert body["extension_count"] > 0
         assert {item["kind"] for item in body["url_inputs"]} == {"github", "youtube"}
+
+
+class TestIngestFailedRetry:
+    """D3-B: the GUI ingest path must not treat a failed non-hashable source
+    as a duplicate. The defect exists independently of the CLI's."""
+
+    @staticmethod
+    def _post(client: TestClient, name: str) -> Any:
+        return client.post(
+            "/api/ingest", files={"file": (name, b"payload", "application/octet-stream")}
+        )
+
+    def _patch_workflow(self, monkeypatch: pytest.MonkeyPatch, behaviour: str) -> None:
+        from types import SimpleNamespace
+
+        from app.domain.documents import DocumentMetadata, SourceDocument
+        from app.domain.notes import ObsidianNote
+        from app.pipelines.ingest_workflow import IngestionWorkflow, IngestionWorkflowError
+
+        if behaviour == "fail":
+
+            def _create_default(*_args: object, **_kwargs: object) -> object:
+                raise IngestionWorkflowError("upstream refused", category="unsupported")
+
+        else:
+
+            class _Workflow:
+                @staticmethod
+                def create_default(*_args: object, **_kwargs: object) -> object:
+                    return _Workflow()
+
+                def run(self, *_args: object, **_kwargs: object) -> object:
+                    return SimpleNamespace(
+                        document=SourceDocument(
+                            source="weird.xyz",
+                            source_type="unknown",
+                            filename="weird.xyz",
+                            text="payload",
+                            metadata=DocumentMetadata(title="Weird"),
+                        ),
+                        note=ObsidianNote(
+                            title="Weird",
+                            filename="Weird.md",
+                            markdown="# Weird",
+                            generated_at="2026-07-08T00:00:00Z",
+                            tags=["local-ai"],
+                            source="weird.xyz",
+                            source_type="unknown",
+                        ),
+                        write_result=SimpleNamespace(
+                            note_path="notes/Weird.md",
+                            created=True,
+                            updated=False,
+                        ),
+                        chunks_stored=1,
+                    )
+
+            def _create_default(*_args: object, **_kwargs: object) -> object:
+                return _Workflow()
+
+        monkeypatch.setattr(
+            IngestionWorkflow, "create_default", staticmethod(_create_default)
+        )
+
+    def test_failed_non_hashable_source_retries_instead_of_duplicate(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from app.infrastructure.state.manifest import ManifestManager
+
+        settings = deps.get_settings()
+        self._patch_workflow(monkeypatch, "fail")
+
+        first = self._post(client, "weird.xyz")
+        assert first.status_code == 502
+
+        # The failed attempt is on disk before the retry.
+        manifest = ManifestManager(
+            settings.manifest.path,
+            project_root=settings.paths.project_root,
+            enabled=settings.manifest.enabled,
+        )
+        assert [e.status for e in manifest.list_entries()] == ["failed"]
+
+        self._patch_workflow(monkeypatch, "succeed")
+        second = self._post(client, "weird.xyz")
+
+        assert second.status_code == 200
+        assert second.json()["status"] == "processed"
+
+        after = ManifestManager(
+            settings.manifest.path,
+            project_root=settings.paths.project_root,
+            enabled=settings.manifest.enabled,
+        )
+        entries = after.list_entries()
+        # Append-only: the failure is preserved, the retry is a new row.
+        assert [e.status for e in entries] == ["failed", "processed"]
+        assert entries[0].error_reason == "IngestionWorkflowError: upstream refused"
+
+    def test_processed_non_hashable_source_still_duplicate(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Successful duplicate protection in the GUI is unchanged."""
+        self._patch_workflow(monkeypatch, "succeed")
+        assert self._post(client, "weird.xyz").json()["status"] == "processed"
+
+        def _must_not_run(*_args: object, **_kwargs: object) -> object:
+            raise AssertionError("the ingestion workflow must not run for a duplicate")
+
+        monkeypatch.setattr(
+            "app.interfaces.web.routes.interact.IngestionWorkflow.create_default", _must_not_run
+        )
+
+        second = self._post(client, "weird.xyz")
+
+        assert second.status_code == 200
+        assert second.json()["status"] == "skipped_duplicate"

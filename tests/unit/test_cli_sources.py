@@ -250,3 +250,204 @@ class TestCliSources:
         assert result.exit_code == 0
         assert "alpha.md" in result.output
         assert not mp.exists()
+
+
+class TestCliSourcesFailed:
+    """D3-A: ``pam sources --failed`` is ledger-driven and claims no indexing."""
+
+    @staticmethod
+    def _failed_ledger(tmp_path: Path) -> ManifestManager:
+        return ManifestManager(
+            tmp_path / "manifests" / "processed.json", project_root=tmp_path
+        )
+
+    @staticmethod
+    def _env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """Point the CLI at tmp and widen the table so long cells stay intact."""
+
+        monkeypatch.setenv("PAM_PATHS__PROJECT_ROOT", str(tmp_path))
+        monkeypatch.setenv("PAM_PATHS__MANIFEST_ROOT", str(tmp_path / "manifests"))
+        monkeypatch.setenv("PAM_MANIFEST__PATH", str(tmp_path / "manifests" / "processed.json"))
+        monkeypatch.setenv("COLUMNS", "220")
+
+    def test_default_listing_omits_failed_only_source(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """The default listing stays vector-store authoritative (unchanged)."""
+        _write_vector_store(
+            tmp_path / "manifests" / "vector_store.json",
+            [_entry("indexed.md", "markdown", 0)],
+        )
+        failed = tmp_path / "broken.md"
+        manager = self._failed_ledger(tmp_path)
+        manager.add_failed_file(
+            path=failed, sha256="deadbeef", extension=".md", error_reason="RuntimeError: boom"
+        )
+        manager.save()
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["sources"])
+
+        assert result.exit_code == 0
+        assert "Indexed Sources" in result.output
+        assert "indexed.md" in result.output
+        # The failed-only source is neither listed nor announced.
+        assert "broken.md" not in result.output
+        assert "Failed Sources" not in result.output
+
+    def test_failed_only_local_source_listed(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        failed = tmp_path / "broken.md"
+        failed.write_text("# broken", encoding="utf-8")
+        manager = self._failed_ledger(tmp_path)
+        manager.add_failed_file(
+            path=failed,
+            sha256="deadbeef",
+            extension=".md",
+            error_reason="RuntimeError: embedding backend down",
+        )
+        manager.save()
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["sources", "--failed"])
+
+        assert result.exit_code == 0
+        out = result.output
+        assert "Failed Sources (not indexed)" in out
+        assert "broken.md" in out
+        assert ".md" in out
+        assert "embedding backend down" in out
+        # Never presented as an indexed row.
+        assert "Indexed Sources" not in out
+        assert "Chunks" not in out
+
+    def test_failed_only_url_listed(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        url = "https://github.com/example/pam/blob/main/README.md"
+        manager = self._failed_ledger(tmp_path)
+        row = manager.add_failed_file(
+            path=Path(url), sha256="", extension="", error_reason="OSError: host unreachable"
+        )
+        manager.save()
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["sources", "--failed"])
+
+        assert result.exit_code == 0
+        # The URL failure is shown under the identity the ledger recorded for it.
+        assert row.original_path in result.output
+        assert "host unreachable" in result.output
+
+    def test_failed_unsupported_source_listed(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        source = tmp_path / "weird.xyz"
+        source.write_text("binary-ish", encoding="utf-8")
+        manager = self._failed_ledger(tmp_path)
+        manager.add_failed_file(
+            path=source,
+            sha256="",
+            extension=".xyz",
+            error_reason="IngestionWorkflowError: Unsupported source type",
+        )
+        manager.save()
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["sources", "--failed"])
+
+        assert result.exit_code == 0
+        out = result.output
+        assert "weird.xyz" in out
+        assert ".xyz" in out
+        assert "Unsupported source type" in out
+
+    def test_repeated_failures_collapse_to_one_row_without_touching_history(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        source = tmp_path / "broken.md"
+        source.write_text("# broken", encoding="utf-8")
+        manager = self._failed_ledger(tmp_path)
+        manager.add_failed_file(
+            path=source, sha256="deadbeef", extension=".md", error_reason="RuntimeError: first"
+        )
+        manager.add_failed_file(
+            path=source, sha256="deadbeef", extension=".md", error_reason="RuntimeError: second"
+        )
+        manager.save()
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["sources", "--failed"])
+
+        assert result.exit_code == 0
+        out = result.output
+        # One source row, with the attempt count surfaced rather than duplicated.
+        assert out.count("broken.md") == 1
+        assert "2" in out
+        # Both underlying attempts survive: the ledger is append-only.
+        after = ManifestManager(
+            tmp_path / "manifests" / "processed.json", project_root=tmp_path
+        )
+        entries = after.list_entries()
+        assert len(entries) == 2
+        assert [e.error_reason for e in entries] == ["RuntimeError: first", "RuntimeError: second"]
+
+    def test_empty_state_when_no_failures(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        source = tmp_path / "ok.md"
+        source.write_text("# ok", encoding="utf-8")
+        manager = self._failed_ledger(tmp_path)
+        manager.add_processed_file(
+            path=source, sha256="abc", extension=".md", status="processed"
+        )
+        manager.save()
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["sources", "--failed"])
+
+        assert result.exit_code == 0
+        assert "No failed sources are recorded" in result.output
+        assert "ok.md" not in result.output
+
+    def test_does_not_create_or_modify_the_ledger(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Listing failures is read-only: no create, no quarantine, no rewrite."""
+        mp = tmp_path / "manifests" / "processed.json"
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["sources", "--failed"])
+
+        assert result.exit_code == 0
+        assert not mp.exists()
+
+        mp.parent.mkdir(parents=True, exist_ok=True)
+        mp.write_text("{ corrupt", encoding="utf-8")
+        corrupt = runner.invoke(entry.cli, ["sources", "--failed"])
+
+        assert corrupt.exit_code == 1
+        assert "unavailable" in corrupt.output.lower()
+        assert "Traceback" not in corrupt.output
+        assert mp.read_text(encoding="utf-8") == "{ corrupt"
+        assert [p.name for p in mp.parent.glob("processed.json*")] == ["processed.json"]
+
+    def test_status_command_unchanged_by_failed_sources(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """D4 owns status counting: a failed entry still counts as before."""
+        source = tmp_path / "broken.md"
+        source.write_text("# broken", encoding="utf-8")
+        manager = self._failed_ledger(tmp_path)
+        manager.add_failed_file(
+            path=source, sha256="deadbeef", extension=".md", error_reason="RuntimeError: boom"
+        )
+        manager.save()
+        self._env(monkeypatch, tmp_path)
+
+        result = runner.invoke(entry.cli, ["status"])
+
+        assert result.exit_code == 0
+        assert "Failed" in result.output
+        assert "Failed Sources" not in result.output

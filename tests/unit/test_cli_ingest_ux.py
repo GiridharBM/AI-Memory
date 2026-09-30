@@ -388,3 +388,117 @@ def test_corrupt_vector_store_exits_one_and_preserves_bytes(
     workflow._writer.save.assert_not_called()
     workflow._writer.create_placeholder.assert_not_called()
     workflow._ingestion_service.ingest.assert_not_called()
+
+
+# -- V1.1.1 D3: a failed non-hashable source stays retryable ---------------
+# A previous failed entry must not turn a re-drop into ``skipped_duplicate``.
+
+
+def test_failed_url_retries_instead_of_duplicate(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    url = "https://github.com/example/pam"
+    monkeypatch.setattr(entry, "IngestionWorkflow", _FailingWorkflow)
+    _set_manifest(tmp_path, monkeypatch)
+    _FailingWorkflow.error = OSError("host unreachable")
+
+    first = runner.invoke(entry.cli, ["ingest", "github", url])
+    assert first.exit_code == 1
+    assert "skipped" not in first.output.lower()
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _SuccessWorkflow.path = tmp_path
+    second = runner.invoke(entry.cli, ["ingest", "github", url])
+
+    assert second.exit_code == 0
+    assert "Ingest skipped (duplicate)" not in second.output
+    assert "Ingestion Complete" in second.output
+
+
+def test_failed_unsupported_source_retries_instead_of_duplicate(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source = _write_source(tmp_path, name="weird.xyz")
+    monkeypatch.setattr(entry, "IngestionWorkflow", _FailingWorkflow)
+    _set_manifest(tmp_path, monkeypatch)
+    _FailingWorkflow.error = entry.IngestionWorkflowError(
+        "Unsupported source type for 'weird.xyz'.", category="unsupported"
+    )
+
+    first = _invoke(source, _FailingWorkflow)
+    assert first.exit_code == 1
+    assert "Ingest skipped (duplicate)" not in first.output
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _SuccessWorkflow.path = tmp_path
+    second = _invoke(source, _SuccessWorkflow)
+
+    assert second.exit_code == 0
+    assert "Ingest skipped (duplicate)" not in second.output
+    assert "Ingestion Complete" in second.output
+
+
+def test_retry_after_failure_stays_append_only(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The old failed row survives; the retry adds a new row beside it."""
+    source = _write_source(tmp_path, name="weird.xyz")
+    monkeypatch.setattr(entry, "IngestionWorkflow", _FailingWorkflow)
+    _set_manifest(tmp_path, monkeypatch)
+    _FailingWorkflow.error = entry.IngestionWorkflowError(
+        "Unsupported source type for 'weird.xyz'.", category="unsupported"
+    )
+    assert _invoke(source, _FailingWorkflow).exit_code == 1
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _SuccessWorkflow.path = tmp_path
+    assert _invoke(source, _SuccessWorkflow).exit_code == 0
+
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    entries = manager.list_entries()
+    assert [e.status for e in entries] == ["failed", "processed"]
+    # The original failure is neither rewritten nor superseded.
+    assert entries[0].error_reason == (
+        "IngestionWorkflowError: Unsupported source type for 'weird.xyz'."
+    )
+
+
+def test_processed_non_hashable_source_still_duplicate(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Successful duplicate protection must be unchanged by the D3 fix."""
+    source = _write_source(tmp_path, name="weird.xyz")
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _set_manifest(tmp_path, monkeypatch)
+    _SuccessWorkflow.path = tmp_path
+    assert _invoke(source, _SuccessWorkflow).exit_code == 0
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", _DuplicateWorkflow)
+    second = _invoke(source, _DuplicateWorkflow)
+
+    assert second.exit_code == 0
+    assert "Ingest skipped (duplicate)" in second.output
+    assert "already recorded" in second.output
+
+
+def test_skipped_duplicate_non_hashable_source_stays_duplicate(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A prior ``skipped_duplicate`` path is a successful status: still protected."""
+    source = _write_source(tmp_path, name="weird.xyz")
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _set_manifest(tmp_path, monkeypatch)
+    _SuccessWorkflow.path = tmp_path
+    assert _invoke(source, _SuccessWorkflow).exit_code == 0
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", _DuplicateWorkflow)
+    assert _invoke(source, _DuplicateWorkflow).exit_code == 0
+
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    assert [e.status for e in manager.list_entries()] == ["processed", "skipped_duplicate"]
+
+    # A third drop short-circuits on the successful path entry, not the failed one.
+    third = _invoke(source, _DuplicateWorkflow)
+
+    assert third.exit_code == 0
+    assert "Ingest skipped (duplicate)" in third.output

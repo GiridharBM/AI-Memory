@@ -240,18 +240,37 @@ class SourceRow:
 
 
 @cli.command("sources")
-def sources() -> None:
+def sources(
+    failed: Annotated[
+        bool,
+        typer.Option(
+            "--failed",
+            help=(
+                "List sources whose ingestion failed, from the durable ledger. "
+                "These are NOT indexed and have no vector chunks."
+            ),
+        ),
+    ] = False,
+) -> None:
     """List the sources currently indexed by PAM (read-only).
 
     The persistent vector store is the authority on what is indexable; the
     durable ledger (manifest) annotates each with ingestion status and the most
     recent successful ingestion time.  This command never queries the corpus,
     launches an LLM, or performs retrieval — it only reads durable state.
+
+    With ``--failed`` the listing is ledger-driven instead: it reports sources
+    whose ingestion failed.  Those sources are not indexed, so they never
+    appear in the default listing.
     """
 
     settings = _load_configured_settings()
     setup_logging(settings)
     logger.info("Sources requested")
+
+    if failed:
+        _print_failed_sources(settings)
+        return
 
     rows = _read_vector_store_sources(settings)
     if rows is None:
@@ -306,6 +325,62 @@ def sources() -> None:
         "Sources listed.",
         extra={"source_count": len(rows), "chunk_count": sum(r.chunks for r in rows)},
     )
+
+
+def _print_failed_sources(settings: Settings) -> None:
+    """List ledger-recorded failed sources (read-only, never claimed indexed).
+
+    Driven entirely by the durable ledger through the same read-only reader the
+    indexed listing uses, so a missing or corrupt ledger is never created,
+    quarantined, or rewritten.  Repeated failed attempts for one source are
+    collapsed into a single row; the append-only ledger history is untouched.
+    """
+
+    entries = _read_ledger_entries(settings)
+    if entries is None:
+        console.print(
+            Panel.fit(
+                "The processed ledger could not be read; failed sources are unavailable.",
+                title="Failed sources unavailable",
+                border_style="red",
+            ),
+        )
+        raise typer.Exit(1)
+
+    grouped: dict[str, list[ManifestEntry]] = {}
+    for entry in entries:
+        if entry.status == "failed":
+            grouped.setdefault(entry.original_path, []).append(entry)
+
+    if not grouped:
+        console.print(
+            Panel.fit(
+                "No failed sources are recorded in the ledger.",
+                title="Failed Sources",
+            ),
+        )
+        return
+
+    table = Table(title="Failed Sources (not indexed)", show_header=True, header_style="bold")
+    table.add_column("Source")
+    table.add_column("Type")
+    table.add_column("Failed Attempts", justify="right")
+    table.add_column("Last Failed (UTC)")
+    table.add_column("Reason")
+
+    for source in sorted(grouped):
+        attempts = grouped[source]
+        latest = max(attempts, key=lambda entry: entry.processed_at)
+        table.add_row(
+            source,
+            latest.extension or "—",
+            str(len(attempts)),
+            latest.processed_at,
+            latest.error_reason or "—",
+        )
+
+    console.print(table)
+    logger.info("Failed sources listed.", extra={"failed_source_count": len(grouped)})
 
 
 def _read_vector_store_sources(settings: Settings) -> list[SourceRow] | None:
@@ -1015,7 +1090,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
             ),
         )
         return
-    if digest is None and manifest.contains_path(ledger_path):
+    if digest is None and manifest.contains_successful_path(ledger_path):
         manifest.add_processed_file(
             path=ledger_path,
             sha256="",
