@@ -1181,6 +1181,15 @@ def _print_ingest_failure(*, category: str, reason: str) -> None:
             ),
         )
         return
+    if category == "unreadable_state":
+        console.print(
+            Panel.fit(
+                f"{reason} The existing index was left untouched.",
+                title="Index unreadable (nothing ingested)",
+                border_style="red",
+            ),
+        )
+        return
     console.print(
         Panel.fit(
             f"{reason} You can retry after resolving the underlying issue "

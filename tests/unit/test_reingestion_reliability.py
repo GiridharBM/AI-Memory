@@ -27,6 +27,8 @@ from types import SimpleNamespace
 from typing import Any, cast
 from unittest.mock import MagicMock
 
+import pytest
+
 from app.domain.documents import DocumentMetadata, SourceDocument
 from app.domain.knowledge_graph import KnowledgeGraph, KnowledgeNode
 from app.domain.semantic_chunking import DocumentChunk
@@ -35,7 +37,7 @@ from app.infrastructure.embeddings import EmbeddingResult
 from app.infrastructure.semantic_chunking import SemanticChunker
 from app.infrastructure.state.manifest import ManifestManager
 from app.infrastructure.vector_store import VectorStore
-from app.pipelines.ingest_workflow import IngestionWorkflow
+from app.pipelines.ingest_workflow import IngestionWorkflow, IngestionWorkflowError
 
 
 class _Embedder:
@@ -323,6 +325,7 @@ def test_partial_embedding_preserves_prior_data_on_disk(tmp_path: Path) -> None:
 
     embedder.fail_indices = {1}  # one chunk emits no embedding
     store2 = VectorStore(persistence_path=vpath)
+    store2.save = MagicMock(wraps=store2.save)  # type: ignore[method-assign]
     wf2 = _workflow(
         chunks=[_chunk("a.md", 10), _chunk("a.md", 11)],
         vector_store=store2,
@@ -333,6 +336,7 @@ def test_partial_embedding_preserves_prior_data_on_disk(tmp_path: Path) -> None:
     _kg, stored, _links = _run(wf2, "a.md")
 
     assert stored == 0
+    assert store2.save.call_count == 0  # a partial embed must never reach disk
     assert wf2._last_knowledge_result is not None
     assert wf2._last_knowledge_result.succeeded is False
     assert _source_ids(_reload_vector(vpath).entries()) == {
@@ -572,3 +576,151 @@ def test_identical_hash_different_path_dedups_safely(tmp_path: Path) -> None:
     # store identity stays path-scoped: replacement targets the ingested path
     assert manifest.contains_path(p2) is False
     assert manifest.contains_path(p1) is True
+
+
+# ── V1.1.1 D5: fail closed on an unreadable vector store ───────────────────
+#
+# A store that failed to load looks EMPTY, so continuing would save only the
+# new entries and silently destroy every other source's vectors.  The guard
+# lives in IngestionWorkflow.run(), so it covers the shared CLI / queue / GUI
+# path and must fire before ANY durable write.
+
+
+def _run_workflow(
+    *,
+    chunks: list[DocumentChunk],
+    vector_store: Any,
+    graph_path: Path | None,
+    embedder: _Embedder | None = None,
+    kg_builder: _KGBuilder | None = None,
+) -> IngestionWorkflow:
+    """Workflow wired for the public run() entry point the CLI/queue/GUI use."""
+    ingestion_service = MagicMock()
+    ingestion_service.ingest.return_value = SimpleNamespace(
+        succeeded=True, document=_document("a.md"), error=None
+    )
+    chunker = MagicMock(spec=SemanticChunker)
+    chunker.chunk.return_value = chunks
+    return IngestionWorkflow(
+        ingestion_service=ingestion_service,
+        processor=MagicMock(),
+        ollama_client=MagicMock(),
+        note_generator=MagicMock(),
+        writer=MagicMock(),
+        chunker=chunker,
+        embedding_service=cast(Any, embedder or _Embedder()),
+        vector_store=vector_store,
+        knowledge_graph_builder=cast(Any, kg_builder or _KGBuilder()),
+        graph_persistence_path=graph_path,
+    )
+
+
+def test_corrupt_store_fails_closed_before_any_durable_write(tmp_path: Path) -> None:
+    vpath = tmp_path / "vstore.json"
+    gpath = tmp_path / "graph.json"
+    corrupt = b'{"entries": [ this is not json'
+    vpath.write_bytes(corrupt)
+
+    store = VectorStore(persistence_path=vpath)
+    assert store.load_error is not None  # the store looks empty but is unreadable
+
+    wf = _run_workflow(
+        chunks=[_chunk("a.md", 0), _chunk("a.md", 1)],
+        vector_store=store,
+        graph_path=gpath,
+    )
+
+    with pytest.raises(IngestionWorkflowError) as excinfo:
+        wf.run("a.md")
+
+    assert excinfo.value.category == "unreadable_state"
+    assert "index could not be read" in str(excinfo.value)
+    # the corrupt file is byte-identical and no atomic-write temp file is left
+    assert vpath.read_bytes() == corrupt
+    assert list(tmp_path.glob("*.tmp")) == []
+    # no durable write of any kind happened
+    wf._writer.save.assert_not_called()
+    wf._writer.create_placeholder.assert_not_called()
+    assert not gpath.exists()
+    # the guard precedes even reading the source
+    wf._ingestion_service.ingest.assert_not_called()
+
+
+def test_corrupt_store_leaves_prior_graph_and_bytes_untouched(tmp_path: Path) -> None:
+    vpath = tmp_path / "vstore.json"
+    gpath = tmp_path / "graph.json"
+
+    healthy = _run_workflow(
+        chunks=[_chunk("a.md", 0)],
+        vector_store=VectorStore(persistence_path=vpath),
+        graph_path=gpath,
+    )
+    healthy.run("a.md")
+    assert _node_ids(KnowledgeGraph.load(gpath)) == ["a.md::n1"]
+    graph_before = gpath.read_bytes()
+
+    corrupt = b"totally corrupt"
+    vpath.write_bytes(corrupt)
+    store = VectorStore(persistence_path=vpath)
+    assert store.load_error is not None
+
+    wf = _run_workflow(
+        chunks=[_chunk("a.md", 5)],
+        vector_store=store,
+        graph_path=gpath,
+    )
+    with pytest.raises(IngestionWorkflowError) as excinfo:
+        wf.run("a.md")
+
+    assert excinfo.value.category == "unreadable_state"
+    assert vpath.read_bytes() == corrupt
+    assert list(tmp_path.glob("*.tmp")) == []
+    assert gpath.read_bytes() == graph_before
+    wf._writer.save.assert_not_called()
+
+
+def test_healthy_store_still_ingests_normally_via_run(tmp_path: Path) -> None:
+    vpath = tmp_path / "vstore.json"
+    store = VectorStore(persistence_path=vpath)
+    store.add_batch([_entry("other.md", 0)])
+    store._version = 0
+
+    wf = _run_workflow(chunks=[_chunk("a.md", 0)], vector_store=store, graph_path=None)
+    result = wf.run("a.md")
+
+    assert wf._writer.save.call_count == 1
+    assert result.chunks_stored == 1
+    assert wf._last_knowledge_result is not None
+    assert wf._last_knowledge_result.succeeded is True
+    # the pre-existing source survives alongside the new one
+    assert _source_ids(_reload_vector(vpath).entries()) == {
+        "a.md": ["a.md::chunk_0"],
+        "other.md": ["other.md::chunk_0"],
+    }
+
+
+def test_missing_store_first_ingest_still_succeeds(tmp_path: Path) -> None:
+    vpath = tmp_path / "vstore.json"
+    assert not vpath.exists()
+
+    store = VectorStore(persistence_path=vpath)
+    assert store.load_error is None  # absent store is a valid first-run state
+
+    wf = _run_workflow(chunks=[_chunk("a.md", 0)], vector_store=store, graph_path=None)
+    wf.run("a.md")
+
+    assert wf._writer.save.call_count == 1
+    assert _source_ids(_reload_vector(vpath).entries()) == {"a.md": ["a.md::chunk_0"]}
+
+
+def test_stub_store_without_load_error_is_not_blocked() -> None:
+    """A MagicMock store (as used by knowledge-engine tests) is not a real
+    VectorStore, so its truthy mock load_error must not trip the guard."""
+    wf = _run_workflow(
+        chunks=[_chunk("a.md", 0)],
+        vector_store=MagicMock(),
+        graph_path=None,
+    )
+    result = wf.run("a.md")
+    assert wf._writer.save.call_count == 1
+    assert result.chunks_stored == 1

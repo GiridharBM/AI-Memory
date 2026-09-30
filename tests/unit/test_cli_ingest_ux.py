@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 from typer.testing import CliRunner
@@ -19,6 +20,8 @@ from app.domain.documents import DocumentMetadata, SourceDocument
 from app.domain.notes import ObsidianNote
 from app.infrastructure.state.manifest import ManifestManager
 from app.infrastructure.vault import WikiUpdateResult
+from app.infrastructure.vector_store import VectorStore
+from app.pipelines.ingest_workflow import IngestionWorkflow
 
 runner = CliRunner()
 
@@ -322,3 +325,66 @@ def test_missing_source_rejected_by_typer() -> None:
     result = runner.invoke(entry.cli, ["ingest", "file", "C:\\__no_such_a2_file__.md"])
     assert result.exit_code != 0
     assert "does not exist" in result.output
+
+
+# ── V1.1.1 D5: unreadable index fails closed with a truthful panel ─────────
+
+
+def test_unreadable_index_panel_is_not_a_security_or_retry_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source = _write_source(tmp_path)
+    monkeypatch.setattr(entry, "IngestionWorkflow", _FailingWorkflow)
+    _set_manifest(tmp_path, monkeypatch)
+    _FailingWorkflow.error = entry.IngestionWorkflowError(
+        "The existing index could not be read.", category="unreadable_state"
+    )
+
+    result = _invoke(source, _FailingWorkflow)
+
+    assert result.exit_code == 1
+    out = result.output
+    assert "Index unreadable" in out
+    assert "nothing ingested" in out
+    # must not be mislabelled as a security block or a transient retry failure
+    assert "Ingest blocked" not in out
+    assert "Ollama offline" not in out
+    assert "Traceback" not in out
+
+
+def test_corrupt_vector_store_exits_one_and_preserves_bytes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """End-to-end through the real IngestionWorkflow guard: a corrupt store
+    must abort before any write and leave the file byte-identical."""
+    source = _write_source(tmp_path)
+    _set_manifest(tmp_path, monkeypatch)
+    vpath = tmp_path / "vector_store.json"
+    corrupt = b'{"entries": [ broken'
+    vpath.write_bytes(corrupt)
+
+    workflow = IngestionWorkflow(
+        ingestion_service=MagicMock(),
+        processor=MagicMock(),
+        ollama_client=MagicMock(),
+        note_generator=MagicMock(),
+        writer=MagicMock(),
+        chunker=MagicMock(),
+        embedding_service=MagicMock(),
+        vector_store=VectorStore(persistence_path=vpath),
+        knowledge_graph_builder=MagicMock(),
+    )
+    monkeypatch.setattr(
+        entry, "IngestionWorkflow", MagicMock(create_default=MagicMock(return_value=workflow))
+    )
+
+    result = _invoke(source, entry.IngestionWorkflow)
+
+    assert result.exit_code == 1
+    assert "Index unreadable" in result.output
+    assert "Traceback" not in result.output
+    assert vpath.read_bytes() == corrupt
+    assert list(tmp_path.glob("*.tmp")) == []
+    workflow._writer.save.assert_not_called()
+    workflow._writer.create_placeholder.assert_not_called()
+    workflow._ingestion_service.ingest.assert_not_called()

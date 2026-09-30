@@ -325,6 +325,19 @@ class IngestionWorkflow:
 
         logger.info("Starting ingestion workflow.", extra={"source": str(source)})
 
+        # Fail closed on an unreadable index before any durable write.  A store
+        # that failed to load looks empty, so continuing would save only the new
+        # entries and silently destroy every other source's vectors.  The
+        # isinstance check keeps injected stubs without a real load_error
+        # (e.g. MagicMock) working as before.
+        if isinstance(self._vector_store, VectorStore) and self._vector_store.load_error:
+            raise IngestionWorkflowError(
+                "The existing index could not be read, so nothing was ingested "
+                f"({self._vector_store.load_error}). Restore or repair the vector "
+                "store before retrying.",
+                category="unreadable_state",
+            )
+
         ingestion_result = self._ingestion_service.ingest(source)
         if not ingestion_result.succeeded or ingestion_result.document is None:
             reason = (
