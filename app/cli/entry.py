@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import sys
+from collections.abc import Collection
 from contextlib import suppress
 from dataclasses import dataclass, field
 from importlib.util import find_spec
@@ -25,7 +26,13 @@ from app.core.logging import get_logger, setup_logging
 from app.domain.knowledge_graph import KnowledgeGraph
 from app.infrastructure.llm import OllamaClient, OllamaClientError
 from app.infrastructure.search import SearchHit, SearchService
-from app.infrastructure.state.manifest import ManifestEntry, ManifestManager, is_successful_status
+from app.infrastructure.state.manifest import (
+    ManifestEntry,
+    ManifestManager,
+    is_successful_status,
+    is_url_source,
+    url_matches_ledger_entry,
+)
 from app.infrastructure.vector_store import VectorStore
 from app.pipelines import IngestionWorkflow, IngestionWorkflowError
 from app.queue import QueueStateStore
@@ -348,9 +355,21 @@ def _print_failed_sources(settings: Settings) -> None:
         raise typer.Exit(1)
 
     grouped: dict[str, list[ManifestEntry]] = {}
+    exact_urls = [
+        entry.original_path for entry in entries if is_url_source(entry.original_path)
+    ]
     for entry in entries:
         if entry.status == "failed":
-            grouped.setdefault(entry.original_path, []).append(entry)
+            key = entry.original_path
+            if not is_url_source(key):
+                matches = [
+                    url
+                    for url in exact_urls
+                    if url_matches_ledger_entry(key, url, exact_urls)
+                ]
+                if len(matches) == 1:
+                    key = matches[0]
+            grouped.setdefault(key, []).append(entry)
 
     if not grouped:
         console.print(
@@ -431,6 +450,9 @@ def _annotate_source_ledger(
     """Annotate each source row with ledger status and last successful ingest."""
     for row in rows:
         targets = _source_forms(row.source, project_root)
+        exact_url_paths = [
+            entry.original_path for entry in entries if is_url_source(entry.original_path)
+        ]
         matched = [
             entry
             for entry in entries
@@ -439,6 +461,7 @@ def _annotate_source_ledger(
                 entry.original_filename,
                 entry.sha256,
                 targets,
+                exact_url_paths,
             )
         ]
         row.manifest_matches = matched
@@ -518,14 +541,19 @@ def remove_source(
         project_root=project_root,
         enabled=settings.manifest.enabled,
     )
+    ledger_entries = manifest.list_entries()
+    exact_url_paths = [
+        entry.original_path for entry in ledger_entries if is_url_source(entry.original_path)
+    ]
     ledger_matches = [
         entry
-        for entry in manifest.list_entries()
+        for entry in ledger_entries
         if _manifest_entry_matches(
             entry.original_path,
             entry.original_filename,
             entry.sha256,
             targets,
+            exact_url_paths,
         )
     ]
 
@@ -1066,6 +1094,8 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         enabled=settings.manifest.enabled,
     )
     ledger_path = Path(source)
+    url_source = source if isinstance(source, str) and is_url_source(source) else None
+    ledger_source: str | Path = url_source if url_source is not None else ledger_path
     try:
         digest = manifest.hash_for_path(source) if isinstance(source, Path) else None
     except ValueError:
@@ -1086,6 +1116,22 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
                 "This file was already processed successfully (identical content); "
                 "skipping. Existing note, index, and knowledge-graph data for this "
                 "source was left untouched.",
+                title="Ingest skipped (duplicate)",
+            ),
+        )
+        return
+    if url_source is not None and manifest.contains_successful_url(url_source):
+        manifest.add_processed_file(
+            path=url_source,
+            sha256="",
+            extension=Path(url_source).suffix,
+            status="skipped_duplicate",
+        )
+        _try_save_ledger(manifest)
+        console.print(
+            Panel.fit(
+                "This source was already recorded; skipping. Existing note, index, "
+                "and knowledge-graph data for this source was left untouched.",
                 title="Ingest skipped (duplicate)",
             ),
         )
@@ -1112,7 +1158,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         result = workflow.run(source, expected_source_type=expected_source_type)
     except (IngestionWorkflowError, AIProcessingError, OllamaClientError, OSError) as exc:
         logger.error("Ingestion pipeline failed: %s", exc)
-        _record_failed_ingest(manifest, ledger_path, digest, exc)
+        _record_failed_ingest(manifest, ledger_source, digest, exc)
         _print_ingest_failure(
             category=getattr(exc, "category", "retryable"),
             reason=str(exc),
@@ -1120,7 +1166,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         raise typer.Exit(1) from exc
     except Exception as exc:
         logger.error("Unexpected failure during ingestion: %s", exc)
-        _record_failed_ingest(manifest, ledger_path, digest, exc)
+        _record_failed_ingest(manifest, ledger_source, digest, exc)
         _print_ingest_failure(
             category="retryable",
             reason=str(exc) or exc.__class__.__name__,
@@ -1131,9 +1177,9 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
     indexed = getattr(result, "indexing_succeeded", True)
     fully_indexed = embedded and indexed
     manifest.add_processed_file(
-        path=ledger_path,
+        path=ledger_source,
         sha256=digest or "",
-        extension=ledger_path.suffix,
+        extension=Path(ledger_source).suffix,
         generated_note=result.note.filename,
         chunks_stored=getattr(result, "chunks_stored", False),
         embedding_succeeded=embedded,
@@ -1187,7 +1233,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
 
 def _record_failed_ingest(
     manifest: ManifestManager,
-    path: Path,
+    path: Path | str,
     digest: str | None,
     exc: Exception,
 ) -> None:
@@ -1195,7 +1241,7 @@ def _record_failed_ingest(
     manifest.add_failed_file(
         path=path,
         sha256=digest or "",
-        extension=path.suffix,
+        extension=Path(path).suffix,
         error_reason=f"{exc.__class__.__name__}: {exc}",
     )
     _try_save_ledger(manifest)
@@ -1597,11 +1643,18 @@ def _manifest_entry_matches(
     original_filename: str,
     sha256: str,
     targets: set[str],
+    known_exact_url_paths: Collection[str] | None = None,
 ) -> bool:
     """Return whether a manifest entry belongs to a delete target."""
     if not sha256 and not original_path and not original_filename:
         return False
     if original_path in targets:
+        return True
+    if any(
+        is_url_source(target)
+        and url_matches_ledger_entry(original_path, target, known_exact_url_paths)
+        for target in targets
+    ):
         return True
     if original_filename in targets:
         return True

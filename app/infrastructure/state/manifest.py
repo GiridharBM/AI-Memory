@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Collection
 from contextlib import suppress
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePath
+from urllib.parse import urlparse
 
 from app.core.logging import get_logger
 from app.infrastructure.state.hashing import compute_file_hash
@@ -20,6 +22,53 @@ SUCCESSFUL_STATUSES = frozenset({"processed", "skipped_duplicate"})
 def is_successful_status(status: str) -> bool:
     """Return true for statuses that count as durably processed."""
     return status in SUCCESSFUL_STATUSES
+
+
+def is_url_source(value: object) -> bool:
+    """Return true for an HTTP/HTTPS URL source string."""
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    if not text:
+        return False
+    parsed = urlparse(text)
+    return parsed.scheme.lower() in {"http", "https"} and bool(parsed.netloc)
+
+
+def _url_ledger_suffix(url: str) -> str:
+    """Return the CWD-independent filesystem spelling of a URL string."""
+    return PurePath(url).as_posix()
+
+
+def url_matches_ledger_entry(
+    entry_path: object, url: str, known_exact_paths: Collection[str] | None = None
+) -> bool:
+    """Match an exact URL against current and recognized historical ledger forms.
+
+    New URL ledger rows use the exact submitted URL. Historical rows created by
+    ``Path(url).resolve()`` retain a CWD-derived mangled spelling. Recognize
+    those rows by their URL-derived suffix without rewriting them and without
+    equating different URL spellings that produce different suffixes.
+    """
+    if not isinstance(entry_path, str) or not entry_path:
+        return False
+    if not is_url_source(url):
+        return False
+    if entry_path == url:
+        return True
+    # A current exact-URL row is itself a complete identity. Do not use legacy
+    # suffix matching to collapse distinct URL spellings.
+    if is_url_source(entry_path):
+        return False
+    suffix = _url_ledger_suffix(url)
+    known_exact_paths = known_exact_paths or ()
+    if any(
+        is_url_source(known_path) and _url_ledger_suffix(known_path) == suffix
+        for known_path in known_exact_paths
+    ):
+        return False
+    normalized_entry = entry_path.replace(os.sep, "/")
+    return normalized_entry == suffix or normalized_entry.endswith("/" + suffix)
 
 
 class ManifestManager:
@@ -124,6 +173,20 @@ class ManifestManager:
             for entry in self._state.files
         )
 
+    def contains_successful_url(self, url: str) -> bool:
+        """Return true if an exact URL was already processed successfully.
+
+        Matches both current exact-URL ledger rows and recognized historical
+        CWD-derived URL rows. Failed entries do not count as duplicates.
+        """
+
+        known_exact_paths = [entry.original_path for entry in self._state.files]
+        return any(
+            url_matches_ledger_entry(entry.original_path, url, known_exact_paths)
+            and is_successful_status(entry.status)
+            for entry in self._state.files
+        )
+
     def add_entry(self, entry: ManifestEntry) -> None:
         """Add an entry to the cached manifest."""
 
@@ -160,10 +223,22 @@ class ManifestManager:
 
         return len(self._state.files)
 
+    def _normalize_ledger_source(self, source: Path | str) -> str:
+        """Return the stored ledger spelling for a filesystem or URL source.
+
+        URL strings retain their exact submitted form so the same URL has the
+        same logical identity from any working directory. Filesystem paths use
+        the existing project-root normalization unchanged.
+        """
+
+        if is_url_source(source):
+            return str(source)
+        return self._normalize_path(source if isinstance(source, Path) else Path(source))
+
     def add_processed_file(
         self,
         *,
-        path: Path,
+        path: Path | str,
         sha256: str,
         extension: str,
         generated_note: str | None = None,
@@ -182,8 +257,8 @@ class ManifestManager:
 
         entry = ManifestEntry(
             sha256=sha256,
-            original_filename=path.name,
-            original_path=self._normalize_path(path),
+            original_filename=Path(path).name,
+            original_path=self._normalize_ledger_source(path),
             processed_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
             extension=extension,
             status=status,
@@ -199,7 +274,7 @@ class ManifestManager:
     def add_failed_file(
         self,
         *,
-        path: Path,
+        path: Path | str,
         sha256: str,
         extension: str,
         error_reason: str,

@@ -699,3 +699,93 @@ class TestIngestFailedRetry:
 
         assert second.status_code == 200
         assert second.json()["status"] == "skipped_duplicate"
+
+
+class TestIngestUrlIdentity:
+    """D3-C: GUI URLs use the same CWD-independent exact identity as the CLI."""
+
+    @staticmethod
+    def _post_url(client: TestClient, url: str) -> Any:
+        return client.post("/api/ingest", data={"url": url})
+
+    @staticmethod
+    def _patch_url_success(monkeypatch: pytest.MonkeyPatch, url: str) -> None:
+        from types import SimpleNamespace
+
+        from app.domain.documents import DocumentMetadata, SourceDocument
+        from app.domain.notes import ObsidianNote
+        from app.pipelines.ingest_workflow import IngestionWorkflow
+
+        class _Workflow:
+            @staticmethod
+            def create_default(*_args: object, **_kwargs: object) -> object:
+                return _Workflow()
+
+            def run(self, *_args: object, **_kwargs: object) -> object:
+                return SimpleNamespace(
+                    document=SourceDocument(
+                        source=url,
+                        source_type="github_readme",
+                        filename="README.md",
+                        text="# PAM",
+                        metadata=DocumentMetadata(title="PAM"),
+                    ),
+                    note=ObsidianNote(
+                        title="PAM",
+                        filename="PAM.md",
+                        markdown="# PAM",
+                        generated_at="2026-07-08T00:00:00Z",
+                        tags=["local-ai"],
+                        source=url,
+                        source_type="github_readme",
+                    ),
+                    write_result=SimpleNamespace(
+                        note_path="notes/PAM.md",
+                        created=True,
+                        updated=False,
+                    ),
+                    chunks_stored=1,
+                )
+
+        monkeypatch.setattr(
+            IngestionWorkflow, "create_default", staticmethod(_Workflow.create_default)
+        )
+
+    def test_successful_url_from_another_cwd_is_duplicate(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from app.infrastructure.state.manifest import ManifestManager
+
+        settings = deps.get_settings()
+        url = "https://github.com/example/pam"
+        origin_directory = settings.paths.project_root / "origin-cwd"
+        retry_directory = settings.paths.project_root / "retry-cwd"
+        origin_directory.mkdir(exist_ok=True)
+        retry_directory.mkdir(exist_ok=True)
+
+        self._patch_url_success(monkeypatch, url)
+        monkeypatch.chdir(origin_directory)
+        first = self._post_url(client, url)
+        assert first.status_code == 200
+        assert first.json()["status"] == "processed"
+
+        def _must_not_run(*_args: object, **_kwargs: object) -> object:
+            raise AssertionError("the ingestion workflow must not run for a duplicate")
+
+        monkeypatch.setattr(
+            "app.interfaces.web.routes.interact.IngestionWorkflow.create_default",
+            _must_not_run,
+        )
+        monkeypatch.chdir(retry_directory)
+        second = self._post_url(client, url)
+
+        assert second.status_code == 200
+        assert second.json()["status"] == "skipped_duplicate"
+        manifest = ManifestManager(
+            settings.manifest.path,
+            project_root=settings.paths.project_root,
+            enabled=settings.manifest.enabled,
+        )
+        entries = manifest.list_entries()
+        assert [entry.status for entry in entries] == ["processed", "skipped_duplicate"]
+        assert [entry.original_path for entry in entries] == [url, url]

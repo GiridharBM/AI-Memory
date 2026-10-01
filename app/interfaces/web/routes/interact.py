@@ -242,7 +242,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
     """
 
     settings = deps.get_settings()
-    from app.infrastructure.state.manifest import ManifestManager
+    from app.infrastructure.state.manifest import ManifestManager, is_url_source
 
     manifest = ManifestManager(
         settings.manifest.path,
@@ -251,6 +251,8 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
     )
 
     ledger_path = Path(source)
+    url_source = source if isinstance(source, str) and is_url_source(source) else None
+    ledger_source: str | Path = url_source if url_source is not None else ledger_path
     digest: str | None
     try:
         digest = manifest.hash_for_path(source) if isinstance(source, Path) else None
@@ -273,6 +275,19 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
                 "skipping. Existing note, index, and knowledge-graph data was left untouched."
             ),
         }
+    if url_source is not None and manifest.contains_successful_url(url_source):
+        manifest.add_processed_file(
+            path=url_source,
+            sha256="",
+            extension=Path(url_source).suffix,
+            status="skipped_duplicate",
+        )
+        _save_ledger(manifest)
+        return {
+            "status": "skipped_duplicate",
+            "source": str(source),
+            "message": "This source was already recorded; skipping.",
+        }
     if digest is None and manifest.contains_successful_path(ledger_path):
         manifest.add_processed_file(
             path=ledger_path,
@@ -292,9 +307,9 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
         result = workflow.run(source, expected_source_type=expected_source_type)
     except (IngestionWorkflowError, OllamaClientError, OSError) as exc:
         manifest.add_failed_file(
-            path=ledger_path,
+            path=ledger_source,
             sha256=digest or "",
-            extension=ledger_path.suffix,
+            extension=Path(ledger_source).suffix,
             error_reason=f"{type(exc).__name__}: {exc}",
         )
         _save_ledger(manifest)
@@ -304,9 +319,9 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
         ) from exc
     except Exception as exc:
         manifest.add_failed_file(
-            path=ledger_path,
+            path=ledger_source,
             sha256=digest or "",
-            extension=ledger_path.suffix,
+            extension=Path(ledger_source).suffix,
             error_reason=f"{type(exc).__name__}: {exc}",
         )
         _save_ledger(manifest)
@@ -320,9 +335,9 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
     chunks_stored = int(getattr(result, "chunks_stored", 0) or 0)
 
     manifest.add_processed_file(
-        path=ledger_path,
+        path=ledger_source,
         sha256=digest or "",
-        extension=ledger_path.suffix,
+        extension=Path(ledger_source).suffix,
         generated_note=result.note.filename,
         chunks_stored=chunks_stored,
         embedding_succeeded=embedded,

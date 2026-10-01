@@ -502,3 +502,122 @@ def test_skipped_duplicate_non_hashable_source_stays_duplicate(
 
     assert third.exit_code == 0
     assert "Ingest skipped (duplicate)" in third.output
+
+
+# ── V1.1.1 D3-C: exact URLs are CWD-independent ──────────────────────────
+
+
+def _legacy_url_row(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, url: str, *, status: str
+) -> str:
+    """Seed a historical CWD-mangled URL row without rewriting it later."""
+    legacy_directory = tmp_path / "legacy-cwd"
+    legacy_directory.mkdir(exist_ok=True)
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    monkeypatch.chdir(legacy_directory)
+    if status == "failed":
+        manager.add_failed_file(
+            path=Path(url), sha256="", extension="", error_reason="OSError: old failure"
+        )
+    else:
+        manager.add_processed_file(path=Path(url), sha256="", extension="", status=status)
+    manager.save()
+    return manager.list_entries()[-1].original_path
+
+
+def test_successful_url_from_another_cwd_is_duplicate(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    url = "https://github.com/example/pam"
+    _set_manifest(tmp_path, monkeypatch)
+    legacy_path = _legacy_url_row(tmp_path, monkeypatch, url, status="processed")
+    retry_directory = tmp_path / "retry-cwd"
+    retry_directory.mkdir()
+
+    monkeypatch.chdir(retry_directory)
+    monkeypatch.setattr(entry, "IngestionWorkflow", _DuplicateWorkflow)
+    result = runner.invoke(entry.cli, ["ingest", "github", url])
+
+    assert result.exit_code == 0
+    assert "Ingest skipped (duplicate)" in result.output
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    entries = manager.list_entries()
+    assert [entry.status for entry in entries] == ["processed", "skipped_duplicate"]
+    assert entries[0].original_path == legacy_path
+    assert entries[1].original_path == url
+
+
+def test_failed_url_retry_from_another_cwd_uses_exact_identity(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    url = "https://github.com/example/pam"
+    _set_manifest(tmp_path, monkeypatch)
+    _legacy_url_row(tmp_path, monkeypatch, url, status="failed")
+    retry_directory = tmp_path / "retry-cwd"
+    retry_directory.mkdir()
+    monkeypatch.setenv("COLUMNS", "220")
+
+    monkeypatch.chdir(retry_directory)
+    monkeypatch.setattr(entry, "IngestionWorkflow", _FailingWorkflow)
+    _FailingWorkflow.error = OSError("host unreachable")
+    result = runner.invoke(entry.cli, ["ingest", "github", url])
+
+    assert result.exit_code == 1
+    assert "Ingest skipped (duplicate)" not in result.output
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    entries = manager.list_entries()
+    assert [entry.status for entry in entries] == ["failed", "failed"]
+    assert entries[1].original_path == url
+
+    failed_listing = runner.invoke(entry.cli, ["sources", "--failed"])
+    assert failed_listing.exit_code == 0
+    assert failed_listing.output.count(url) == 1
+
+
+def test_url_variants_remain_distinct_identities(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    base_url = "https://github.com/o/r"
+    slashed_url = "https://github.com/o/r/"
+    watch_url = "https://www.youtube.com/watch?v=ID"
+    short_url = "https://youtu.be/ID"
+    _set_manifest(tmp_path, monkeypatch)
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _SuccessWorkflow.path = tmp_path
+
+    assert runner.invoke(entry.cli, ["ingest", "github", base_url]).exit_code == 0
+    assert runner.invoke(entry.cli, ["ingest", "github", slashed_url]).exit_code == 0
+
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    assert [entry.status for entry in manager.list_entries()] == ["processed", "processed"]
+    assert [entry.original_path for entry in manager.list_entries()] == [
+        base_url,
+        slashed_url,
+    ]
+    assert manager.contains_successful_url(base_url) is True
+    assert manager.contains_successful_url(slashed_url) is True
+    assert manager.contains_successful_url(watch_url) is False
+    assert manager.contains_successful_url(short_url) is False
+
+
+def test_same_absolute_local_file_from_another_cwd_is_duplicate(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source = _write_source(tmp_path)
+    first_directory = tmp_path / "first-cwd"
+    second_directory = tmp_path / "second-cwd"
+    first_directory.mkdir()
+    second_directory.mkdir()
+    _set_manifest(tmp_path, monkeypatch)
+
+    monkeypatch.chdir(first_directory)
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _SuccessWorkflow.path = tmp_path
+    assert _invoke(source, _SuccessWorkflow).exit_code == 0
+
+    monkeypatch.chdir(second_directory)
+    monkeypatch.setattr(entry, "IngestionWorkflow", _DuplicateWorkflow)
+    second = _invoke(source, _DuplicateWorkflow)
+
+    assert second.exit_code == 0
+    assert "Ingest skipped (duplicate)" in second.output

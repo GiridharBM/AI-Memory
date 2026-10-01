@@ -283,6 +283,41 @@ def test_remove_url_source(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     assert manifest.list_entries() == []
 
 
+def test_failed_only_url_remove_across_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    url = "https://github.com/example/pam"
+    unrelated_url = "https://github.com/example/other"
+    legacy_directory = tmp_path / "legacy-cwd"
+    legacy_directory.mkdir()
+    retry_directory = tmp_path / "retry-cwd"
+    retry_directory.mkdir()
+    manager = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    )
+
+    monkeypatch.chdir(legacy_directory)
+    manager.add_failed_file(
+        path=Path(url), sha256="", extension="", error_reason="OSError: old failure"
+    )
+    manager.add_failed_file(
+        path=Path(unrelated_url),
+        sha256="",
+        extension="",
+        error_reason="OSError: unrelated",
+    )
+    manager.save()
+    before = [entry.original_path for entry in manager.list_entries()]
+
+    monkeypatch.chdir(retry_directory)
+    result = _invoke(tmp_path, monkeypatch, url)
+
+    assert result.exit_code == 0, result.output
+    remaining = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    ).list_entries()
+    assert [entry.original_path for entry in remaining] == [before[1]]
+    assert remaining[0].error_reason == "OSError: unrelated"
+
+
 def test_remove_relative_path_from_any_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     a = _write_file(tmp_path, "notes/a.md")
     _seed(tmp_path, [str(a.resolve())])
