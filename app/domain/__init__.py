@@ -36,6 +36,7 @@ from app.domain.generation import (
 )
 from app.domain.generation_context import GenerationContext, RetrievedChunk
 from app.domain.generation_result import GenerationResult
+from app.domain.generation_sets import FlashcardSet, QuizSet
 from app.domain.jobs import (
     GenerationJob,
     GenerationJobStatus,
@@ -78,6 +79,7 @@ __all__ = [
     "EdgeType",
     "Entity",
     "EntityMetadata",
+    "FlashcardSet",
     "GenerationContext",
     "GenerationJob",
     "GenerationJobStatus",
@@ -98,6 +100,7 @@ __all__ = [
     "ProvenanceLevel",
     "ProvenanceRecord",
     "ProvenanceRole",
+    "QuizSet",
     "RelatedTopic",
     "Relationship",
     "RelationshipMetadata",
