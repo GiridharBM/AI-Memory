@@ -8,6 +8,13 @@ from app.domain.analysis import (
     KeyConcept,
     RelatedTopic,
 )
+from app.domain.artifacts import (
+    Artifact,
+    ArtifactKind,
+    ProvenanceRecord,
+    ProvenanceRole,
+    note_to_artifact,
+)
 from app.domain.documents import (
     DocumentIngestionError,
     DocumentIngestionResult,
@@ -56,6 +63,8 @@ from app.domain.semantic_chunking import DocumentChunk
 from app.domain.vector_store import SearchResult, VectorEntry
 
 __all__ = [
+    "Artifact",
+    "ArtifactKind",
     "ConfigValue",
     "Definition",
     "DocumentAnalysis",
@@ -83,6 +92,8 @@ __all__ = [
     "NodeType",
     "ObsidianNote",
     "ProvenanceLevel",
+    "ProvenanceRecord",
+    "ProvenanceRole",
     "RelatedTopic",
     "Relationship",
     "RelationshipMetadata",
@@ -94,6 +105,7 @@ __all__ = [
     "VectorEntry",
     "cancel",
     "fail",
+    "note_to_artifact",
     "resolve_memory_scope",
     "set_progress",
     "transition",
