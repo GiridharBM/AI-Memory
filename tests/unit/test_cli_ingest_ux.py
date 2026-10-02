@@ -97,6 +97,16 @@ class _DuplicateWorkflow(_SuccessWorkflow):
         raise AssertionError("workflow must not run for a duplicate")
 
 
+class _ReRunWorkflow(_SuccessWorkflow):
+    """Counts runs so a re-ingest cannot silently skip the workflow."""
+
+    calls = 0
+
+    def run(self, source_arg: str | Path, **_: object) -> SimpleNamespace:
+        type(self).calls += 1
+        return super().run(source_arg)
+
+
 class _FailingWorkflow(_SuccessWorkflow):
     error: Exception | None = None
 
@@ -598,6 +608,61 @@ def test_url_variants_remain_distinct_identities(
     assert manager.contains_successful_url(slashed_url) is True
     assert manager.contains_successful_url(watch_url) is False
     assert manager.contains_successful_url(short_url) is False
+
+
+def test_url_ingest_remove_reingest_runs_ingestion_again(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    url = "https://github.com/o/r"
+    _set_manifest(tmp_path, monkeypatch)
+    # Point remove at the same isolated stores: it must never read or write
+    # the real vector store or knowledge graph.
+    monkeypatch.setattr(entry, "setup_logging", lambda _settings: None)
+    monkeypatch.setattr(
+        entry,
+        "_load_configured_settings",
+        lambda **_: SimpleNamespace(
+            paths=SimpleNamespace(
+                manifest_root=tmp_path / "manifests",
+                project_root=tmp_path,
+            ),
+            manifest=SimpleNamespace(path=_manifest(tmp_path), enabled=True),
+        ),
+    )
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    _SuccessWorkflow.path = tmp_path
+
+    assert runner.invoke(entry.cli, ["ingest", "github", url]).exit_code == 0
+    assert runner.invoke(entry.cli, ["remove", url]).exit_code == 0
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    assert manager.contains_successful_url(url) is False
+
+    # The removed URL is no longer a duplicate, so a fresh ingest must run.
+    monkeypatch.setattr(entry, "IngestionWorkflow", _ReRunWorkflow)
+    reingest = runner.invoke(entry.cli, ["ingest", "github", url])
+
+    assert reingest.exit_code == 0
+    assert _ReRunWorkflow.calls == 1
+
+
+def test_url_identity_ignores_surrounding_whitespace(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    url = "https://github.com/o/r"
+    _set_manifest(tmp_path, monkeypatch)
+    _SuccessWorkflow.path = tmp_path
+
+    monkeypatch.setattr(entry, "IngestionWorkflow", _SuccessWorkflow)
+    assert runner.invoke(entry.cli, ["ingest", "github", f"  {url}  "]).exit_code == 0
+    monkeypatch.setattr(entry, "IngestionWorkflow", _DuplicateWorkflow)
+    second = runner.invoke(entry.cli, ["ingest", "github", url])
+
+    assert second.exit_code == 0
+    assert "Ingest skipped (duplicate)" in second.output
+    manager = ManifestManager(_manifest(tmp_path), project_root=tmp_path)
+    assert manager.list_entries()
+    assert {entry.original_path for entry in manager.list_entries()} == {url}
+    assert manager.contains_successful_url(url) is True
 
 
 def test_same_absolute_local_file_from_another_cwd_is_duplicate(

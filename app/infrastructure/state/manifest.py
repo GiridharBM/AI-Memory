@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 import os
-from collections.abc import Collection
+import re
 from contextlib import suppress
 from datetime import UTC, datetime
-from pathlib import Path, PurePath
+from pathlib import Path
 from urllib.parse import urlparse
 
 from app.core.logging import get_logger
@@ -17,6 +17,8 @@ from app.infrastructure.state.models import ManifestEntry, ManifestState
 logger = get_logger(__name__)
 
 SUCCESSFUL_STATUSES = frozenset({"processed", "skipped_duplicate"})
+
+_REPEATED_SLASH = re.compile(r"/{2,}")
 
 
 def is_successful_status(status: str) -> bool:
@@ -35,40 +37,91 @@ def is_url_source(value: object) -> bool:
     return parsed.scheme.lower() in {"http", "https"} and bool(parsed.netloc)
 
 
-def _url_ledger_suffix(url: str) -> str:
-    """Return the CWD-independent filesystem spelling of a URL string."""
-    return PurePath(url).as_posix()
+def _url_scheme(url: str) -> str:
+    """Return the lower-cased scheme of a URL string."""
+
+    return urlparse(url.strip()).scheme.lower()
+
+
+def historical_url_ledger_form(url: str) -> str:
+    """Return the CWD-mangled ledger spelling the pre-D3-C writer produced.
+
+    ``Path(url).resolve()`` prefixed the URL with the working directory and
+    collapsed repeated separators, so the ledger kept ``https:/github.com/o/r``
+    (never ``https://...``). Reproduce only that mangling: no case, query,
+    fragment, port, or ``.git`` folding. A trailing slash is preserved, so
+    ``.../o/r`` and ``.../o/r/`` produce different forms and never collapse.
+    Returns ``""`` when the URL has no scheme marker to anchor on.
+    """
+
+    text = url.strip()
+    scheme = _url_scheme(text)
+    if scheme not in {"http", "https"}:
+        return ""
+    start = text.lower().find(f"{scheme}:/")
+    if start == -1:
+        return ""
+    raw_scheme = text[start : start + len(scheme)]
+    tail = _REPEATED_SLASH.sub("/", text[start + len(raw_scheme) + 1 :])
+    return f"{raw_scheme}:{tail}"
+
+
+def _historical_entry_form(entry_path: str, scheme: str) -> str:
+    """Return the URL part of a stored legacy row, or ``""`` when absent.
+
+    Anchored at the *first* occurrence of the URL's own scheme marker so a row
+    whose CWD prefix merely contains ``:/`` (a Windows drive, or a URL nested in
+    another URL's path) is never mistaken for this URL's mangled form.
+    """
+
+    text = entry_path.replace("\\", "/")
+    start = text.lower().find(f"{scheme}:/")
+    if start == -1:
+        return ""
+    return text[start:]
+
+
+def _entry_is_local_file(entry_path: str, project_root: Path | None) -> bool:
+    """Return true when a stored row addresses a real path on disk.
+
+    Relative rows resolve against the project root (the same anchor the
+    ledger writer uses), never against the process CWD, so the answer does
+    not change with the working directory.
+    """
+
+    candidate = Path(entry_path)
+    if not candidate.is_absolute() and project_root is not None:
+        candidate = project_root / candidate
+    return os.path.exists(candidate)
 
 
 def url_matches_ledger_entry(
-    entry_path: object, url: str, known_exact_paths: Collection[str] | None = None
+    entry_path: object, url: str, project_root: Path | None = None
 ) -> bool:
     """Match an exact URL against current and recognized historical ledger forms.
 
-    New URL ledger rows use the exact submitted URL. Historical rows created by
-    ``Path(url).resolve()`` retain a CWD-derived mangled spelling. Recognize
-    those rows by their URL-derived suffix without rewriting them and without
-    equating different URL spellings that produce different suffixes.
+    New URL rows store the exact submitted URL. A historical row is recognized
+    only when its URL part is exactly the mangled form of *this* URL, anchored
+    at the first scheme marker, with no filesystem path mistaken for one.
+    Historical rows are never rewritten or merged.
     """
-    if not isinstance(entry_path, str) or not entry_path:
+
+    if not isinstance(entry_path, str) or not entry_path or not is_url_source(url):
         return False
-    if not is_url_source(url):
-        return False
-    if entry_path == url:
+    target = url.strip()
+    if entry_path == target:
         return True
-    # A current exact-URL row is itself a complete identity. Do not use legacy
-    # suffix matching to collapse distinct URL spellings.
+    # A current exact-URL row is a complete identity: never collapse spellings.
     if is_url_source(entry_path):
         return False
-    suffix = _url_ledger_suffix(url)
-    known_exact_paths = known_exact_paths or ()
-    if any(
-        is_url_source(known_path) and _url_ledger_suffix(known_path) == suffix
-        for known_path in known_exact_paths
-    ):
+    entry_form = _historical_entry_form(entry_path, _url_scheme(target))
+    if not entry_form:
         return False
-    normalized_entry = entry_path.replace(os.sep, "/")
-    return normalized_entry == suffix or normalized_entry.endswith("/" + suffix)
+    # A row that is a real path on disk is a local file, not a historical URL.
+    if _entry_is_local_file(entry_path, project_root):
+        return False
+    form = historical_url_ledger_form(target)
+    return bool(form) and entry_form == form
 
 
 class ManifestManager:
@@ -180,9 +233,8 @@ class ManifestManager:
         CWD-derived URL rows. Failed entries do not count as duplicates.
         """
 
-        known_exact_paths = [entry.original_path for entry in self._state.files]
         return any(
-            url_matches_ledger_entry(entry.original_path, url, known_exact_paths)
+            url_matches_ledger_entry(entry.original_path, url, self.project_root)
             and is_successful_status(entry.status)
             for entry in self._state.files
         )
@@ -196,14 +248,25 @@ class ManifestManager:
         self,
         *,
         sha256: str | None = None,
-        path: Path | None = None,
+        path: Path | str | None = None,
     ) -> bool:
-        """Remove the first entry matching hash or path."""
+        """Remove the first entry matching hash or path.
+
+        A URL target is compared against the exact stored URL identity; a
+        filesystem target keeps the existing project-root normalization.
+        """
 
         if sha256 is None and path is None:
             raise ValueError("Either sha256 or path must be provided.")
 
-        normalized_path = self._normalize_path(path) if path is not None else None
+        raw = str(path) if path is not None else ""
+        normalized_path: str | None
+        if path is not None and is_url_source(raw):
+            # Ledger URL rows are stored stripped; strip the target too so a
+            # padded argument still addresses the exact stored identity.
+            normalized_path = raw.strip()
+        else:
+            normalized_path = self._normalize_path(Path(path)) if path is not None else None
         for index, entry in enumerate(self._state.files):
             if sha256 is not None and entry.sha256 == sha256:
                 del self._state.files[index]
@@ -226,13 +289,14 @@ class ManifestManager:
     def _normalize_ledger_source(self, source: Path | str) -> str:
         """Return the stored ledger spelling for a filesystem or URL source.
 
-        URL strings retain their exact submitted form so the same URL has the
-        same logical identity from any working directory. Filesystem paths use
-        the existing project-root normalization unchanged.
+        URL strings retain their exact submitted form, trimmed exactly like the
+        ingestion service normalizes them, so the same URL has the same logical
+        identity from any working directory. Filesystem paths use the existing
+        project-root normalization unchanged.
         """
 
         if is_url_source(source):
-            return str(source)
+            return str(source).strip()
         return self._normalize_path(source if isinstance(source, Path) else Path(source))
 
     def add_processed_file(

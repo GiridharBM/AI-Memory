@@ -251,7 +251,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> dict
     )
 
     ledger_path = Path(source)
-    url_source = source if isinstance(source, str) and is_url_source(source) else None
+    url_source = source.strip() if isinstance(source, str) and is_url_source(source) else None
     ledger_source: str | Path = url_source if url_source is not None else ledger_path
     digest: str | None
     try:

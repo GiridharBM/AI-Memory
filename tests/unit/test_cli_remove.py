@@ -135,14 +135,13 @@ def _reload(tmp_path: Path) -> tuple[VectorStore, KnowledgeGraph, ManifestManage
     return store, kg, manifest
 
 
-def _seed_url(tmp_path: Path, url: str) -> None:
+def _seed_url(tmp_path: Path, url: str, *, ledger_row: str | None = None) -> None:
     """Seed a URL source the way the real URL ingestor stores it.
 
-    Vector/KG key by the verbatim URL; the ledger row is the project-relative
-    mangled form (``str(Path(url))``) the ingestor would store under its
-    project root. ``ManifestManager.add_processed_file`` re-normalizes against
-    the CWD (which differs from the test tmp dir on Windows), so the row is
-    written directly for inter-operator-stable collation.
+    Vector/KG key by the verbatim URL. Since D3-C the ledger row is the exact
+    URL; pass ``ledger_row`` to reproduce a pre-D3-C CWD-mangled row. The row
+    is written directly rather than through ``add_processed_file`` because that
+    helper re-normalizes against the CWD.
     """
     _write_vector_store(
         tmp_path / "manifests" / "vector_store.json",
@@ -155,7 +154,7 @@ def _seed_url(tmp_path: Path, url: str) -> None:
     row = {
         "sha256": "",
         "original_filename": Path(url).name,
-        "original_path": str(Path(url)),
+        "original_path": url if ledger_row is None else ledger_row,
         "processed_at": "2026-09-01T00:00:00Z",
         "extension": ".md",
         "status": "processed",
@@ -283,6 +282,99 @@ def test_remove_url_source(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     assert manifest.list_entries() == []
 
 
+def test_remove_deletes_exact_url_row_and_its_vectors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    url = "https://github.com/example/pam"
+    _seed_url(tmp_path, url)
+
+    assert json.loads((tmp_path / "manifests" / "processed.json").read_text(encoding="utf-8"))[
+        "files"
+    ][0]["original_path"] == url
+    result = _invoke(tmp_path, monkeypatch, url)
+
+    assert result.exit_code == 0, result.output
+    store, kg, manifest = _reload(tmp_path)
+    assert store.entries() == []
+    assert kg.nodes == {}
+    assert manifest.list_entries() == []
+    assert manifest.contains_successful_url(url) is False
+
+
+def test_remove_deletes_exact_and_historical_rows_together(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    url = "https://github.com/example/pam"
+    historical = str(Path(url))
+    _seed_url(tmp_path, url)
+    _seed_url(tmp_path, url, ledger_row=historical)
+    _write_vector_store(
+        tmp_path / "manifests" / "vector_store.json",
+        [_chunk_entry(url, 0), _chunk_entry(url, 1)],
+    )
+
+    result = _invoke(tmp_path, monkeypatch, url)
+
+    assert result.exit_code == 0, result.output
+    store, _kg, manifest = _reload(tmp_path)
+    assert store.entries() == []
+    assert manifest.list_entries() == []
+
+
+def test_remove_keeps_distinct_url_variant_rows(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    url = "https://github.com/o/r"
+    slashed = f"{url}/"
+    historical = str(Path(url))
+    _seed_url(tmp_path, slashed, ledger_row=historical)
+    _seed_url(tmp_path, slashed, ledger_row=slashed)
+    _write_vector_store(
+        tmp_path / "manifests" / "vector_store.json",
+        [_chunk_entry(url, 0), _chunk_entry(slashed, 0)],
+    )
+
+    result = _invoke(tmp_path, monkeypatch, url)
+
+    assert result.exit_code == 0, result.output
+    store, _kg, manifest = _reload(tmp_path)
+    # The base historical row genuinely belongs to the removed URL, so it is
+    # removed with it. The slashed variant is a different identity: its exact
+    # row and its vectors survive.
+    assert _sources_of(store) == {slashed}
+    assert {entry.original_path for entry in manifest.list_entries()} == {slashed}
+
+
+def test_remove_keeps_local_file_row_shaped_like_a_url(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    url = "https://github.com/o/r"
+    local = Path(f"{tmp_path.as_posix()}/https:/github.com/o/r")
+    try:
+        local.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:  # Windows forbids a "https:" path component.
+        pytest.skip("platform forbids URL-shaped directory names")
+    local.write_text("not a url", encoding="utf-8")
+    manager = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    )
+    manager.add_processed_file(
+        path=local, sha256="localdigest", extension="", status="processed"
+    )
+    manager.save()
+    local_row = manager.list_entries()[0].original_path
+    _seed_url(tmp_path, url)
+
+    result = _invoke(tmp_path, monkeypatch, url)
+
+    assert result.exit_code == 0, result.output
+    _store, _kg, manifest = _reload(tmp_path)
+    # The local file's ledger row survives the URL removal untouched.
+    assert [entry.original_path for entry in manifest.list_entries()] == [local_row]
+    assert manifest.contains_path(local) is True
+    assert manifest.contains_successful_url(url) is False
+
+
 def test_failed_only_url_remove_across_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     url = "https://github.com/example/pam"
     unrelated_url = "https://github.com/example/other"
@@ -316,6 +408,111 @@ def test_failed_only_url_remove_across_cwd(tmp_path: Path, monkeypatch: pytest.M
     ).list_entries()
     assert [entry.original_path for entry in remaining] == [before[1]]
     assert remaining[0].error_reason == "OSError: unrelated"
+
+
+def test_remove_exact_url_from_another_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    url = "https://github.com/example/pam"
+    _seed_url(tmp_path, url)
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+
+    monkeypatch.chdir(elsewhere)
+    result = _invoke(tmp_path, monkeypatch, url)
+
+    assert result.exit_code == 0, result.output
+    store, kg, manifest = _reload(tmp_path)
+    assert store.entries() == []
+    assert kg.nodes == {}
+    assert manifest.list_entries() == []
+    assert manifest.contains_successful_url(url) is False
+
+
+def test_remove_exact_and_historical_rows_from_another_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Exact + historical rows for one URL coexist until removed together.
+
+    Row 1 is a historical failed attempt written from another CWD; row 2 is
+    the exact processed row. Neither is rewritten or merged, D4 still counts
+    two attempts, and removing the URL deletes both rows but nothing else.
+    """
+    url = "https://github.com/example/pam"
+    unrelated_url = "https://github.com/example/other"
+    legacy_directory = tmp_path / "legacy-cwd"
+    legacy_directory.mkdir()
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    manager = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    )
+    monkeypatch.chdir(legacy_directory)
+    manager.add_failed_file(
+        path=Path(url), sha256="", extension="", error_reason="OSError: old failure"
+    )
+    manager.save()
+    historical_row = manager.list_entries()[0].original_path
+    assert historical_row != url
+    _seed_url(tmp_path, url)
+    _seed_url(tmp_path, unrelated_url)
+    _write_vector_store(
+        tmp_path / "manifests" / "vector_store.json",
+        [_chunk_entry(url, 0), _chunk_entry(unrelated_url, 0)],
+    )
+    reloaded = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    )
+    before = [entry.original_path for entry in reloaded.list_entries()]
+    assert len(before) == 3  # D4: every attempt stays a row.
+
+    monkeypatch.chdir(elsewhere)
+    result = _invoke(tmp_path, monkeypatch, url)
+
+    assert result.exit_code == 0, result.output
+    remaining = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    ).list_entries()
+    assert [entry.original_path for entry in remaining] == [unrelated_url]
+    assert before[0] == historical_row  # historical evidence untouched in place
+    store, _kg, _manifest = _reload(tmp_path)
+    assert _sources_of(store) == {unrelated_url}
+
+
+def test_remove_nested_scheme_history_not_matched(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inner_url = "https://github.com/o/r"
+    nested_row = f"{tmp_path.as_posix()}/https:/x/a/https:/github.com/o/r"
+    manager = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    )
+    manager.add_failed_file(
+        path=nested_row, sha256="", extension="", error_reason="OSError: nested"
+    )
+    manager.save()
+    stored_row = manager.list_entries()[0].original_path
+
+    result = _invoke(tmp_path, monkeypatch, inner_url)
+
+    assert result.exit_code == 1, result.output
+    assert "Source not found" in result.output
+    remaining = ManifestManager(
+        tmp_path / "manifests" / "processed.json", project_root=tmp_path
+    ).list_entries()
+    assert [entry.original_path for entry in remaining] == [stored_row]
+
+
+def test_remove_padded_url_addresses_stripped_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    url = "https://github.com/o/r"
+    _seed_url(tmp_path, url)
+
+    result = _invoke(tmp_path, monkeypatch, f"  {url}  ")
+
+    assert result.exit_code == 0, result.output
+    store, _kg, manifest = _reload(tmp_path)
+    assert store.entries() == []
+    assert manifest.list_entries() == []
 
 
 def test_remove_relative_path_from_any_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

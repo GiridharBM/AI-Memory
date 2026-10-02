@@ -29,6 +29,7 @@ from app.infrastructure.search import SearchHit, SearchService
 from app.infrastructure.state.manifest import (
     ManifestEntry,
     ManifestManager,
+    historical_url_ledger_form,
     is_successful_status,
     is_url_source,
     url_matches_ledger_entry,
@@ -355,21 +356,9 @@ def _print_failed_sources(settings: Settings) -> None:
         raise typer.Exit(1)
 
     grouped: dict[str, list[ManifestEntry]] = {}
-    exact_urls = [
-        entry.original_path for entry in entries if is_url_source(entry.original_path)
-    ]
     for entry in entries:
         if entry.status == "failed":
-            key = entry.original_path
-            if not is_url_source(key):
-                matches = [
-                    url
-                    for url in exact_urls
-                    if url_matches_ledger_entry(key, url, exact_urls)
-                ]
-                if len(matches) == 1:
-                    key = matches[0]
-            grouped.setdefault(key, []).append(entry)
+            grouped.setdefault(entry.original_path, []).append(entry)
 
     if not grouped:
         console.print(
@@ -450,9 +439,6 @@ def _annotate_source_ledger(
     """Annotate each source row with ledger status and last successful ingest."""
     for row in rows:
         targets = _source_forms(row.source, project_root)
-        exact_url_paths = [
-            entry.original_path for entry in entries if is_url_source(entry.original_path)
-        ]
         matched = [
             entry
             for entry in entries
@@ -461,7 +447,6 @@ def _annotate_source_ledger(
                 entry.original_filename,
                 entry.sha256,
                 targets,
-                exact_url_paths,
             )
         ]
         row.manifest_matches = matched
@@ -503,6 +488,10 @@ def remove_source(
     settings = _load_configured_settings()
     setup_logging(settings)
     project_root = settings.paths.project_root
+    if is_url_source(source):
+        # Strip once so padded input addresses the same identity the ledger
+        # stores. Local paths are never stripped: a filename may hold spaces.
+        source = source.strip()
     targets = _source_forms(source, project_root)
 
     store = VectorStore(
@@ -542,9 +531,20 @@ def remove_source(
         enabled=settings.manifest.enabled,
     )
     ledger_entries = manifest.list_entries()
-    exact_url_paths = [
-        entry.original_path for entry in ledger_entries if is_url_source(entry.original_path)
-    ]
+    url_key = source if is_url_source(source) else None
+    # For a URL source the ledger may only be matched by exact identity, or by
+    # a historical row of this exact URL when no other known URL shares its
+    # mangled form. Going through the generic target set would let the raw
+    # ``in targets`` shortcut below accept any CWD-mangled spelling,
+    # including rows that belong to other URLs or to local files.
+    ledger_targets: set[str] = targets
+    legacy_url_targets: Collection[str] = ()
+    if url_key is not None:
+        ledger_targets = {url_key}
+        if url_key in _legacy_url_delete_targets(
+            source, targets, ledger_entries, store, kg
+        ):
+            legacy_url_targets = {url_key}
     ledger_matches = [
         entry
         for entry in ledger_entries
@@ -552,8 +552,9 @@ def remove_source(
             entry.original_path,
             entry.original_filename,
             entry.sha256,
-            targets,
-            exact_url_paths,
+            ledger_targets,
+            legacy_url_targets,
+            project_root,
         )
     ]
 
@@ -568,7 +569,10 @@ def remove_source(
         if node.source in targets
     }
     matched |= {
-        _canonical_source(entry.original_path, project_root)
+        _canonical_source(url_key, project_root)
+        if url_key is not None
+        and url_matches_ledger_entry(entry.original_path, url_key, project_root)
+        else _canonical_source(entry.original_path, project_root)
         for entry in ledger_matches
     }
 
@@ -617,9 +621,12 @@ def remove_source(
 
     removed_ledger = 0
     for entry in ledger_matches:
-        entry_path = Path(entry.original_path)
-        if not entry_path.is_absolute():
-            entry_path = project_root / entry_path
+        if is_url_source(entry.original_path):
+            entry_path: Path | str = entry.original_path
+        else:
+            entry_path = Path(entry.original_path)
+            if not entry_path.is_absolute():
+                entry_path = project_root / entry_path
         if manifest.remove_entry(path=entry_path):
             removed_ledger += 1
     manifest.save()
@@ -1094,7 +1101,7 @@ def _run_ingest(source: str | Path, *, expected_source_type: str | None) -> None
         enabled=settings.manifest.enabled,
     )
     ledger_path = Path(source)
-    url_source = source if isinstance(source, str) and is_url_source(source) else None
+    url_source = source.strip() if isinstance(source, str) and is_url_source(source) else None
     ledger_source: str | Path = url_source if url_source is not None else ledger_path
     try:
         digest = manifest.hash_for_path(source) if isinstance(source, Path) else None
@@ -1638,12 +1645,52 @@ def _canonical_source(value: str, project_root: Path) -> str:
         return str(p.resolve())
 
 
+def _legacy_url_delete_targets(
+    source: str,
+    targets: set[str],
+    ledger_entries: list[ManifestEntry],
+    store: VectorStore,
+    kg: KnowledgeGraph,
+) -> set[str]:
+    """Return the URL targets whose historical ledger rows are safe to delete.
+
+    A historical row is a mangled spelling, so two URL spellings the old
+    writer persisted identically (e.g. ``.../a/b`` and ``.../a//b``) cannot be
+    told apart from that row alone. When any other known identity shares the
+    historical form, the row is left untouched rather than risking another
+    source's deletion.
+    """
+
+    known = {
+        entry.original_path for entry in ledger_entries if is_url_source(entry.original_path)
+    }
+    known |= {entry.source for entry in store.entries() if is_url_source(entry.source)}
+    known |= {node.source for node in kg.nodes.values() if is_url_source(node.source)}
+    known |= {target for target in targets if is_url_source(target)}
+    if is_url_source(source):
+        known.add(source.strip())
+    safe: set[str] = set()
+    for candidate in known:
+        form = historical_url_ledger_form(candidate)
+        if not form:
+            continue
+        rivals = {
+            other
+            for other in known
+            if other != candidate and historical_url_ledger_form(other) == form
+        }
+        if not rivals:
+            safe.add(candidate)
+    return safe
+
+
 def _manifest_entry_matches(
     original_path: str,
     original_filename: str,
     sha256: str,
     targets: set[str],
-    known_exact_url_paths: Collection[str] | None = None,
+    legacy_url_targets: Collection[str] = (),
+    project_root: Path | None = None,
 ) -> bool:
     """Return whether a manifest entry belongs to a delete target."""
     if not sha256 and not original_path and not original_filename:
@@ -1651,9 +1698,9 @@ def _manifest_entry_matches(
     if original_path in targets:
         return True
     if any(
-        is_url_source(target)
-        and url_matches_ledger_entry(original_path, target, known_exact_url_paths)
+        url_matches_ledger_entry(original_path, target, project_root)
         for target in targets
+        if target in legacy_url_targets
     ):
         return True
     if original_filename in targets:

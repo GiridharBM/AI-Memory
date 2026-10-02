@@ -789,3 +789,29 @@ class TestIngestUrlIdentity:
         entries = manifest.list_entries()
         assert [entry.status for entry in entries] == ["processed", "skipped_duplicate"]
         assert [entry.original_path for entry in entries] == [url, url]
+
+    def test_padded_url_records_one_exact_identity(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from app.infrastructure.state.manifest import ManifestManager
+
+        settings = deps.get_settings()
+        url = "https://github.com/example/pam"
+
+        self._patch_url_success(monkeypatch, url)
+        first = self._post_url(client, f"  {url}  ")
+        assert first.status_code == 200
+        assert first.json()["status"] == "processed"
+
+        self._patch_url_success(monkeypatch, url)
+        second = self._post_url(client, url)
+        assert second.status_code == 200
+        assert second.json()["status"] == "skipped_duplicate"
+
+        manifest = ManifestManager(
+            settings.manifest.path,
+            project_root=settings.paths.project_root,
+            enabled=settings.manifest.enabled,
+        )
+        assert {entry.original_path for entry in manifest.list_entries()} == {url}
+        assert manifest.contains_successful_url(url) is True

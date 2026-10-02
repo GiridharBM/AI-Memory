@@ -10,6 +10,7 @@ import pytest
 
 from app.infrastructure.state.manifest import (
     ManifestManager,
+    historical_url_ledger_form,
     is_url_source,
     url_matches_ledger_entry,
 )
@@ -273,9 +274,9 @@ def test_historical_cwd_mangled_url_matches_exact_url(tmp_path: Path) -> None:
 
     assert is_url_source(url) is True
     assert is_url_source(legacy_path) is False
-    assert url_matches_ledger_entry(legacy_path, url, []) is True
-    assert url_matches_ledger_entry(url, url, []) is True
-    assert url_matches_ledger_entry(legacy_path, f"{url}/", [url]) is False
+    assert url_matches_ledger_entry(legacy_path, url) is True
+    assert url_matches_ledger_entry(url, url) is True
+    assert url_matches_ledger_entry(legacy_path, f"{url}/") is False
 
 
 def test_absolute_local_path_identity_is_unchanged_across_cwd(
@@ -328,3 +329,158 @@ def test_multiple_historical_url_attempts_match_without_mutation(
     assert reloaded.contains_successful_url(url) is True
     assert reloaded.count() == 3
     assert [(entry.status, entry.original_path) for entry in reloaded.list_entries()] == before
+
+
+# ── V1.1.1 D3-C repair: URL rows vs historical rows vs local paths ─────────
+
+
+def _legacy_row(cwd: Path, url: str) -> str:
+    return str(Path(cwd) / Path(url))
+
+
+def test_historical_row_matches_only_the_url_it_was_written_for(tmp_path: Path) -> None:
+    legacy = tmp_path / "legacy-cwd"
+    legacy.mkdir()
+    row = _legacy_row(legacy, "https://github.com/o/r")
+
+    assert url_matches_ledger_entry(row, "https://github.com/o/r") is True
+    assert url_matches_ledger_entry(row, "https://github.com/o/r/") is False
+    assert url_matches_ledger_entry(row, "https://github.com/o/R") is False
+    assert url_matches_ledger_entry(row, "https://github.com/o/r?x=1") is False
+    assert url_matches_ledger_entry(row, "https://github.com/o/other") is False
+    assert url_matches_ledger_entry(row, "https://gitlab.com/o/r") is False
+    assert url_matches_ledger_entry(row, "https://github.com/o/r.git") is False
+
+
+def test_trailing_slash_variants_produce_distinct_historical_forms(tmp_path: Path) -> None:
+    plain = "https://github.com/o/r"
+    slashed = f"{plain}/"
+    legacy = tmp_path / "legacy-cwd"
+    legacy.mkdir()
+    base_row = _legacy_row(legacy, plain)
+
+    # The legacy identity preserves the trailing slash: the two spellings
+    # must never collapse into one another.
+    assert historical_url_ledger_form(plain) != historical_url_ledger_form(slashed)
+    assert historical_url_ledger_form(slashed).endswith("/")
+    assert url_matches_ledger_entry(base_row, plain) is True
+    assert url_matches_ledger_entry(base_row, slashed) is False
+
+    # A historical row that keeps the trailing separator belongs to the
+    # slashed spelling only. (The old writer dropped the slash, so only a
+    # slash-preserving stored form can prove the matcher tells them apart.)
+    slashed_row = f"{base_row}{os.sep}"
+    assert url_matches_ledger_entry(slashed_row, slashed) is True
+    assert url_matches_ledger_entry(slashed_row, plain) is False
+
+
+def test_url_variant_spellings_stay_distinct(tmp_path: Path) -> None:
+    base = "https://github.com/o/r"
+    legacy = tmp_path / "legacy-cwd"
+    legacy.mkdir()
+    row = _legacy_row(legacy, base)
+
+    for variant in (
+        f"{base}/",
+        f"{base}.git",
+        f"{base}?x=1",
+        f"{base}#x",
+        "https://github.com/o/R",
+        "https://gitlab.com/o/r",
+        "https://www.youtube.com/watch?v=ABC",
+        "https://youtu.be/ABC",
+        "https://www.youtube.com/watch?v=ABC&t=30",
+    ):
+        assert url_matches_ledger_entry(row, variant) is False
+        assert url_matches_ledger_entry(variant, variant) is True
+    assert url_matches_ledger_entry(row, base) is True
+
+
+def test_historical_row_matches_both_separator_spellings(tmp_path: Path) -> None:
+    url = "https://github.com/o/r"
+    windows_spelling = f"{tmp_path}{os.sep}https:{os.sep}github.com{os.sep}o{os.sep}r"
+    posix_spelling = f"{tmp_path.as_posix()}/https:/github.com/o/r"
+
+    assert url_matches_ledger_entry(windows_spelling, url) is True
+    assert url_matches_ledger_entry(posix_spelling, url) is True
+
+
+def test_nested_scheme_path_is_not_a_historical_url_row(tmp_path: Path) -> None:
+    inner_url = "https://github.com/o/r"
+    nested_url = "https://x/a/https://github.com/o/r"
+    nested = f"{tmp_path.as_posix()}/https:/x/a/https:/github.com/o/r"
+
+    assert url_matches_ledger_entry(nested, inner_url) is False
+    assert url_matches_ledger_entry(nested, nested_url) is True
+
+
+def test_real_local_file_under_url_shaped_path_is_not_a_url_row(tmp_path: Path) -> None:
+    url = "https://github.com/o/r"
+    local = Path(f"{tmp_path.as_posix()}/https:/github.com/o/r")
+    try:
+        local.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:  # Windows forbids a "https:" path component.
+        pytest.skip("platform forbids URL-shaped directory names")
+    local.write_text("not a url", encoding="utf-8")
+
+    assert url_matches_ledger_entry(str(local), url) is False
+    assert url_matches_ledger_entry(str(local), url, tmp_path) is False
+    assert url_matches_ledger_entry(str(local.parent / "sibling.md"), url, tmp_path) is False
+    # The file must also survive as an ordinary local ledger row.
+    manager = ManifestManager(tmp_path / "manifests" / "processed.json", project_root=tmp_path)
+    manager.add_processed_file(path=local, sha256="localdigest", extension="")
+    assert manager.contains_path(local) is True
+    assert manager.contains_successful_url(url) is False
+
+
+def test_exact_row_does_not_hide_a_historical_row(tmp_path: Path) -> None:
+    url = "https://github.com/o/r"
+    legacy = tmp_path / "legacy-cwd"
+    legacy.mkdir()
+    row = _legacy_row(legacy, url)
+    manager = ManifestManager(tmp_path / "manifests" / "processed.json", project_root=tmp_path)
+    manager.add_processed_file(path=url, sha256="", extension="")
+    manager.add_processed_file(path=row, sha256="", extension="")
+
+    assert manager.count() == 2
+    assert manager.contains_successful_url(url) is True
+    assert all(
+        url_matches_ledger_entry(entry.original_path, url) for entry in manager.list_entries()
+    )
+
+
+def test_url_identity_ignores_surrounding_whitespace(tmp_path: Path) -> None:
+    manager = ManifestManager(tmp_path / "manifests" / "processed.json", project_root=tmp_path)
+    padded = "  https://github.com/o/r  "
+
+    manager.add_processed_file(path=padded, sha256="", extension="")
+
+    assert manager.list_entries()[0].original_path == "https://github.com/o/r"
+    assert manager.contains_successful_url("https://github.com/o/r") is True
+
+
+def test_remove_entry_deletes_exact_url_row_and_leaves_local_rows(tmp_path: Path) -> None:
+    manager = ManifestManager(tmp_path / "manifests" / "processed.json", project_root=tmp_path)
+    source = tmp_path / "note.md"
+    source.write_text("# Local", encoding="utf-8")
+    manager.add_processed_file(path="https://github.com/o/r", sha256="", extension="")
+    manager.add_processed_file(path=source, sha256="d", extension=".md")
+
+    manager.remove_entry(path="https://github.com/o/r")
+
+    assert manager.count() == 1
+    assert manager.contains_successful_url("https://github.com/o/r") is False
+    assert manager.contains_successful_path(source) is True
+
+
+def test_remove_entry_does_not_guess_a_url_from_a_mangled_path(tmp_path: Path) -> None:
+    manager = ManifestManager(tmp_path / "manifests" / "processed.json", project_root=tmp_path)
+    manager.add_processed_file(path="https://github.com/o/r", sha256="", extension="")
+
+    # Path("https://github.com/o/r") loses the "://" that defines URL identity;
+    # refusing to guess is safer than deleting the wrong row. CLI removal of a
+    # historical row goes through url_matches_ledger_entry instead.
+    manager.remove_entry(path=Path("https:/github.com/o/r"))
+
+    assert manager.count() == 1
+    assert manager.contains_successful_url("https://github.com/o/r") is True
