@@ -21,6 +21,12 @@ from app.domain.entity_relationship import (
     RelationshipMetadata,
     SourceReference,
 )
+from app.domain.generation import (
+    ConfigValue,
+    GenerationRequest,
+    GenerationTaskType,
+    ProvenanceLevel,
+)
 from app.domain.knowledge_graph import (
     EdgeType,
     GraphBuildResult,
@@ -30,10 +36,18 @@ from app.domain.knowledge_graph import (
     NodeType,
 )
 from app.domain.notes import ObsidianNote
+from app.domain.scopes import (
+    MemoryScope,
+    MemoryScopeKind,
+    ResolvedScope,
+    UnsupportedMemoryScopeError,
+    resolve_memory_scope,
+)
 from app.domain.semantic_chunking import DocumentChunk
 from app.domain.vector_store import SearchResult, VectorEntry
 
 __all__ = [
+    "ConfigValue",
     "Definition",
     "DocumentAnalysis",
     "DocumentChunk",
@@ -44,19 +58,27 @@ __all__ = [
     "EdgeType",
     "Entity",
     "EntityMetadata",
+    "GenerationRequest",
+    "GenerationTaskType",
     "GraphBuildResult",
     "ImportantEntity",
     "KeyConcept",
     "KnowledgeEdge",
     "KnowledgeGraph",
     "KnowledgeNode",
+    "MemoryScope",
+    "MemoryScopeKind",
     "NodeType",
     "ObsidianNote",
+    "ProvenanceLevel",
     "RelatedTopic",
     "Relationship",
     "RelationshipMetadata",
+    "ResolvedScope",
     "SearchResult",
     "SourceDocument",
     "SourceReference",
+    "UnsupportedMemoryScopeError",
     "VectorEntry",
+    "resolve_memory_scope",
 ]
