@@ -34,6 +34,8 @@ from app.domain.generation import (
     GenerationTaskType,
     ProvenanceLevel,
 )
+from app.domain.generation_context import GenerationContext, RetrievedChunk
+from app.domain.generation_result import GenerationResult
 from app.domain.jobs import (
     GenerationJob,
     GenerationJobStatus,
@@ -76,9 +78,11 @@ __all__ = [
     "EdgeType",
     "Entity",
     "EntityMetadata",
+    "GenerationContext",
     "GenerationJob",
     "GenerationJobStatus",
     "GenerationRequest",
+    "GenerationResult",
     "GenerationTaskType",
     "GraphBuildResult",
     "ImportantEntity",
@@ -98,6 +102,7 @@ __all__ = [
     "Relationship",
     "RelationshipMetadata",
     "ResolvedScope",
+    "RetrievedChunk",
     "SearchResult",
     "SourceDocument",
     "SourceReference",

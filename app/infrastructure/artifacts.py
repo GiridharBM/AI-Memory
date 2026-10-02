@@ -135,6 +135,16 @@ class ArtifactStore:
                 key=lambda item: (item.version, item.created_at, item.artifact_id),
             )
 
+    def list_for_job(self, job_id: str) -> list[Artifact]:
+        """Return every artifact row produced by one job, oldest first."""
+
+        with self._lock:
+            self._load_once()
+            return sorted(
+                (item for item in self._artifacts.values() if item.job_id == job_id),
+                key=lambda item: (item.created_at, item.artifact_id),
+            )
+
 
 class ProvenanceStore:
     """Thread-safe atomic-JSON store for artifact provenance records.
