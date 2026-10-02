@@ -27,6 +27,15 @@ from app.domain.generation import (
     GenerationTaskType,
     ProvenanceLevel,
 )
+from app.domain.jobs import (
+    GenerationJob,
+    GenerationJobStatus,
+    InvalidJobTransitionError,
+    cancel,
+    fail,
+    set_progress,
+    transition,
+)
 from app.domain.knowledge_graph import (
     EdgeType,
     GraphBuildResult,
@@ -58,10 +67,13 @@ __all__ = [
     "EdgeType",
     "Entity",
     "EntityMetadata",
+    "GenerationJob",
+    "GenerationJobStatus",
     "GenerationRequest",
     "GenerationTaskType",
     "GraphBuildResult",
     "ImportantEntity",
+    "InvalidJobTransitionError",
     "KeyConcept",
     "KnowledgeEdge",
     "KnowledgeGraph",
@@ -80,5 +92,9 @@ __all__ = [
     "SourceReference",
     "UnsupportedMemoryScopeError",
     "VectorEntry",
+    "cancel",
+    "fail",
     "resolve_memory_scope",
+    "set_progress",
+    "transition",
 ]
