@@ -97,8 +97,13 @@ class GenerationExecutor:
         self._job_store.update(job)
         return job
 
-    def run(self, request: GenerationRequest) -> ExecutionOutcome:
-        """Execute the full pipeline for one request."""
+    def submit(self, request: GenerationRequest) -> GenerationJob:
+        """Create and persist a PENDING job without executing it.
+
+        Lets API callers return a job id immediately and run execution on a
+        background thread. The handler check mirrors :meth:`run` so
+        unsupported tasks fail before any job exists.
+        """
 
         handler = self._handlers.get(request.task_type)
         if handler is None:
@@ -106,8 +111,35 @@ class GenerationExecutor:
             raise UnsupportedTaskError(
                 f"No handler registered for task '{request.task_type.value}'."
             )
-        job = self._job_store.create(request)
+        return self._job_store.create(request)
+
+    def execute_job(self, job_id: str) -> ExecutionOutcome:
+        """Execute a previously submitted job to completion.
+
+        Terminal jobs (DONE/FAILED/CANCELLED) return as-is without
+        re-running, so a retried background launch can never duplicate work.
+        """
+
+        job = self._job_store.get(job_id)
+        if job is None:
+            raise KeyError(f"Unknown generation job: {job_id}")
+        if job.status in (
+            GenerationJobStatus.DONE,
+            GenerationJobStatus.FAILED,
+            GenerationJobStatus.CANCELLED,
+        ):
+            return ExecutionOutcome(job=job, artifact_id=None)
+        handler = self._handlers.get(job.request.task_type)
+        if handler is None:
+            raise UnsupportedTaskError(
+                f"No handler registered for task '{job.request.task_type.value}'."
+            )
         return self._execute(job, handler)
+
+    def run(self, request: GenerationRequest) -> ExecutionOutcome:
+        """Execute the full pipeline for one request."""
+
+        return self.execute_job(self.submit(request).job_id)
 
     def _execute(self, job: GenerationJob, handler: TaskHandler) -> ExecutionOutcome:
         try:

@@ -9,6 +9,9 @@ import { Ask } from './pages/Ask'
 import { Search } from './pages/Search'
 import { Memories } from './pages/Memories'
 import { Ingest } from './pages/Ingest'
+import { Generate } from './pages/Generate'
+import { Library } from './pages/Library'
+import { MindMap } from './pages/MindMap'
 import { Activity, Configuration, Evaluation, Retrieval } from './pages/Intelligence'
 import { Diagnostics, Storage } from './pages/System'
 
@@ -18,6 +21,9 @@ const TITLES: Record<string, string> = {
   search: 'Search',
   memories: 'Memories',
   ingest: 'Add Knowledge',
+  generate: 'Generate',
+  library: 'Library',
+  mindmap: 'Mind Map',
   evaluation: 'Evaluation',
   retrieval: 'Retrieval',
   activity: 'Activity',
@@ -98,6 +104,12 @@ function Page({ section }: { section: string }) {
       return <Memories />
     case 'ingest':
       return <Ingest />
+    case 'generate':
+      return <Generate />
+    case 'library':
+      return <Library />
+    case 'mindmap':
+      return <MindMap />
     case 'evaluation':
       return <Evaluation />
     case 'retrieval':

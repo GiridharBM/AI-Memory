@@ -142,7 +142,81 @@ export function Activity() {
           </Card>
         )}
       </AsyncBoundary>
+      <GenerationJobs />
     </>
+  )
+}
+
+/** Generation jobs from the V2 job store. */
+function GenerationJobs() {
+  const state = useApi(() => api.listJobs(), [])
+
+  return (
+    <div className="mt-6">
+      <AsyncBoundary state={state}>
+        {(data) =>
+          data.jobs.length === 0 ? (
+            <Card>
+              <EmptyState
+                title="No generation jobs yet."
+                hint="Submit a request from Generate to see it tracked here."
+              />
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader
+                title="Generation jobs"
+                subtitle={`${data.total} tracked job${data.total === 1 ? '' : 's'}`}
+              />
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[13px]">
+                  <thead>
+                    <tr className="border-b border-border text-[10px] uppercase tracking-[0.08em] text-text-faint">
+                      <th scope="col" className="px-5 py-2.5 font-semibold">When</th>
+                      <th scope="col" className="px-5 py-2.5 font-semibold">Task</th>
+                      <th scope="col" className="px-5 py-2.5 font-semibold">Status</th>
+                      <th scope="col" className="px-5 py-2.5 text-right font-semibold">Progress</th>
+                      <th scope="col" className="px-5 py-2.5 font-semibold">Stage</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {data.jobs.map((job) => (
+                      <tr key={job.job_id}>
+                        <td className="px-5 py-2.5 font-mono text-[11px] whitespace-nowrap text-text-faint">
+                          {formatTimestamp(job.created_at)}
+                        </td>
+                        <td className="px-5 py-2.5 font-mono text-[11px] uppercase text-text-muted">
+                          {job.task_type}
+                        </td>
+                        <td className="px-5 py-2.5">
+                          <StatusBadge
+                            status={
+                              job.status === 'done'
+                                ? 'ready'
+                                : job.status === 'failed'
+                                  ? 'unavailable'
+                                  : 'disabled'
+                            }
+                            label={job.status}
+                            size="sm"
+                          />
+                        </td>
+                        <td className="px-5 py-2.5 text-right font-mono text-xs text-text-muted">
+                          {job.progress}%
+                        </td>
+                        <td className="max-w-56 truncate px-5 py-2.5 font-mono text-[11px] text-text-faint">
+                          {job.stage || '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )
+        }
+      </AsyncBoundary>
+    </div>
   )
 }
 

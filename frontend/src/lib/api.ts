@@ -8,13 +8,21 @@
 
 import type {
   ActivityResponse,
+  ArtifactSummary,
+  ArtifactVersion,
+  ArtifactsResponse,
   AskResponse,
   CapabilitiesResponse,
   ConfigResponse,
   DiagnosticsResponse,
   EvaluationResponse,
+  GenerationJob,
+  GenerationTask,
   HealthResponse,
   IngestResponse,
+  JobsResponse,
+  MindMapResponse,
+  ProvenanceResponse,
   SearchResponse,
   SourceDetail,
   SourcesResponse,
@@ -85,4 +93,28 @@ export const api = {
   ask: (body: { question: string; top_k?: number; min_score?: number }) =>
     post<AskResponse>('/ask', body),
   ingest: (form: FormData) => request<IngestResponse>('/ingest', { method: 'POST', body: form }),
+  createGeneration: (body: {
+    task_type: GenerationTask
+    memory_scope: { kind: 'all' } | { kind: 'documents'; source_ids: string[] }
+    config?: Record<string, string | number | boolean | null>
+    model_role?: string
+  }) => post<GenerationJob>('/generation', body),
+  getJob: (id: string) => request<GenerationJob>(`/jobs/${id}`),
+  listJobs: () => request<JobsResponse>('/jobs'),
+  cancelJob: (id: string) => post<GenerationJob>(`/jobs/${id}/cancel`, {}),
+  listArtifacts: () => request<ArtifactsResponse>('/artifacts'),
+  getArtifact: (id: string) => request<ArtifactSummary>(`/artifacts/${id}`),
+  getArtifactVersions: (id: string) =>
+    request<ArtifactVersion>(`/artifacts/${id}/versions`),
+  getArtifactProvenance: (id: string) =>
+    request<ProvenanceResponse>(`/artifacts/${id}/provenance`),
+  getMindMap: (nodeId?: string, depth?: number) => {
+    const params = new URLSearchParams()
+    if (nodeId !== undefined) params.set('node_id', nodeId)
+    if (depth !== undefined) params.set('depth', String(depth))
+    const query = params.toString()
+    return request<MindMapResponse>(`/mindmap${query ? `?${query}` : ''}`)
+  },
+  /** Direct download URL for binary artifact content (PPTX). No JSON fetch. */
+  artifactContentUrl: (id: string) => `/api/artifacts/${id}/content`,
 }

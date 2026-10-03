@@ -20,6 +20,9 @@ const GROUPS: NavGroup[] = [
       { label: 'Search', path: '/search', icon: '⌕' },
       { label: 'Memories', path: '/memories', icon: '❑' },
       { label: 'Ingest', path: '/ingest', icon: '↧' },
+      { label: 'Generate', path: '/generate', icon: '✦' },
+      { label: 'Library', path: '/library', icon: '▤' },
+      { label: 'Mind Map', path: '/mindmap', icon: '⁂' },
     ],
   },
   {

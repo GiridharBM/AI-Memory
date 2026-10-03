@@ -22,7 +22,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import ConfigurationError
 from app.interfaces.web import deps
-from app.interfaces.web.routes import interact, knowledge, system
+from app.interfaces.web.routes import artifacts, generation, interact, knowledge, mindmap, system
 
 API_PREFIX = "/api"
 
@@ -61,6 +61,9 @@ def create_app() -> FastAPI:
     app.include_router(system.router, prefix=API_PREFIX)
     app.include_router(knowledge.router, prefix=API_PREFIX)
     app.include_router(interact.router, prefix=API_PREFIX)
+    app.include_router(generation.router, prefix=API_PREFIX)
+    app.include_router(artifacts.router, prefix=API_PREFIX)
+    app.include_router(mindmap.router, prefix=API_PREFIX)
 
     @app.get(f"{API_PREFIX}/health", tags=["system"])
     def health() -> JSONResponse:

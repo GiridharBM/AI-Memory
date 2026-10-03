@@ -277,3 +277,95 @@ export interface IngestResponse {
   graph_warning?: string | null
   message?: string
 }
+
+export type GenerationTask = 'flashcards' | 'quiz' | 'report' | 'ppt'
+
+export type GenerationJobStatus =
+  | 'pending'
+  | 'processing'
+  | 'validating'
+  | 'done'
+  | 'failed'
+  | 'cancelled'
+
+export interface GenerationJob {
+  job_id: string
+  task_type: string
+  status: GenerationJobStatus
+  progress: number
+  stage: string
+  message: string
+  created_at: string
+  updated_at: string
+  error: string | null
+}
+
+export interface JobsResponse {
+  jobs: GenerationJob[]
+  total: number
+}
+
+export interface ArtifactSummary {
+  artifact_id: string
+  logical_id: string
+  kind: string
+  title: string
+  version: number
+  created_at: string
+  updated_at: string
+  job_id: string
+  model_role: string
+  metadata: Record<string, string>
+  content: string | null
+  content_ref: string | null
+}
+
+export interface ArtifactsResponse {
+  artifacts: ArtifactSummary[]
+  total: number
+}
+
+export interface ArtifactVersion {
+  artifact_id: string
+  logical_id: string
+  versions: ArtifactSummary[]
+}
+
+export interface ProvenanceEntry {
+  artifact_id: string
+  source_id: string
+  role: string
+  source_type: string | null
+  chunk_id: string | null
+  chunk_index: number | null
+  start_char: number | null
+  end_char: number | null
+  kg_node_id: string | null
+  quote: string | null
+}
+
+export interface ProvenanceResponse {
+  artifact_id: string
+  records: ProvenanceEntry[]
+  total: number
+}
+
+export interface MindMapNode {
+  id: string
+  label: string
+  node_type: string
+  source: string
+}
+
+export interface MindMapEdge {
+  source_id: string
+  target_id: string
+  edge_type: string
+}
+
+export interface MindMapResponse {
+  available: boolean
+  nodes: MindMapNode[]
+  edges: MindMapEdge[]
+  root: string | null
+}

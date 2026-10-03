@@ -99,6 +99,7 @@ def _make_settings(
             manifest_root=tmp_path / "manifests",
             cache_root=tmp_path / "cache",
             log_root=tmp_path / "logs",
+            artifact_root=tmp_path / "artifacts",
         ),
         ollama=OllamaSettings(),
         logging=logging_settings or LoggingSettings(
