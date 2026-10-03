@@ -35,6 +35,7 @@ from app.domain.generation import (
     ProvenanceLevel,
 )
 from app.domain.generation_context import GenerationContext, RetrievedChunk
+from app.domain.generation_documents import Presentation, Report, ReportSection, Slide
 from app.domain.generation_result import GenerationResult
 from app.domain.generation_sets import FlashcardSet, QuizSet
 from app.domain.jobs import (
@@ -97,6 +98,7 @@ __all__ = [
     "MemoryScopeKind",
     "NodeType",
     "ObsidianNote",
+    "Presentation",
     "ProvenanceLevel",
     "ProvenanceRecord",
     "ProvenanceRole",
@@ -104,9 +106,12 @@ __all__ = [
     "RelatedTopic",
     "Relationship",
     "RelationshipMetadata",
+    "Report",
+    "ReportSection",
     "ResolvedScope",
     "RetrievedChunk",
     "SearchResult",
+    "Slide",
     "SourceDocument",
     "SourceReference",
     "UnsupportedMemoryScopeError",

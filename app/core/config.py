@@ -45,6 +45,7 @@ class PathSettings(BaseModel):
     manifest_root: Path
     cache_root: Path
     log_root: Path
+    artifact_root: Path = Field(default_factory=lambda: Path("./data/artifacts"))
 
     @field_validator(
         "project_root",
@@ -54,6 +55,7 @@ class PathSettings(BaseModel):
         "manifest_root",
         "cache_root",
         "log_root",
+        "artifact_root",
         mode="before",
     )
     @classmethod
