@@ -26,6 +26,27 @@ from app.infrastructure.search import SearchHit
 DEFAULT_TOP_K = 5
 DEFAULT_MAX_HITS = 20
 
+# Adapter-level compensation for post-fusion filtering in the frozen
+# SearchService, NOT an exact replacement for pre-ranking filtering.
+#
+# The frozen stack fuses first and filters second: ``HybridSearch.search``
+# returns ``hits[:top_k]`` (app/infrastructure/search.py) and only then does
+# ``SearchService.search`` apply ``filter``. A per-source restricted search at
+# top_k=5 therefore discards every hit of the very source it was asked about
+# whenever other sources outrank it -- on the shipped corpus a source that
+# plainly contained the query term returned zero hits. Restricted calls ask for
+# a deeper candidate window and slice back to ``top_k`` per source after the
+# filter has run.
+#
+# Bounds are fixed rather than derived from corpus size, so the cost of a
+# restricted request stays predictable. Known ceiling while the retrieval stack
+# stays frozen: ``VectorStore.search`` filters before scoring, but
+# ``SearchService`` never forwards its filter down to the store, so a source
+# whose chunks all rank below this window is still invisible.
+RESTRICTED_OVERSAMPLE_FACTOR = 20
+RESTRICTED_MIN_TOP_K = 200
+RESTRICTED_MAX_TOP_K = 1000
+
 
 class RetrievalPort(Protocol):
     """Structural interface satisfied by ``SearchService`` (no import needed)."""
@@ -105,17 +126,30 @@ def retrieve_for_request(
     queries = _queries_for_request(request)
     try:
         collected: list[SearchHit] = []
-        # Branch on the resolved scope data (not the request spelling) so the
-        # behavior follows what was actually resolved. For consistent callers
-        # both agree; node-only scopes retrieve broad evidence a handler
-        # narrows by nodes, never inventing retrieval semantics.
-        if scope.restricted and scope.source_ids:
+        # Branch on ``restricted`` alone. A restricted scope that resolved to no
+        # source matches nothing, so it must return nothing: adding
+        # ``and scope.source_ids`` here would let an empty restricted scope fall
+        # through to the unrestricted branch and quietly return the whole
+        # corpus as evidence for a narrowly-scoped request. Node/topic scopes are
+        # representable but unresolved until scope resolution lands, so they fail
+        # closed here rather than pretending to be narrower than they are.
+        if scope.restricted:
+            candidate_top_k = min(
+                max(top_k * RESTRICTED_OVERSAMPLE_FACTOR, RESTRICTED_MIN_TOP_K),
+                RESTRICTED_MAX_TOP_K,
+            )
             for source_id in scope.source_ids:
                 for query in queries:
+                    # Oversample for the post-fusion filter, then keep at most
+                    # ``top_k`` per source so one verbose source cannot crowd
+                    # the others out of the context budget.
                     collected.extend(
                         search_service.search(
-                            query, top_k=top_k, filter={"source": source_id}, min_score=0.0
-                        )
+                            query,
+                            top_k=candidate_top_k,
+                            filter={"source": source_id},
+                            min_score=0.0,
+                        )[:top_k]
                     )
         else:
             for query in queries:
