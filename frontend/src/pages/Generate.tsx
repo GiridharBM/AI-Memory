@@ -8,11 +8,14 @@ import { useJob } from '../lib/jobs'
 import { navigate } from '../lib/router'
 import type { ArtifactSummary, GenerationTask } from '../lib/types'
 
-const TASKS: { value: GenerationTask; label: string }[] = [
+type GenerateTaskValue = GenerationTask | 'mindmap_enrich'
+
+const TASKS: { value: GenerateTaskValue; label: string }[] = [
   { value: 'flashcards', label: 'Flashcards' },
   { value: 'quiz', label: 'Quiz' },
   { value: 'report', label: 'Report' },
   { value: 'ppt', label: 'Presentation' },
+  { value: 'mindmap_enrich', label: 'AI Mind Map' },
 ]
 
 const inputClass =
@@ -126,7 +129,7 @@ function CheckField({
 }
 
 export function Generate() {
-  const [task, setTask] = useState<GenerationTask>('flashcards')
+  const [task, setTask] = useState<GenerateTaskValue>('flashcards')
   const [scopeKind, setScopeKind] = useState<'all' | 'documents'>('all')
   const [sources, setSources] = useState('')
   const [count, setCount] = useState(5)
@@ -136,6 +139,7 @@ export function Generate() {
   const [title, setTitle] = useState('')
   const [sectionCount, setSectionCount] = useState(5)
   const [slideCount, setSlideCount] = useState(5)
+  const [nodeLimit, setNodeLimit] = useState(20)
   const [detailLevel, setDetailLevel] = useState('standard')
   const [speakerNotes, setSpeakerNotes] = useState(true)
   const [query, setQuery] = useState('')
@@ -158,6 +162,10 @@ export function Generate() {
       if (title.trim()) config.title = title.trim()
       config.section_count = sectionCount
       config.detail_level = detailLevel
+    } else if (task === 'mindmap_enrich') {
+      if (title.trim()) config.title = title.trim()
+      config.node_limit = nodeLimit
+      config.detail = detailLevel
     } else {
       if (title.trim()) config.title = title.trim()
       config.slide_count = slideCount
@@ -188,7 +196,7 @@ export function Generate() {
     setJobId(null)
     try {
       const created = await api.createGeneration({
-        task_type: task,
+        task_type: task as GenerationTask,
         memory_scope: buildScope(),
         config: buildConfig(),
       })
@@ -306,6 +314,24 @@ export function Generate() {
                     value={detailLevel}
                     options={['brief', 'standard', 'detailed']}
                     onChange={setDetailLevel}
+                  />
+                </>
+              )}
+              {task === 'mindmap_enrich' && (
+                <>
+                  <TextField label="Title (optional)" value={title} onChange={setTitle} />
+                  <SelectField
+                    label="Detail level"
+                    value={detailLevel}
+                    options={['brief', 'standard', 'detailed']}
+                    onChange={setDetailLevel}
+                  />
+                  <NumberField
+                    label="Nodes (max)"
+                    value={nodeLimit}
+                    onChange={setNodeLimit}
+                    min={1}
+                    max={60}
                   />
                 </>
               )}
@@ -461,7 +487,9 @@ export function ArtifactView({
         <span className="font-mono text-[11px] uppercase text-text-muted">{artifact.kind}</span>
         <span className="text-text-faint">v{artifact.version}</span>
       </div>
-      {artifact.content ? (
+      {artifact.kind === 'mindmap' && artifact.content ? (
+        <MindMapArtifactContent content={artifact.content} />
+      ) : artifact.content ? (
         <pre className="overflow-x-auto rounded-md border border-border bg-bg px-4 py-3 font-mono text-xs whitespace-pre-wrap text-text">
           {artifact.content}
         </pre>
@@ -482,6 +510,99 @@ export function ArtifactView({
         >
           Open in Library →
         </button>
+      ) : null}
+    </div>
+  )
+}
+
+interface EnrichedNodeView {
+  id: string
+  label: string
+  node_type?: string
+  source?: string
+  description?: string
+  key_points?: string[]
+}
+
+interface EnrichedEdgeView {
+  source_id: string
+  target_id: string
+  relationship?: string
+}
+
+interface EnrichedMapView {
+  title?: string
+  root_node_id?: string
+  nodes?: EnrichedNodeView[]
+  edges?: EnrichedEdgeView[]
+}
+
+function MindMapArtifactContent({ content }: { content: string }) {
+  let parsed: EnrichedMapView | null = null
+  try {
+    parsed = JSON.parse(content) as EnrichedMapView
+  } catch {
+    parsed = null
+  }
+  if (parsed === null || !Array.isArray(parsed.nodes)) {
+    return (
+      <pre className="overflow-x-auto rounded-md border border-border bg-bg px-4 py-3 font-mono text-xs whitespace-pre-wrap text-text">
+        {content}
+      </pre>
+    )
+  }
+  const nodes = parsed.nodes ?? []
+  const edges = Array.isArray(parsed.edges) ? parsed.edges : []
+  const byId = new Map(nodes.map((node) => [node.id, node]))
+  const root = parsed.root_node_id ? byId.get(parsed.root_node_id) : undefined
+  return (
+    <div className="space-y-3">
+      <p className="text-[13px] text-text-muted">
+        {nodes.length} nodes · {edges.length} edges
+        {root ? ` · root: ${root.label}` : null}
+      </p>
+      <ul className="divide-y divide-border rounded-md border border-border">
+        {nodes.map((node) => (
+          <li key={node.id} className="px-4 py-3">
+            <div className="flex items-center gap-4">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-medium text-text">
+                  {node.label}
+                </span>
+                <span className="mt-0.5 block truncate font-mono text-[11px] text-text-faint">
+                  {node.source || 'no source'}
+                </span>
+              </span>
+              <span className="shrink-0 font-mono text-[11px] uppercase text-text-muted">
+                {node.node_type || 'concept'}
+              </span>
+            </div>
+            {node.description ? (
+              <p className="mt-1.5 text-[13px] text-text-muted">{node.description}</p>
+            ) : null}
+            {node.key_points && node.key_points.length > 0 ? (
+              <ul className="mt-1.5 list-disc space-y-0.5 pl-5 text-[13px] text-text-muted">
+                {node.key_points.map((point, index) => (
+                  <li key={`${node.id}-point-${index}`}>{point}</li>
+                ))}
+              </ul>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      {edges.length > 0 ? (
+        <ul className="space-y-1">
+          {edges.map((edge) => (
+            <li
+              key={`${edge.source_id}-${edge.target_id}-${edge.relationship ?? ''}`}
+              className="font-mono text-[11px] text-text-faint"
+            >
+              {byId.get(edge.source_id)?.label ?? edge.source_id} →{' '}
+              {byId.get(edge.target_id)?.label ?? edge.target_id}
+              {edge.relationship ? ` · ${edge.relationship}` : null}
+            </li>
+          ))}
+        </ul>
       ) : null}
     </div>
   )

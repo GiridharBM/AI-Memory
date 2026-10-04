@@ -55,6 +55,7 @@ from app.domain.knowledge_graph import (
     KnowledgeNode,
     NodeType,
 )
+from app.domain.mindmap import EnrichedMindMap, EnrichedMindMapEdge, EnrichedMindMapNode
 from app.domain.notes import ObsidianNote
 from app.domain.scopes import (
     MemoryScope,
@@ -78,6 +79,9 @@ __all__ = [
     "DocumentMetadata",
     "DocumentSummary",
     "EdgeType",
+    "EnrichedMindMap",
+    "EnrichedMindMapEdge",
+    "EnrichedMindMapNode",
     "Entity",
     "EntityMetadata",
     "FlashcardSet",

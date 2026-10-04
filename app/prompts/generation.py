@@ -204,3 +204,65 @@ Rules:
 Source context:
 {_context_block(context)}
 """
+
+
+def build_mindmap_user_prompt(
+    context: GenerationContext,
+    *,
+    title: str | None,
+    node_limit: int,
+    detail: str,
+) -> str:
+    """Build the user prompt requesting an enriched mind map."""
+
+    title_rule = (
+        f'The mind map must be titled "{title}".'
+        if title
+        else "Choose a concise mind map title from the context."
+    )
+    return f"""\
+Generate an enriched mind map ({detail} detail) from the source context \
+below. {title_rule}
+
+Return JSON with exactly this structure:
+{{
+  "title": "...",
+  "root_node_id": "...",
+  "nodes": [
+    {{
+      "id": "...",
+      "label": "...",
+      "node_type": "...",
+      "source": "...",
+      "description": "...",
+      "key_points": ["..."]
+    }}
+  ],
+  "edges": [
+    {{
+      "source_id": "...",
+      "target_id": "...",
+      "relationship": "..."
+    }}
+  ]
+}}
+
+Rules:
+- Generate at most {node_limit} nodes, no more; generate at least 1 node.
+- Generate at most 120 edges.
+- root_node_id must match the id of an existing node.
+- Every edge source_id and target_id must match an existing node id.
+- Do not repeat the same node id twice.
+- Do not repeat the same edge twice.
+- No self-edges: source_id and target_id must differ on every edge.
+- Use only the retrieved source context below.
+- Do not invent source IDs.
+- Do not invent chunk IDs.
+- Reuse existing knowledge-graph identifiers as node ids where applicable.
+- Descriptions and key_points are derived annotations summarizing the \
+context; they do not need verbatim quotes.
+- Return only valid JSON. Do not wrap the JSON in Markdown.
+
+Source context:
+{_context_block(context)}
+"""
