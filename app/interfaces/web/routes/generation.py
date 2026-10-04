@@ -17,8 +17,9 @@ from typing import Any, TypeVar, cast
 from fastapi import APIRouter, HTTPException
 
 from app.application.flashcard_handler import FlashcardTaskHandler
-from app.application.generation_errors import UnsupportedTaskError
+from app.application.generation_errors import RetrievalError, UnsupportedTaskError
 from app.application.generation_executor import GenerationExecutor
+from app.application.mindmap_handler import MindMapEnrichTaskHandler
 from app.application.presentation_handler import PresentationTaskHandler
 from app.application.quiz_handler import QuizTaskHandler
 from app.application.report_handler import ReportTaskHandler
@@ -31,6 +32,7 @@ from app.domain.jobs import (
     InvalidJobTransitionError,
     cancel,
 )
+from app.domain.knowledge_graph import KnowledgeGraph
 from app.infrastructure.artifacts import ArtifactStore, ProvenanceStore
 from app.infrastructure.jobs import GenerationJobStore
 from app.infrastructure.llm import OllamaClient, OllamaRequest
@@ -94,6 +96,26 @@ def _generate_json_factory(
     return generate
 
 
+def _knowledge_graph_loader(settings: Settings) -> Callable[[], KnowledgeGraph]:
+    """Read-only supplier of the persisted KG for topic/node scope resolution.
+
+    A missing graph file loads as an empty graph (every requested node ID
+    then fails closed as unknown); a corrupt file fails safely instead of
+    being mistaken for an empty graph. Never writes.
+    """
+
+    def load() -> KnowledgeGraph:
+        path = settings.paths.manifest_root / "knowledge_graph.json"
+        if not path.exists():
+            return KnowledgeGraph()
+        try:
+            return KnowledgeGraph.load(path)
+        except Exception as exc:
+            raise RetrievalError(f"Knowledge-graph loading failed: {exc}") from exc
+
+    return load
+
+
 def _build_executor(
     settings: Settings,
     *,
@@ -116,6 +138,7 @@ def _build_executor(
             artifact_root=settings.paths.artifact_root,
             project_root=settings.paths.project_root,
         ),
+        MindMapEnrichTaskHandler(generate_json=generate),
     ):
         handlers[handler.task_type] = handler
     return GenerationExecutor(
@@ -125,6 +148,7 @@ def _build_executor(
         handlers=handlers,
         search_service=SearchService.create_default(settings),
         is_cancelled=is_cancelled,
+        graph_loader=_knowledge_graph_loader(settings),
     )
 
 
@@ -143,7 +167,17 @@ def _run_job(settings: Settings, job_id: str) -> None:
     def cancelled() -> bool:
         return _is_cancelled(store_path, job_id)
 
-    executor = _build_executor(settings, is_cancelled=cancelled)
+    try:
+        stored = GenerationJobStore(store_path).get(job_id)
+    except Exception:
+        logger.exception("Background generation failed to load job.", extra={"job_id": job_id})
+        return
+    if stored is None:
+        logger.warning("Background generation job not found.", extra={"job_id": job_id})
+        return
+    executor = _build_executor(
+        settings, model_role=stored.request.model_role, is_cancelled=cancelled
+    )
     try:
         executor.execute_job(job_id)
     except Exception:

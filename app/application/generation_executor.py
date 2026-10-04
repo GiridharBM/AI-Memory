@@ -40,7 +40,7 @@ from app.application.generation_errors import (
     UnsupportedTaskError,
 )
 from app.application.generation_validation import validate_result
-from app.application.retrieval_adapter import RetrievalPort, build_context
+from app.application.retrieval_adapter import GraphLoader, RetrievalPort, build_context
 from app.application.task_handler import TaskHandler
 from app.domain.artifacts import Artifact, ProvenanceRecord
 from app.domain.generation import GenerationRequest, GenerationTaskType
@@ -85,6 +85,7 @@ class GenerationExecutor:
         handlers: Mapping[GenerationTaskType, TaskHandler],
         search_service: RetrievalPort,
         is_cancelled: Callable[[], bool] | None = None,
+        graph_loader: GraphLoader | None = None,
     ) -> None:
         self._job_store = job_store
         self._artifact_store = artifact_store
@@ -92,6 +93,7 @@ class GenerationExecutor:
         self._handlers = dict(handlers)
         self._search_service = search_service
         self._is_cancelled = is_cancelled or (lambda: False)
+        self._graph_loader = graph_loader
 
     def _save(self, job: GenerationJob) -> GenerationJob:
         self._job_store.update(job)
@@ -156,7 +158,9 @@ class GenerationExecutor:
             job = self._save(set_progress(job, 10, stage=_STAGE_RETRIEVING))
             try:
                 context = build_context(
-                    request=job.request, search_service=self._search_service
+                    request=job.request,
+                    search_service=self._search_service,
+                    graph_loader=self._graph_loader,
                 )
             except (UnsupportedScopeError, RetrievalError):
                 raise

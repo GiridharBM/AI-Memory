@@ -8,12 +8,16 @@ into domain-safe ``RetrievedChunk`` records. No new retrieval system.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Protocol
 
 from app.application.generation_errors import RetrievalError, UnsupportedScopeError
+from app.application.scope_resolution import resolve_sources_for_nodes
 from app.domain.generation import GenerationRequest
 from app.domain.generation_context import GenerationContext, RetrievedChunk
+from app.domain.knowledge_graph import KnowledgeGraph
 from app.domain.scopes import (
+    MemoryScope,
     MemoryScopeKind,
     ResolvedScope,
     UnsupportedMemoryScopeError,
@@ -59,6 +63,12 @@ class RetrievalPort(Protocol):
         filter: dict[str, object] | None = None,
         min_score: float = 0.0,
     ) -> list[SearchHit]: ...
+
+
+# Zero-argument supplier of the persisted knowledge graph for topic/node
+# scope resolution. Loading lives at the application boundary (the caller
+# injects it); this module only consumes the loaded graph read-only.
+GraphLoader = Callable[[], KnowledgeGraph]
 
 
 def _queries_for_request(request: GenerationRequest) -> list[str]:
@@ -162,12 +172,41 @@ def retrieve_for_request(
     return tuple(_to_chunk(hit) for hit in merged)
 
 
+def _resolve_topic_node_scope(
+    scope: MemoryScope, graph_loader: GraphLoader | None
+) -> ResolvedScope:
+    """Expand a TOPICS/NODES scope to source IDs via exact KG node lookup.
+
+    Unknown node IDs fail closed; nodes with no source contribute nothing
+    (possibly yielding zero sources, which P0 retrieves as zero hits —
+    never whole-corpus evidence).
+    """
+
+    if graph_loader is None:
+        raise UnsupportedScopeError(
+            "Topic/node scopes require a knowledge-graph loader; refusing to "
+            "fall back to unrestricted memory."
+        )
+    try:
+        graph = graph_loader()
+    except (UnsupportedScopeError, RetrievalError):
+        raise
+    except Exception as exc:
+        raise RetrievalError(f"Knowledge-graph loading failed: {exc}") from exc
+    node_ids = (
+        scope.topic_ids if scope.kind is MemoryScopeKind.TOPICS else scope.node_ids
+    )
+    sources = resolve_sources_for_nodes(graph, node_ids)
+    return ResolvedScope(restricted=True, source_ids=sources, node_ids=node_ids)
+
+
 def build_context(
     request: GenerationRequest,
     search_service: RetrievalPort,
     *,
     top_k: int = DEFAULT_TOP_K,
     max_hits: int = DEFAULT_MAX_HITS,
+    graph_loader: GraphLoader | None = None,
 ) -> GenerationContext:
     """Resolve scope, retrieve evidence, and bundle the handler input."""
 
@@ -175,5 +214,7 @@ def build_context(
         scope = resolve_memory_scope(request.memory_scope)
     except UnsupportedMemoryScopeError as exc:
         raise UnsupportedScopeError(str(exc)) from exc
+    if request.memory_scope.kind in (MemoryScopeKind.TOPICS, MemoryScopeKind.NODES):
+        scope = _resolve_topic_node_scope(request.memory_scope, graph_loader)
     hits = retrieve_for_request(request, scope, search_service, top_k=top_k, max_hits=max_hits)
     return GenerationContext(request=request, scope=scope, hits=hits, nodes=())
