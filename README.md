@@ -4,7 +4,7 @@
 
 **A local-first AI memory system that turns your notes, documents, and files into a searchable, connected knowledge base — retrieved and answered by a local LLM.**
 
-![Status](https://img.shields.io/badge/status-V1.1.0-success)
+![Status](https://img.shields.io/badge/status-V2.0_RC-success)
 ![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
 ![Local First](https://img.shields.io/badge/design-local--first%20%7C%20private-informational)
 
@@ -12,15 +12,53 @@
 
 ---
 
-## Current Release
+## Current Release Candidate
 
-**PAM V1.1.0** (tag `v1.1.0`) is the latest published release.
+**PAM V2.0** (release candidate — tag `v2.0.0` pending) builds on the V1.1.0
+foundation with an async **generation system**: scoped generation jobs
+(flashcards, quizzes, reports, PPTX presentations, AI-enriched mind maps,
+SDXL images) with persisted artifacts and evidence-set provenance, plus
+memory-scope selection (all/documents/topics/nodes) over the existing
+hybrid retrieval backend.
 
-V1.1 focuses on **reliability, source management, ingestion safety, CLI usability, and truthful status** — not on retrieval-quality improvements. The retrieval pipeline was intentionally frozen for V1.1 (see [Retrieval Status](#retrieval-status)).
+**Previous release:** **PAM V1.1.0** (tag `v1.1.0`) remains the latest
+*published* release until the V2.0 tag is created. V1.1 focused on
+**reliability, source management, ingestion safety, CLI usability, and
+truthful status** — not on retrieval-quality improvements. The retrieval
+pipeline stays frozen (see [Retrieval Status](#retrieval-status)).
 
-After the V1.1.0 release, the project continues with documentation and maintenance work. The V1.1.0 tag remains the published release; later commits are post-release documentation/maintenance and do not change the release.
+### V2 capabilities (verified)
 
-See [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md) for the current canonical status of the project.
+- **Generation jobs** — async `POST /generation` with progress, cancellation,
+  and DONE/FAILED/CANCELLED lifecycle (`GenerationExecutor`).
+- **Study material** — flashcards, multiple-choice quizzes, structured Markdown
+  reports, PPTX presentations, AI-enriched mind maps.
+- **SDXL image generation** — local SDXL (768×768 default; 512 fallback, 1024
+  opt-in) with prompt planning over retrieved evidence; validated on an
+  RTX 5060 Laptop GPU (8 GB).
+- **Memory scopes** — `all` / `documents` / `topics` / `nodes` restrict what
+  generation may use; `topics`/`nodes` resolve through the knowledge graph;
+  unknown scopes fail closed, never widening to whole-corpus retrieval.
+- **Artifacts & provenance** — versioned artifacts (inline or file-backed with
+  traversal-safe serving) and per-chunk evidence-set provenance in the GUI
+  Library.
+- **Multimodal ingestion** — images (OCR/vision/EXIF/diagrams), audio
+  transcription, video ingestion alongside the existing document pipeline.
+
+### Known V2 limitations
+
+- **SDXL requires a CUDA-enabled PyTorch build** (cu128+ for Blackwell GPUs).
+  CPU-only installs fail fast with a clear error instead of generating; no
+  silent fallback exists. See `requirements.txt` and `config/default.yaml`
+  (`image_generation`).
+- **`topics`/`nodes` scopes resolve each KG node to its single persisted
+  source** (last-writer-wins on shared labels); multi-source history is not
+  represented.
+- **`projects` scopes are representable but unsupported** and fail closed.
+- **SDXL renders weak/unreliable in-image text** (short words occasionally
+  legible); diagrams illustrate structure, not exact labels.
+- **V2.0 is unreleased** until the release commit and `v2.0.0` tag are created;
+  see [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md).
 
 ---
 

@@ -1,6 +1,6 @@
 # PAM Project Status
 
-> **Current version: PAM V1.1.0** (published release).
+> **Current version: PAM V2.0** (release candidate — tag `v2.0.0` pending).
 >
 > This is the current canonical status document. Historical phase and release
 > reports in [`docs/phases/`](./phases/) and [`docs/releases/`](./releases/)
@@ -14,23 +14,22 @@
 
 | | |
 |---|---|
-| **Version** | **V1.1.0** |
-| Tag | `v1.1.0` |
-| Release commit | `e5d9129` |
+| **Version** | **V2.0.0 (release candidate)** |
+| Tag | `v2.0.0` (pending — a stale experimental `v2.0.0` tag from early history must be replaced) |
+| Previous release | **V1.1.0** — tag `v1.1.0` → `e5d9129` (latest *published* release until V2.0 is tagged) |
 
-The commit after the release (`7aac60b`) is a documentation-organization change and
-does **not** change the V1.1.0 release tag. Subsequent commits are documentation /
-maintenance work; the V1.1.0 tag remains the published release reference.
-
-> Note: `pyproject.toml` now carries `version = "1.1.0"`, aligned with the V1.1.0
-> release/tag designation (alignment made in `14ceaae`). The package version and the
-> V1.1.0 Git tag are now consistent.
+> Note: `pyproject.toml` now carries `version = "2.0.0"`, aligned with the V2.0
+> release designation. The installed package version surfaces in the GUI System
+> page via `/system` (`pam_version`).
 
 ---
 
 ## Release State
 
 - **V1.1.0 published** — tag `v1.1.0` → `e5d9129`, pushed to `origin/main`.
+- **V2.0 release candidate** — generation system (P0/P1 scopes, V2-F mindmap,
+  V2-H SDXL images) implemented and tested on `main`, awaiting release commit
+  and `v2.0.0` tag (see `CHANGELOG.md` and `docs/releases/VERSION_2_0_0_FINAL_REPORT.md`).
 - **Retrieval frozen** — the retrieval pipeline was intentionally frozen for V1.1.
   Retrieval-improvement experiments remain experimental / deferred and are not part
   of the V1.1 production path.
@@ -56,6 +55,39 @@ Verified in the current implementation:
 - Secret-bearing source blocking (local `.env`/key/credential files blocked before
   processing).
 - Bounded QA timeout.
+
+---
+
+## V2.0 Capabilities (Release Candidate)
+
+Verified in the current implementation (full suite **2153 passed / 2
+pre-existing skips**; SDXL validated on RTX 5060 Laptop GPU):
+
+- Async generation jobs (`POST /generation`) with progress, cancellation, and
+  DONE/FAILED/CANCELLED lifecycle; job/artifact/provenance APIs and GUI
+  Library.
+- Study-material generation: flashcards, multiple-choice quizzes, structured
+  Markdown reports, PPTX presentations, AI-enriched mind maps.
+- SDXL image generation (768×768 default; 512 fallback, 1024 opt-in; standard
+  20-step and 4-step Turbo fast mode) with prompt planning over retrieved
+  evidence. Measured: 100% @768², ≤5.82 GB reserved VRAM, ~8–22 s/image.
+- Memory scopes: `all` / `documents` / `topics` / `nodes` restrict generation
+  evidence; topics/nodes resolve through the knowledge graph; unknown scopes
+  fail closed (P0/P1).
+- Versioned artifacts (inline or traversal-safe file-backed) with per-chunk
+  evidence-set provenance rendered in the GUI.
+- Multimodal ingestion: images (OCR/vision/EXIF/diagrams), audio
+  transcription, video ingestion.
+
+Known V2 limitations (see also Current Limitations):
+
+- SDXL requires a CUDA-enabled PyTorch build (cu128+ for Blackwell GPUs);
+  CPU-only installs fail fast with a clear error. `diffusers`/`accelerate`/
+  `Pillow` declared in `requirements.txt`; torch cu128 installed separately.
+- Topic/node scopes resolve each KG node to its single persisted source
+  (last-writer-wins); `projects` scopes fail closed (unsupported).
+- SDXL in-image text is weak/unreliable; diagrams illustrate structure.
+- `GenerationTask` `video` is declared but has no handler (rejected).
 
 ---
 
@@ -143,8 +175,8 @@ CLI (pam)
 - **Evaluation tooling aligned to v3.0** — `test_eval_dataset.py` and the eval tooling
   (`eval/scripts/run_eval.py`, `eval/scripts/ground_truth_audit.py`) have been reconciled
   to the current v3.0 dataset contract (contract tests pass).
-- **Packaging version** — `pyproject.toml` version is `1.1.0`, aligned with the V1.1.0
-  Git tag (see Current Release).
+- **Packaging version** — `pyproject.toml` version is `2.0.0`, aligned with the V2.0
+  release designation (see Current Release).
 
 Engineering debt is kept distinct from user-facing product defects.
 
@@ -183,11 +215,15 @@ measurements as a claim about a new run.
 
 Latest known verification snapshot (dated):
 
-- **1712 passed / 57 deselected / 0 failed** (full `pytest tests/` run)
+- **2153 passed / 2 pre-existing skips / 57 deselected** (full `pytest tests/` run)
 - The **57 deselected** are `integration`-marked and excluded from the default run.
-- **Ruff passes**; **`mypy app/` reports 0 production errors.**
-- The former CLI remove logging-isolation flake was **fixed** (`ea8a95b`).
+- The **2 skips** are platform-specific (Windows forbids URL-shaped directory names).
+- **Ruff passes**; **mypy reports only pre-existing `reranker.py` stub errors**.
+- **Frontend `tsc` + `oxlint` + production build pass.**
+- **SDXL GPU validation** — 55 measured runs + SHA-matched determinism smoke on
+  RTX 5060 Laptop GPU (8 GB); evidence lives outside the repo.
 - **Evaluation contract tests pass** — `test_eval_dataset.py` (v3.0 contract) = **32 passed**
+- The former CLI remove logging-isolation flake was **fixed** (`ea8a95b`).
 
 Remote GitHub CI was not independently verified from this environment; local
 CI-equivalent checks pass.
@@ -201,6 +237,11 @@ Verified open items:
 1. Vector-store / KG persistence not fully transactional across both stores.
 2. KG shared-node removal semantics.
 3. Retrieval threshold reconciliation (0.25 production vs experimental alternatives).
+4. Topic/node scopes resolve each KG node to its single persisted source
+   (last-writer-wins); multi-source history would need a KG identity redesign.
+5. `projects` scopes fail closed (grouping undecided).
+6. SDXL requires CUDA torch (CPU-only installs fail fast); in-image text is weak.
+7. `video` generation task declared but unimplemented (rejected at submit).
 
 ---
 
