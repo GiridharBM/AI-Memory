@@ -3,7 +3,15 @@
 All notable changes to Personal AI Memory are documented here. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [2.0.0] - Unreleased
+## [2.0.1] - Unreleased
+
+### Fixed
+- Fixed artifact content resolution for project-relative artifact references.
+- Fixed relative artifact-root resolution being dependent on the process working directory.
+- Preserved existing artifact-relative references.
+- Added regression coverage for project-relative, artifact-relative, missing, traversal, absolute-path, and CWD-independent resolution.
+
+## [2.0.0] - 2026-10-05
 
 V2.0 adds an async generation system on top of the V1.1 foundation: scoped
 generation jobs with persisted artifacts and evidence-set provenance, plus

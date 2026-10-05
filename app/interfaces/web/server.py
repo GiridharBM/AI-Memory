@@ -38,7 +38,7 @@ def _frontend_dist() -> Path | None:
 def create_app() -> FastAPI:
     app = FastAPI(
         title="PAM — Personal AI Memory",
-        version="2.0.0",
+        version="2.0.1",
         description=(
             "Local HTTP interface over the PAM CLI and application services. "
             "Read-mostly: it exposes existing PAM operations and does not "

@@ -428,3 +428,116 @@ class TestMindMapApi:
         body = client.get("/api/mindmap").json()
 
         assert body == {"available": True, "nodes": [], "edges": [], "root": None}
+
+
+# ── Artifact content_ref resolution ───────────────────────────────────
+
+
+class TestContentRefResolution:
+    """Project-relative handler refs must serve; artifact-relative refs keep working.
+
+    Regression for the live PPTX 404: handlers store project-relative refs
+    (e.g. ``data/artifacts/deck.pptx``) while ``_resolve_content_ref`` only
+    understood artifact-relative ones.
+    """
+
+    def _write_project_file(self, tmp_settings: Settings, ref: str, payload: bytes) -> None:
+        root = tmp_settings.paths.project_root
+        target = root / ref
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(payload)
+
+    def _store(
+        self, tmp_settings: Settings, content_ref: str
+    ) -> Artifact:
+        store = ArtifactStore(tmp_settings.paths.manifest_root / "artifacts.json")
+        artifact = Artifact.create(
+            kind=ArtifactKind.PPT,
+            title="Deck",
+            job_id="job-1",
+            request=_request(),
+            content_ref=content_ref,
+        )
+        store.create(artifact)
+        return artifact
+
+    def test_project_relative_ref_serves_file(
+        self, client: TestClient, tmp_settings: Settings
+    ) -> None:
+        payload = b"%PDF-fake-pptx-bytes"
+        self._write_project_file(tmp_settings, "data/artifacts/deck.pptx", payload)
+        artifact = self._store(tmp_settings, "data/artifacts/deck.pptx")
+
+        response = client.get(f"/api/artifacts/{artifact.artifact_id}/content")
+
+        assert response.status_code == 200
+        assert response.content == payload
+        assert "presentationml.presentation" in response.headers["content-type"]
+
+    def test_artifact_relative_ref_still_serves_file(
+        self, client: TestClient, tmp_settings: Settings
+    ) -> None:
+        payload = b"%PDF-fake-pptx-bytes"
+        root = tmp_settings.paths.artifact_root
+        root.mkdir(parents=True, exist_ok=True)
+        (root / "deck.pptx").write_bytes(payload)
+        artifact = self._store(tmp_settings, "deck.pptx")
+
+        response = client.get(f"/api/artifacts/{artifact.artifact_id}/content")
+
+        assert response.status_code == 200
+        assert response.content == payload
+
+    def test_missing_project_relative_ref_is_404(
+        self, client: TestClient, tmp_settings: Settings
+    ) -> None:
+        artifact = self._store(tmp_settings, "data/artifacts/gone.pptx")
+
+        assert (
+            client.get(f"/api/artifacts/{artifact.artifact_id}/content").status_code
+            == 404
+        )
+
+    def test_project_relative_traversal_is_404(
+        self, client: TestClient, tmp_settings: Settings
+    ) -> None:
+        artifact = self._store(tmp_settings, "data/artifacts/../../evil.pptx")
+
+        assert (
+            client.get(f"/api/artifacts/{artifact.artifact_id}/content").status_code
+            == 404
+        )
+
+    def test_relative_artifact_root_ignores_cwd(
+        self, client: TestClient, tmp_settings: Settings, tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        from app.interfaces.web.routes import artifacts as artifact_routes
+
+        elsewhere = tmp_path / "other-cwd"
+        elsewhere.mkdir()
+        monkeypatch.chdir(elsewhere)
+        settings = tmp_settings.model_copy(
+            update={
+                "paths": tmp_settings.paths.model_copy(
+                    update={"artifact_root": Path("data/artifacts")}
+                )
+            }
+        )
+        target = tmp_settings.paths.project_root / "data" / "artifacts" / "deck.pptx"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"%PDF-fake-pptx-bytes")
+
+        resolved = artifact_routes._resolve_content_ref(settings, "data/artifacts/deck.pptx")
+
+        assert resolved == target.resolve()
+
+    def test_absolute_ref_outside_roots_is_404(
+        self, client: TestClient, tmp_settings: Settings
+    ) -> None:
+        artifact = self._store(tmp_settings, "/etc/passwd")
+
+        assert (
+            client.get(f"/api/artifacts/{artifact.artifact_id}/content").status_code
+            == 404
+        )

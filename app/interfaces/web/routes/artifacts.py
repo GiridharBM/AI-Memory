@@ -1,8 +1,9 @@
 """Artifact routes: metadata, versions, provenance, and safe content serving.
 
 Clients address artifacts by id only — filesystem paths are never accepted.
-Binary content resolves against the configured artifact root with the same
-``resolve()`` + ``is_relative_to()`` containment the SPA fallback uses.
+Binary content resolves against the configured artifact root first, then the
+project root (handler-generated refs are project-relative), each with the
+same ``resolve()`` + ``is_relative_to()`` containment the SPA fallback uses.
 """
 
 from __future__ import annotations
@@ -127,18 +128,32 @@ def get_artifact_provenance(artifact_id: str) -> dict[str, Any]:
 
 
 def _resolve_content_ref(settings: Settings, content_ref: str) -> Path | None:
-    """Resolve a stored ref inside the artifact root, else ``None``."""
+    """Resolve a stored ref inside the artifact or project root, else ``None``.
 
-    candidate = (settings.paths.artifact_root / content_ref).resolve()
+    Artifact-root-relative refs keep resolving exactly as before; handler
+    generated project-relative refs (e.g. ``data/artifacts/deck.pptx``) fall
+    through to the project root. A relative ``artifact_root`` is anchored at
+    the project root first so resolution never depends on the launch CWD.
+    Absolute and escaping refs resolve outside both roots and return ``None``.
+    """
+
     try:
-        root = settings.paths.artifact_root.resolve()
+        project_root = settings.paths.project_root.resolve()
     except OSError:
         return None
-    if not candidate.is_relative_to(root):
+    configured = settings.paths.artifact_root
+    artifact_root = (
+        configured if configured.is_absolute() else project_root / configured
+    )
+    try:
+        artifact_root = artifact_root.resolve()
+    except OSError:
         return None
-    if not candidate.is_file():
-        return None
-    return candidate
+    for base in (artifact_root, project_root):
+        candidate = (base / content_ref).resolve()
+        if candidate.is_relative_to(base) and candidate.is_file():
+            return candidate
+    return None
 
 
 @router.get("/artifacts/{artifact_id}/content")
