@@ -16,3 +16,10 @@ odfpy>=1.4.0
 striprtf>=0.0.26
 xlrd>=2.0.0
 olefile>=0.47
+# V2-H local image generation (SDXL via Diffusers). NOTE: diffusion needs a
+# CUDA-enabled torch build (cu128+ for Blackwell GPUs); install torch
+# separately per https://pytorch.org/get-started/locally/ on the image
+# machine. CI and non-GPU paths use a stub runtime and never import torch.
+diffusers>=0.35.0
+accelerate>=1.0.0
+Pillow>=10.0.0

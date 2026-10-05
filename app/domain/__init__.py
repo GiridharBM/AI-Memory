@@ -38,6 +38,7 @@ from app.domain.generation_context import GenerationContext, RetrievedChunk
 from app.domain.generation_documents import Presentation, Report, ReportSection, Slide
 from app.domain.generation_result import GenerationResult
 from app.domain.generation_sets import FlashcardSet, QuizSet
+from app.domain.image import ImagePlan, ImageSpec
 from app.domain.jobs import (
     GenerationJob,
     GenerationJobStatus,
@@ -92,6 +93,8 @@ __all__ = [
     "GenerationResult",
     "GenerationTaskType",
     "GraphBuildResult",
+    "ImagePlan",
+    "ImageSpec",
     "ImportantEntity",
     "InvalidJobTransitionError",
     "KeyConcept",

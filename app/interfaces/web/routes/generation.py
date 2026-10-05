@@ -19,6 +19,7 @@ from fastapi import APIRouter, HTTPException
 from app.application.flashcard_handler import FlashcardTaskHandler
 from app.application.generation_errors import RetrievalError, UnsupportedTaskError
 from app.application.generation_executor import GenerationExecutor
+from app.application.image_handler import ImageTaskHandler
 from app.application.mindmap_handler import MindMapEnrichTaskHandler
 from app.application.presentation_handler import PresentationTaskHandler
 from app.application.quiz_handler import QuizTaskHandler
@@ -34,6 +35,7 @@ from app.domain.jobs import (
 )
 from app.domain.knowledge_graph import KnowledgeGraph
 from app.infrastructure.artifacts import ArtifactStore, ProvenanceStore
+from app.infrastructure.image_runtime import DiffusersImageRuntime
 from app.infrastructure.jobs import GenerationJobStore
 from app.infrastructure.llm import OllamaClient, OllamaRequest
 from app.infrastructure.search import SearchService
@@ -139,6 +141,13 @@ def _build_executor(
             project_root=settings.paths.project_root,
         ),
         MindMapEnrichTaskHandler(generate_json=generate),
+        ImageTaskHandler(
+            generate_json=generate,
+            image_runtime=DiffusersImageRuntime(),
+            image_config=settings.image_generation,
+            artifact_root=settings.paths.artifact_root,
+            project_root=settings.paths.project_root,
+        ),
     ):
         handlers[handler.task_type] = handler
     return GenerationExecutor(

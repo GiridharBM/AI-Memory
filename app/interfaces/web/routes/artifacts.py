@@ -23,6 +23,13 @@ _PPTX_MEDIA_TYPE = (
     "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 )
 
+_EXTENSION_MEDIA_TYPES = {
+    ".pptx": _PPTX_MEDIA_TYPE,
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+}
+
 
 def _stores(settings: Settings) -> tuple[ArtifactStore, ProvenanceStore]:
     """Build the artifact and provenance stores under the manifest root."""
@@ -161,8 +168,8 @@ def get_artifact_content(artifact_id: str) -> Any:
     resolved = _resolve_content_ref(settings, artifact.content_ref)
     if resolved is None:
         raise HTTPException(status_code=404, detail="Artifact content not found.")
-    media_type = (
-        _PPTX_MEDIA_TYPE if resolved.suffix.lower() == ".pptx" else "application/octet-stream"
+    media_type = _EXTENSION_MEDIA_TYPES.get(
+        resolved.suffix.lower(), "application/octet-stream"
     )
     return FileResponse(
         path=resolved, media_type=media_type, filename=f"{artifact.title}{resolved.suffix}"

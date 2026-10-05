@@ -470,6 +470,30 @@ class QaSettings(BaseModel):
     timeout_seconds: int = Field(default=120, ge=1)
 
 
+class ImageGenerationSettings(BaseModel):
+    """Settings for V2-H local image generation (SDXL via Diffusers).
+
+    Model identifiers are Hugging Face repos with pinned revisions so
+    generations stay reproducible. The defaults are the V2-G benchmark
+    winners on the 8 GB RTX 5060 gate. NOTE: diffusion requires a
+    CUDA-enabled torch build (cu128+ for Blackwell); the default
+    dependency set ships CPU torch, so image generation fails fast with
+    a clear error until a CUDA torch is installed on the image machine.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    model_id_standard: str = "stabilityai/stable-diffusion-xl-base-1.0"
+    model_revision_standard: str = "462165984030"
+    model_id_fast: str = "stabilityai/sdxl-turbo"
+    model_revision_fast: str = "71153311d3db"
+    default_width: int = Field(default=768, ge=1)
+    default_height: int = Field(default=768, ge=1)
+    default_steps_standard: int = Field(default=20, ge=1)
+    default_steps_fast: int = Field(default=4, ge=1)
+    max_output_bytes: int = Field(default=25_000_000, ge=1024)
+
+
 class ChunkingSettings(BaseModel):
     """Settings for the semantic chunker (P3-105, P3-205).
 
@@ -534,6 +558,7 @@ class Settings(BaseSettings):
     answerability: AnswerabilitySettings = Field(default_factory=AnswerabilitySettings)
     qa: QaSettings = Field(default_factory=QaSettings)
     chunking: ChunkingSettings = Field(default_factory=ChunkingSettings)
+    image_generation: ImageGenerationSettings = Field(default_factory=ImageGenerationSettings)
 
 
 def load_settings(

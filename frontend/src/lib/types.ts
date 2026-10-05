@@ -278,7 +278,7 @@ export interface IngestResponse {
   message?: string
 }
 
-export type GenerationTask = 'flashcards' | 'quiz' | 'report' | 'ppt'
+export type GenerationTask = 'flashcards' | 'quiz' | 'report' | 'ppt' | 'image'
 
 export type GenerationJobStatus =
   | 'pending'

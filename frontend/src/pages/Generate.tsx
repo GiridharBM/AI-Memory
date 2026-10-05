@@ -16,6 +16,7 @@ const TASKS: { value: GenerateTaskValue; label: string }[] = [
   { value: 'report', label: 'Report' },
   { value: 'ppt', label: 'Presentation' },
   { value: 'mindmap_enrich', label: 'AI Mind Map' },
+  { value: 'image', label: 'Image' },
 ]
 
 const inputClass =
@@ -140,6 +141,10 @@ export function Generate() {
   const [sectionCount, setSectionCount] = useState(5)
   const [slideCount, setSlideCount] = useState(5)
   const [nodeLimit, setNodeLimit] = useState(20)
+  const [imageMode, setImageMode] = useState('standard')
+  const [imageSize, setImageSize] = useState('768x768')
+  const [imageSteps, setImageSteps] = useState(20)
+  const [seed, setSeed] = useState(0)
   const [detailLevel, setDetailLevel] = useState('standard')
   const [speakerNotes, setSpeakerNotes] = useState(true)
   const [query, setQuery] = useState('')
@@ -166,6 +171,14 @@ export function Generate() {
       if (title.trim()) config.title = title.trim()
       config.node_limit = nodeLimit
       config.detail = detailLevel
+    } else if (task === 'image') {
+      if (title.trim()) config.title = title.trim()
+      config.mode = imageMode
+      const [imageWidth, imageHeight] = imageSize.split('x').map(Number)
+      config.width = imageWidth
+      config.height = imageHeight
+      config.steps = imageSteps
+      config.seed = seed
     } else {
       if (title.trim()) config.title = title.trim()
       config.slide_count = slideCount
@@ -335,6 +348,40 @@ export function Generate() {
                   />
                 </>
               )}
+              {task === 'image' && (
+                <>
+                  <TextField label="Title (optional)" value={title} onChange={setTitle} />
+                  <SelectField
+                    label="Mode"
+                    value={imageMode}
+                    options={['standard', 'fast']}
+                    onChange={(value) => {
+                      setImageMode(value)
+                      setImageSteps(value === 'fast' ? 4 : 20)
+                    }}
+                  />
+                  <SelectField
+                    label="Size"
+                    value={imageSize}
+                    options={['512x512', '768x768', '1024x1024']}
+                    onChange={setImageSize}
+                  />
+                  <NumberField
+                    label="Steps"
+                    value={imageSteps}
+                    onChange={setImageSteps}
+                    min={1}
+                    max={30}
+                  />
+                  <NumberField
+                    label="Seed (0 = random)"
+                    value={seed}
+                    onChange={setSeed}
+                    min={0}
+                    max={2147483647}
+                  />
+                </>
+              )}
               {task === 'report' && (
                 <NumberField
                   label="Sections"
@@ -489,6 +536,12 @@ export function ArtifactView({
       </div>
       {artifact.kind === 'mindmap' && artifact.content ? (
         <MindMapArtifactContent content={artifact.content} />
+      ) : artifact.kind === 'image' && artifact.content_ref ? (
+        <img
+          src={api.artifactContentUrl(artifact.artifact_id)}
+          alt={artifact.title}
+          className="max-h-96 w-auto rounded-md border border-border"
+        />
       ) : artifact.content ? (
         <pre className="overflow-x-auto rounded-md border border-border bg-bg px-4 py-3 font-mono text-xs whitespace-pre-wrap text-text">
           {artifact.content}
