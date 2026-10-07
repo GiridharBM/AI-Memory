@@ -64,6 +64,17 @@ from app.domain.knowledge_graph import (
     KnowledgeNode,
     NodeType,
 )
+from app.domain.memory import (
+    CandidateStatus,
+    Memory,
+    MemoryCandidate,
+    MemoryCategory,
+    MemoryGrounding,
+    MemoryReview,
+    MemorySource,
+    MemoryStatus,
+    ReviewDecision,
+)
 from app.domain.mindmap import EnrichedMindMap, EnrichedMindMapEdge, EnrichedMindMapNode
 from app.domain.notes import ObsidianNote
 from app.domain.scopes import (
@@ -79,6 +90,7 @@ from app.domain.vector_store import SearchResult, VectorEntry
 __all__ = [
     "Artifact",
     "ArtifactKind",
+    "CandidateStatus",
     "ConfigValue",
     "Conversation",
     "ConversationStatus",
@@ -113,8 +125,15 @@ __all__ = [
     "KnowledgeEdge",
     "KnowledgeGraph",
     "KnowledgeNode",
+    "Memory",
+    "MemoryCandidate",
+    "MemoryCategory",
+    "MemoryGrounding",
+    "MemoryReview",
     "MemoryScope",
     "MemoryScopeKind",
+    "MemorySource",
+    "MemoryStatus",
     "Message",
     "MessageRole",
     "NodeType",
@@ -131,6 +150,7 @@ __all__ = [
     "ReportSection",
     "ResolvedScope",
     "RetrievedChunk",
+    "ReviewDecision",
     "SearchResult",
     "Slide",
     "SourceDocument",
