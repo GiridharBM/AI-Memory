@@ -14,6 +14,11 @@ import type {
   AskResponse,
   CapabilitiesResponse,
   ConfigResponse,
+  Conversation,
+  ConversationAskResponse,
+  ConversationMessage,
+  ConversationMessagesResponse,
+  ConversationsResponse,
   DiagnosticsResponse,
   EvaluationResponse,
   GenerationJob,
@@ -92,6 +97,21 @@ export const api = {
   }) => post<SearchResponse>('/search', body),
   ask: (body: { question: string; top_k?: number; min_score?: number }) =>
     post<AskResponse>('/ask', body),
+  createConversation: (body: { title?: string }) =>
+    post<Conversation>('/conversations', body),
+  listConversations: (limit = 50, offset = 0) =>
+    request<ConversationsResponse>(`/conversations?limit=${limit}&offset=${offset}`),
+  getConversation: (id: string) => request<Conversation>(`/conversations/${id}`),
+  appendMessage: (id: string, body: { role: 'user'; content: string }) =>
+    post<ConversationMessage>(`/conversations/${id}/messages`, body),
+  listMessages: (id: string, limit = 50, offset = 0) =>
+    request<ConversationMessagesResponse>(
+      `/conversations/${id}/messages?limit=${limit}&offset=${offset}`,
+    ),
+  archiveConversation: (id: string) =>
+    post<Conversation>(`/conversations/${id}/archive`, {}),
+  askInConversation: (id: string, body: { question: string; top_k?: number }) =>
+    post<ConversationAskResponse>(`/conversations/${id}/ask`, body),
   ingest: (form: FormData) => request<IngestResponse>('/ingest', { method: 'POST', body: form }),
   createGeneration: (body: {
     task_type: GenerationTask

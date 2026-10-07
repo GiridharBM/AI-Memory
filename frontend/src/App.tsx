@@ -7,6 +7,7 @@ import { useRoute } from './lib/router'
 import { Dashboard } from './pages/Dashboard'
 import { Ask } from './pages/Ask'
 import { Search } from './pages/Search'
+import { Conversations } from './pages/Conversations'
 import { Memories } from './pages/Memories'
 import { Ingest } from './pages/Ingest'
 import { Generate } from './pages/Generate'
@@ -19,6 +20,7 @@ const TITLES: Record<string, string> = {
   dashboard: 'Dashboard',
   ask: 'Ask PAM',
   search: 'Search',
+  conversations: 'Conversations',
   memories: 'Memories',
   ingest: 'Add Knowledge',
   generate: 'Generate',
@@ -100,6 +102,8 @@ function Page({ section }: { section: string }) {
       return <Ask />
     case 'search':
       return <Search />
+    case 'conversations':
+      return <Conversations />
     case 'memories':
       return <Memories />
     case 'ingest':

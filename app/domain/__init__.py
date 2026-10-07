@@ -15,6 +15,14 @@ from app.domain.artifacts import (
     ProvenanceRole,
     note_to_artifact,
 )
+from app.domain.conversation import (
+    Conversation,
+    ConversationStatus,
+    EvidenceCitation,
+    EvidenceSnapshot,
+    Message,
+    MessageRole,
+)
 from app.domain.documents import (
     DocumentIngestionError,
     DocumentIngestionResult,
@@ -72,6 +80,8 @@ __all__ = [
     "Artifact",
     "ArtifactKind",
     "ConfigValue",
+    "Conversation",
+    "ConversationStatus",
     "Definition",
     "DocumentAnalysis",
     "DocumentChunk",
@@ -85,6 +95,8 @@ __all__ = [
     "EnrichedMindMapNode",
     "Entity",
     "EntityMetadata",
+    "EvidenceCitation",
+    "EvidenceSnapshot",
     "FlashcardSet",
     "GenerationContext",
     "GenerationJob",
@@ -103,6 +115,8 @@ __all__ = [
     "KnowledgeNode",
     "MemoryScope",
     "MemoryScopeKind",
+    "Message",
+    "MessageRole",
     "NodeType",
     "ObsidianNote",
     "Presentation",

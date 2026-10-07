@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
+from app.domain.conversation import Message
+
+MAX_HISTORY_CHARS = 2000
+
 QA_SYSTEM_PROMPT = """
 You are a grounded question-answering assistant for a local personal knowledge base.
 
@@ -27,15 +33,43 @@ Rules:
 """.strip()
 
 
-def build_qa_user_prompt(question: str, context: str) -> str:
-    """Build the user prompt combining the question with retrieved context."""
+def build_qa_user_prompt(question: str, context: str, history: str = "") -> str:
+    """Build the user prompt combining the question with retrieved context.
+
+    An empty ``history`` block reproduces the historical prompt byte for byte;
+    conversation history is appended as a clearly delimited section only when
+    present, so it can never be mistaken for retrieved evidence.
+    """
 
     if not context.strip():
         context = "No relevant context was retrieved from the knowledge base."
 
-    return f"""
+    prompt = f"""
 Question: {question}
 
 Retrieved context:
 {context}
 """.strip()
+    if history.strip():
+        prompt += f"""
+
+Conversation history (recent turns for context only; not retrieved evidence,
+and never a substitute for cited sources):
+{history.strip()}"""
+    return prompt
+
+
+def build_history_block(
+    messages: Sequence[Message], *, max_chars: int = MAX_HISTORY_CHARS
+) -> str:
+    """Render recent messages as a delimited history block, newest-bounded."""
+
+    lines: list[str] = []
+    used = 0
+    for message in reversed(list(messages)):
+        line = f"[{message.role.value}] {' '.join(message.content.split())}"
+        if used + len(line) > max_chars and lines:
+            break
+        lines.append(line)
+        used += len(line)
+    return "\n".join(reversed(lines))

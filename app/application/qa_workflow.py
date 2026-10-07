@@ -31,6 +31,7 @@ from dataclasses import dataclass, field
 from app.application.system_facts import SystemFactsRouter, SystemFactsService
 from app.core.config import Settings
 from app.core.logging import get_logger
+from app.domain.conversation import Message
 from app.infrastructure.answerability import AnswerabilityGate, AnswerabilityResult
 from app.infrastructure.llm import (
     OllamaClient,
@@ -41,7 +42,7 @@ from app.infrastructure.llm import (
 )
 from app.infrastructure.reranker import CrossEncoderReranker, RerankerConfig
 from app.infrastructure.search import SearchHit, SearchService
-from app.prompts.qa import QA_SYSTEM_PROMPT, build_qa_user_prompt
+from app.prompts.qa import QA_SYSTEM_PROMPT, build_history_block, build_qa_user_prompt
 
 logger = get_logger(__name__)
 
@@ -462,6 +463,7 @@ class QAWorkflow:
         top_k: int = 5,
         min_score: float = 0.0,
         filter: dict[str, object] | None = None,
+        history: Sequence[Message] = (),
     ) -> QAAnswer:
         """Answer ``question`` using the top retrieved sources."""
 
@@ -535,7 +537,9 @@ class QAWorkflow:
                 return _abstention_answer(question, str(evidence_result.reason))
 
         context = build_context(hits)
-        prompt = build_qa_user_prompt(question, context)
+        prompt = build_qa_user_prompt(
+            question, context, history=build_history_block(history)
+        )
         start_time = time.perf_counter()
         request = OllamaRequest(
             system_prompt=QA_SYSTEM_PROMPT,

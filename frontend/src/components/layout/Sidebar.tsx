@@ -17,6 +17,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { label: 'Dashboard', path: '/dashboard', icon: '▦' },
       { label: 'Ask PAM', path: '/ask', icon: '◈' },
+      { label: 'Conversations', path: '/conversations', icon: '◫' },
       { label: 'Search', path: '/search', icon: '⌕' },
       { label: 'Memories', path: '/memories', icon: '❑' },
       { label: 'Ingest', path: '/ingest', icon: '↧' },

@@ -305,6 +305,61 @@ export interface JobsResponse {
   total: number
 }
 
+export type ConversationStatus = 'active' | 'archived'
+
+export type MessageRole = 'user' | 'assistant' | 'system'
+
+export interface EvidenceCitation {
+  number: number
+  source: string
+  chunk_id: string | null
+  chunk_index: number | null
+}
+
+export interface EvidenceSnapshot {
+  model: string
+  outcome: string
+  citations: EvidenceCitation[]
+  error: string | null
+}
+
+export interface Conversation {
+  id: string
+  title: string
+  created_at: string
+  updated_at: string
+  status: ConversationStatus
+  message_count: number
+  metadata: Record<string, string>
+}
+
+export interface ConversationMessage {
+  id: string
+  conversation_id: string
+  role: MessageRole
+  content: string
+  created_at: string
+  seq: number
+  model: string | null
+  evidence: EvidenceSnapshot | null
+  metadata: Record<string, string>
+}
+
+export interface ConversationsResponse {
+  conversations: Conversation[]
+  total: number
+}
+
+export interface ConversationMessagesResponse {
+  messages: ConversationMessage[]
+  total: number
+}
+
+export interface ConversationAskResponse {
+  user_message: ConversationMessage
+  assistant_message: ConversationMessage
+}
+
 export interface ArtifactSummary {
   artifact_id: string
   logical_id: string
