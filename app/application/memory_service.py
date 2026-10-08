@@ -333,3 +333,25 @@ class MemoryService:
             self._memories.save(current)
             self._memories.save(retired)
             return current
+
+    def supersede_latest(
+        self,
+        logical_id: str,
+        text: str,
+        *,
+        category: MemoryCategory,
+        confidence: float,
+    ) -> Memory:
+        """Supersede reusing the latest version's source (review-UI path)."""
+
+        versions = self._memories.versions(logical_id)
+        if not versions:
+            raise UnknownMemoryError(f"Unknown logical memory: {logical_id}.")
+        latest = max(versions, key=lambda item: item.version)
+        return self.supersede(
+            logical_id,
+            text,
+            category=category,
+            confidence=confidence,
+            source=latest.source,
+        )

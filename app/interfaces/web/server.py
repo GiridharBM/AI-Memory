@@ -28,6 +28,7 @@ from app.interfaces.web.routes import (
     generation,
     interact,
     knowledge,
+    memories,
     mindmap,
     system,
 )
@@ -73,6 +74,7 @@ def create_app() -> FastAPI:
     app.include_router(artifacts.router, prefix=API_PREFIX)
     app.include_router(mindmap.router, prefix=API_PREFIX)
     app.include_router(conversations.router, prefix=API_PREFIX)
+    app.include_router(memories.router, prefix=API_PREFIX)
 
     @app.get(f"{API_PREFIX}/health", tags=["system"])
     def health() -> JSONResponse:

@@ -8,10 +8,12 @@
 
 import type {
   ActivityResponse,
+  ApproveCandidateResponse,
   ArtifactSummary,
   ArtifactVersion,
   ArtifactsResponse,
   AskResponse,
+  CandidateListResponse,
   CapabilitiesResponse,
   ConfigResponse,
   Conversation,
@@ -26,6 +28,11 @@ import type {
   HealthResponse,
   IngestResponse,
   JobsResponse,
+  MemoryCandidate,
+  MemoryCategory,
+  MemoryListResponse,
+  MemoryProvenanceResponse,
+  MemoryRecord,
   MindMapResponse,
   ProvenanceResponse,
   SearchResponse,
@@ -112,6 +119,31 @@ export const api = {
     post<Conversation>(`/conversations/${id}/archive`, {}),
   askInConversation: (id: string, body: { question: string; top_k?: number }) =>
     post<ConversationAskResponse>(`/conversations/${id}/ask`, body),
+  extractMemories: (conversationId: string) =>
+    post<CandidateListResponse>('/memories/extract', { conversation_id: conversationId }),
+  listCandidates: (limit = 50, offset = 0) =>
+    request<CandidateListResponse>(`/memories/candidates?limit=${limit}&offset=${offset}`),
+  getCandidate: (id: string) => request<MemoryCandidate>(`/memories/candidates/${id}`),
+  approveCandidate: (id: string, body: { edited_text?: string }) =>
+    post<ApproveCandidateResponse>(`/memories/candidates/${id}/approve`, body),
+  rejectCandidate: (id: string, body: { reason: string }) =>
+    post<MemoryCandidate>(`/memories/candidates/${id}/reject`, body),
+  editCandidate: (id: string, body: { edited_text: string }) =>
+    post<MemoryCandidate>(`/memories/candidates/${id}/edit`, body),
+  listMemories: (limit = 50, offset = 0, logicalId?: string) => {
+    const params = new URLSearchParams()
+    params.set('limit', String(limit))
+    params.set('offset', String(offset))
+    if (logicalId !== undefined) params.set('logical_id', logicalId)
+    return request<MemoryListResponse>(`/memories?${params.toString()}`)
+  },
+  getMemory: (id: string) => request<MemoryRecord>(`/memories/${id}`),
+  supersedeMemory: (
+    logicalId: string,
+    body: { text: string; category: MemoryCategory; confidence: number },
+  ) => post<MemoryRecord>(`/memories/${logicalId}/supersede`, body),
+  memoryProvenance: (id: string) =>
+    request<MemoryProvenanceResponse>(`/memories/${id}/provenance`),
   ingest: (form: FormData) => request<IngestResponse>('/ingest', { method: 'POST', body: form }),
   createGeneration: (body: {
     task_type: GenerationTask

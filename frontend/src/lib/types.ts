@@ -360,6 +360,100 @@ export interface ConversationAskResponse {
   assistant_message: ConversationMessage
 }
 
+export type MemoryCategory =
+  | 'fact'
+  | 'preference'
+  | 'goal'
+  | 'decision'
+  | 'constraint'
+  | 'project'
+  | 'correction'
+
+export type CandidateStatus = 'pending' | 'approved' | 'rejected' | 'superseded'
+
+export type MemoryStatus = 'active' | 'superseded'
+
+export interface MemoryGrounding {
+  conversation_id: string
+  message_id: string
+  seq: number
+  quoted_text: string
+}
+
+export interface MemoryReview {
+  decision: 'approved' | 'rejected'
+  reviewed_at: string
+  reason: string | null
+  edited: boolean
+  edited_text: string | null
+}
+
+export interface MemorySource {
+  conversation_id: string
+  message_id: string
+  seq: number
+  grounding: MemoryGrounding
+  evidence: EvidenceSnapshot | null
+}
+
+export interface MemoryCandidate {
+  id: string
+  text: string
+  category: MemoryCategory
+  confidence: number
+  conversation_id: string
+  message_id: string
+  seq: number
+  extracted_at: string
+  grounding: MemoryGrounding
+  evidence: EvidenceSnapshot | null
+  status: CandidateStatus
+  review: MemoryReview | null
+  edited_text: string | null
+  supersedes_id: string | null
+}
+
+export interface MemoryRecord {
+  id: string
+  logical_id: string
+  version: number
+  text: string
+  category: MemoryCategory
+  confidence_at_approval: number
+  source: MemorySource
+  approved_at: string
+  status: MemoryStatus
+  supersedes_id: string | null
+}
+
+export interface CandidateListResponse {
+  candidates: MemoryCandidate[]
+  total: number
+}
+
+export interface MemoryListResponse {
+  memories: MemoryRecord[]
+  total: number
+}
+
+export interface ApproveCandidateResponse {
+  memory: MemoryRecord
+  candidate: MemoryCandidate
+}
+
+export interface MemoryProvenanceResponse {
+  memory_id: string
+  memory: MemoryRecord
+  source: {
+    conversation_id: string
+    message_id: string
+    seq: number
+    quoted_text: string
+    evidence: EvidenceSnapshot | null
+  }
+  conversation: { id: string; title: string; status: string } | null
+}
+
 export interface ArtifactSummary {
   artifact_id: string
   logical_id: string

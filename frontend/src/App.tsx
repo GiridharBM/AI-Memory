@@ -13,6 +13,7 @@ import { Ingest } from './pages/Ingest'
 import { Generate } from './pages/Generate'
 import { Library } from './pages/Library'
 import { MindMap } from './pages/MindMap'
+import { MemoryReview } from './pages/MemoryReview'
 import { Activity, Configuration, Evaluation, Retrieval } from './pages/Intelligence'
 import { Diagnostics, Storage } from './pages/System'
 
@@ -22,6 +23,7 @@ const TITLES: Record<string, string> = {
   search: 'Search',
   conversations: 'Conversations',
   memories: 'Memories',
+  'memory-review': 'Memory Review',
   ingest: 'Add Knowledge',
   generate: 'Generate',
   library: 'Library',
@@ -106,6 +108,8 @@ function Page({ section }: { section: string }) {
       return <Conversations />
     case 'memories':
       return <Memories />
+    case 'memory-review':
+      return <MemoryReview />
     case 'ingest':
       return <Ingest />
     case 'generate':
