@@ -2,6 +2,10 @@ import { useState } from 'react'
 
 import { PageHeader } from '../components/dashboard/MetricCard'
 import { AsyncBoundary, Card, CardHeader, EmptyState } from '../components/common/Card'
+import { FlashcardDeck } from '../components/study/FlashcardDeck'
+import { MindMapCanvas } from '../components/study/MindMapCanvas'
+import { QuizRunner } from '../components/study/QuizRunner'
+import { parseFlashcards, parseQuiz } from '../components/study/study'
 import { ApiError, api } from '../lib/api'
 import { useApi } from '../lib/hooks'
 import { useJob } from '../lib/jobs'
@@ -132,6 +136,7 @@ function CheckField({
 export function Generate() {
   const [task, setTask] = useState<GenerateTaskValue>('flashcards')
   const [scopeKind, setScopeKind] = useState<'all' | 'documents'>('all')
+  const [showAdvancedScope, setShowAdvancedScope] = useState(false)
   const [sources, setSources] = useState('')
   const [count, setCount] = useState(5)
   const [difficulty, setDifficulty] = useState('intermediate')
@@ -254,37 +259,73 @@ export function Generate() {
             </div>
 
             <div>
-              <span className={labelClass}>Memory scope</span>
-              <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    ['all', 'All memory'],
-                    ['documents', 'Documents'],
-                  ] as const
-                ).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setScopeKind(value)}
-                    aria-pressed={scopeKind === value}
-                    className={`rounded-md border px-3.5 py-2 text-[13px] font-medium transition-colors ${
-                      scopeKind === value
-                        ? 'border-accent bg-accent-dim text-accent-soft'
-                        : 'border-border text-text-muted hover:border-accent/50 hover:text-text'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {scopeKind === 'documents' ? (
-                <div className="mt-3">
-                  <TextField
-                    label="Source identifiers (comma-separated)"
-                    value={sources}
-                    onChange={setSources}
-                    placeholder="a.md, b.md"
-                  />
+              <TextField
+                label="Topic or query"
+                value={query}
+                onChange={setQuery}
+                placeholder="What do you want PAM to generate this about?"
+              />
+              <p className="mt-1.5 text-xs text-text-faint">
+                The retrieval focus — e.g. Machine Learning. PAM searches its
+                memory for this topic; it is not a filename or source ID.
+              </p>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (showAdvancedScope) {
+                    setScopeKind('all')
+                    setSources('')
+                  }
+                  setShowAdvancedScope((value) => !value)
+                }}
+                aria-expanded={showAdvancedScope}
+                className="text-[13px] text-text-muted transition-colors hover:text-text"
+              >
+                {showAdvancedScope ? '▾' : '▸'} Advanced scope
+              </button>
+              {showAdvancedScope ? (
+                <div className="mt-3 rounded-md border border-border px-4 py-4">
+                  <span className={labelClass}>Memory scope</span>
+                  <div className="flex flex-wrap gap-2">
+                    {(
+                      [
+                        ['all', 'All memory'],
+                        ['documents', 'Documents'],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setScopeKind(value)}
+                        aria-pressed={scopeKind === value}
+                        className={`rounded-md border px-3.5 py-2 text-[13px] font-medium transition-colors ${
+                          scopeKind === value
+                            ? 'border-accent bg-accent-dim text-accent-soft'
+                            : 'border-border text-text-muted hover:border-accent/50 hover:text-text'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {scopeKind === 'documents' ? (
+                    <div className="mt-3">
+                      <TextField
+                        label="Source identifiers (comma-separated)"
+                        value={sources}
+                        onChange={setSources}
+                        placeholder="a.md, b.md"
+                      />
+                      <p className="mt-1.5 text-xs text-text-faint">
+                        Vector source values from Ingest/Library — not topics.
+                        Unknown identifiers match nothing; PAM never falls back
+                        to the whole corpus.
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -411,13 +452,6 @@ export function Generate() {
               )}
             </div>
 
-            <TextField
-              label="Topic or query (optional)"
-              value={query}
-              onChange={setQuery}
-              placeholder="e.g. retrieval pipelines"
-            />
-
             {submitError ? (
               <p role="alert" className="text-[13px] text-danger">
                 {submitError}
@@ -543,9 +577,7 @@ export function ArtifactView({
           className="max-h-96 w-auto rounded-md border border-border"
         />
       ) : artifact.content ? (
-        <pre className="overflow-x-auto rounded-md border border-border bg-bg px-4 py-3 font-mono text-xs whitespace-pre-wrap text-text">
-          {artifact.content}
-        </pre>
+        <StudyArtifactContent kind={artifact.kind} content={artifact.content} />
       ) : null}
       {artifact.content_ref ? (
         <a
@@ -565,6 +597,21 @@ export function ArtifactView({
         </button>
       ) : null}
     </div>
+  )
+}
+
+function StudyArtifactContent({ kind, content }: { kind: string; content: string }) {
+  if (kind === 'flashcards') {
+    const cards = parseFlashcards(content)
+    if (cards !== null) return <FlashcardDeck cards={cards} />
+  } else if (kind === 'quiz') {
+    const questions = parseQuiz(content)
+    if (questions !== null) return <QuizRunner questions={questions} />
+  }
+  return (
+    <pre className="overflow-x-auto rounded-md border border-border bg-bg px-4 py-3 font-mono text-xs whitespace-pre-wrap text-text">
+      {content}
+    </pre>
   )
 }
 
@@ -606,57 +653,23 @@ function MindMapArtifactContent({ content }: { content: string }) {
   }
   const nodes = parsed.nodes ?? []
   const edges = Array.isArray(parsed.edges) ? parsed.edges : []
-  const byId = new Map(nodes.map((node) => [node.id, node]))
-  const root = parsed.root_node_id ? byId.get(parsed.root_node_id) : undefined
   return (
-    <div className="space-y-3">
-      <p className="text-[13px] text-text-muted">
-        {nodes.length} nodes · {edges.length} edges
-        {root ? ` · root: ${root.label}` : null}
-      </p>
-      <ul className="divide-y divide-border rounded-md border border-border">
-        {nodes.map((node) => (
-          <li key={node.id} className="px-4 py-3">
-            <div className="flex items-center gap-4">
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium text-text">
-                  {node.label}
-                </span>
-                <span className="mt-0.5 block truncate font-mono text-[11px] text-text-faint">
-                  {node.source || 'no source'}
-                </span>
-              </span>
-              <span className="shrink-0 font-mono text-[11px] uppercase text-text-muted">
-                {node.node_type || 'concept'}
-              </span>
-            </div>
-            {node.description ? (
-              <p className="mt-1.5 text-[13px] text-text-muted">{node.description}</p>
-            ) : null}
-            {node.key_points && node.key_points.length > 0 ? (
-              <ul className="mt-1.5 list-disc space-y-0.5 pl-5 text-[13px] text-text-muted">
-                {node.key_points.map((point, index) => (
-                  <li key={`${node.id}-point-${index}`}>{point}</li>
-                ))}
-              </ul>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-      {edges.length > 0 ? (
-        <ul className="space-y-1">
-          {edges.map((edge) => (
-            <li
-              key={`${edge.source_id}-${edge.target_id}-${edge.relationship ?? ''}`}
-              className="font-mono text-[11px] text-text-faint"
-            >
-              {byId.get(edge.source_id)?.label ?? edge.source_id} →{' '}
-              {byId.get(edge.target_id)?.label ?? edge.target_id}
-              {edge.relationship ? ` · ${edge.relationship}` : null}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
+    <MindMapCanvas
+      title={parsed.title}
+      nodes={nodes.map((node) => ({
+        id: node.id,
+        label: node.label,
+        node_type: node.node_type,
+        source: node.source,
+        description: node.description,
+        key_points: node.key_points,
+      }))}
+      edges={edges.map((edge) => ({
+        source_id: edge.source_id,
+        target_id: edge.target_id,
+        relationship: edge.relationship,
+      }))}
+      rootId={parsed.root_node_id}
+    />
   )
 }

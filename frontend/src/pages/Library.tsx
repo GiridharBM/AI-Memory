@@ -73,7 +73,7 @@ function ArtifactList() {
                           {artifact.job_id} · v{artifact.version}
                         </span>
                       </span>
-                      <span className="shrink-0 font-mono text-[11px] uppercase text-text-muted">
+                      <span className="shrink-0 font-mono text-[11px] text-text-muted">
                         {artifact.kind}
                       </span>
                       <span className="w-36 shrink-0 text-right font-mono text-[11px] text-text-faint">
@@ -122,10 +122,10 @@ function ArtifactDetail({ id }: { id: string }) {
                   ['Created', formatTimestamp(data.created_at)],
                   ['Updated', formatTimestamp(data.updated_at)],
                 ].map(([label, value]) => (
-                  <div key={label} className="bg-surface px-5 py-4">
-                    <dt className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-faint">
-                      {label}
-                    </dt>
+                      <div key={label} className="bg-surface px-5 py-4">
+                        <dt className="text-[13px] font-medium text-text-muted">
+                          {label}
+                        </dt>
                     <dd
                       className="mt-1.5 truncate font-mono text-[13px] text-text"
                       title={value}
@@ -187,7 +187,7 @@ function ArtifactDetail({ id }: { id: string }) {
                           key={`${record.source_id}-${record.chunk_index ?? index}`}
                           className="px-5 py-3 text-[13px]"
                         >
-                          <span className="font-mono text-[11px] uppercase text-text-muted">
+                          <span className="font-mono text-[11px] text-text-muted">
                             {record.role}
                           </span>{' '}
                           <span className="font-mono text-[12px] text-text">

@@ -1,36 +1,47 @@
 @import 'tailwindcss';
 
 /*
- * PAM GUI design tokens.
+ * PAM GUI design tokens — "Neutral Elegance" direction.
  *
- * Dark-first, calm and technical. The stack deliberately prefers Inter when the
- * user already has it and otherwise falls back to the platform UI font: a
- * local-first, privacy-conscious tool should not phone home to a font CDN.
+ * A premium, calm, personal knowledge application: alabaster pages, charcoal
+ * ink, sage accents that guide the eye without dominating. Surfaces step
+ * lighter than the page; status colors stay restrained and compatible.
+ * Token NAMES are stable so every page inherits the direction without
+ * structural edits. `on-accent` is the single dark-on-sage text color that
+ * keeps solid primary actions readable.
+ *
+ * Type stays local-first like the data: the display face is the platform
+ * serif stack (Georgia/Palatino), never a font CDN. One serif voice for
+ * headlines and figures, system sans for interface text, mono for
+ * identifiers — two families with clearly distinct roles, per face.
  */
 @theme {
-  --color-bg: #0b0d10;
-  --color-surface: #12161c;
-  --color-elevated: #181d24;
-  --color-border: #262c35;
-  --color-border-strong: #333b47;
+  --color-bg: #f7f2eb;
+  --color-surface: #fdfbf4;
+  --color-elevated: #fffdf8;
+  --color-border: #e3daca;
+  --color-border-strong: #c8bc9c;
 
-  --color-accent: #6d7cf5;
-  --color-accent-soft: #8b97f7;
-  --color-accent-dim: #1b2140;
+  --color-accent: #8b9a6e;
+  --color-accent-soft: #5f6e46;
+  --color-accent-dim: #e6e9d5;
+  --color-on-accent: #1e1e1f;
 
-  --color-success: #3fb950;
-  --color-success-dim: #10261a;
-  --color-warning: #d29922;
-  --color-warning-dim: #2a2110;
-  --color-danger: #f85149;
-  --color-danger-dim: #2c1416;
+  --color-success: #3e7a45;
+  --color-success-dim: #dce7d7;
+  --color-warning: #8a5a00;
+  --color-warning-dim: #f1e4c3;
+  --color-danger: #b3261e;
+  --color-danger-dim: #f4d9d3;
 
-  --color-text: #f0f3f7;
-  --color-text-muted: #9aa5b4;
-  --color-text-faint: #6b7684;
+  --color-text: #1e1e1f;
+  --color-text-muted: #5d5a50;
+  --color-text-faint: #8d8776;
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Roboto, 'Helvetica Neue', sans-serif;
+  --font-display: Georgia, 'Palatino Linotype', 'Book Antiqua',
+    'Times New Roman', serif;
   --font-mono: ui-monospace, 'JetBrains Mono', 'Cascadia Code', 'SF Mono',
     Menlo, Consolas, monospace;
 
@@ -62,7 +73,7 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
@@ -84,7 +95,7 @@
     background-color: var(--color-accent-dim);
   }
 
-  /* Scrollbars that match the surface palette instead of punching a light hole. */
+  /* Scrollbars that match the paper palette instead of defaulting to grey. */
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-border-strong) transparent;
@@ -103,7 +114,7 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #46505f;
+    background-color: #a39a80;
   }
 }
 

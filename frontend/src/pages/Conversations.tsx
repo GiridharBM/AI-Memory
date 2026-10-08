@@ -235,12 +235,12 @@ function ThreadView({
               onChange={(event) => setDraft(event.target.value)}
               placeholder="Ask a follow-up…"
               aria-label="Ask a follow-up question"
-              className="w-full rounded-md border border-border bg-bg px-3 py-2 text-[13px] text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
+              className="min-w-0 flex-1 rounded-md border border-border-strong bg-bg px-3.5 py-2.5 text-[14px] text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
             />
             <button
               type="submit"
               disabled={sending || draft.trim().length === 0}
-              className="shrink-0 rounded-md border border-accent/40 bg-accent-dim px-4 py-2 text-[13px] font-medium text-accent-soft transition-colors hover:border-accent hover:bg-accent/20 disabled:opacity-50"
+              className="shrink-0 rounded-md bg-accent px-5 py-2.5 text-[14px] font-medium text-on-accent transition-colors hover:bg-accent-soft disabled:opacity-50"
             >
               {sending ? 'Sending…' : 'Send'}
             </button>
@@ -254,39 +254,46 @@ function ThreadView({
 function MessageView({ message }: { message: ConversationMessage }) {
   const mine = message.role === 'user'
   const failed = message.evidence?.error != null
-  return (
-    <li className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-[85%] rounded-md border px-4 py-3 ${
-          mine ? 'border-accent/30 bg-accent-dim/40' : 'border-border bg-elevated/40'
-        }`}
-      >
-        <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-faint">
-          {message.role}
-          {message.model ? ` · ${message.model}` : null}
-        </p>
-        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-text">
-          {message.content}
-        </p>
-        {failed ? (
-          <p role="alert" className="mt-1.5 font-mono text-[11px] text-danger">
-            Generation failed and was recorded, not lost.
+  if (mine) {
+    return (
+      <li className="flex justify-end">
+        <div className="max-w-[85%] rounded-md border border-border bg-elevated/60 px-4 py-2.5">
+          <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-text">
+            {message.content}
           </p>
-        ) : null}
-        {!mine && message.evidence && message.evidence.citations.length > 0 ? (
-          <ul className="mt-2 space-y-1 border-t border-border pt-2">
-            {message.evidence.citations.map((citation) => (
-              <li
-                key={`${citation.number}-${citation.source}`}
-                className="font-mono text-[11px] text-text-faint"
-              >
-                [{citation.number}] {citation.source}
-                {citation.chunk_id ? ` · ${citation.chunk_id}` : null}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
+        </div>
+      </li>
+    )
+  }
+  return (
+    <li className="border-l-2 border-border pl-4">
+      <p className="font-display text-[13px] italic text-text-muted">
+        {message.role === 'assistant'
+          ? `PAM${message.model ? ` · ${message.model}` : ''}`
+          : message.role}
+      </p>
+      <p className="mt-1 max-w-prose text-[14px] leading-relaxed whitespace-pre-wrap text-text">
+        {message.content}
+      </p>
+      {failed ? (
+        <p role="alert" className="mt-1.5 text-[13px] text-danger">
+          Generation failed and was recorded, not lost.
+        </p>
+      ) : null}
+      {message.evidence && message.evidence.citations.length > 0 ? (
+        <ul className="mt-2 space-y-1 border-t border-border pt-2">
+          {message.evidence.citations.map((citation) => (
+            <li
+              key={`${citation.number}-${citation.source}`}
+              className="font-mono text-[11px] text-text-faint"
+            >
+              <span className="text-accent-soft">[{citation.number}]</span>{' '}
+              {citation.source}
+              {citation.chunk_id ? ` · ${citation.chunk_id}` : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </li>
   )
 }

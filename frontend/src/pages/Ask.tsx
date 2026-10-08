@@ -70,7 +70,7 @@ export function Ask() {
             <button
               type="submit"
               disabled={pending || question.trim().length === 0}
-              className="shrink-0 rounded-md bg-accent px-4 py-1.5 text-[13px] font-medium text-bg transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
+              className="shrink-0 rounded-md bg-accent px-4 py-1.5 text-[13px] font-medium text-on-accent transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pending ? 'Thinking…' : 'Ask →'}
             </button>

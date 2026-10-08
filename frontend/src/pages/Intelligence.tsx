@@ -44,7 +44,7 @@ export function Retrieval() {
                     ] as [string, string | number][]
                   ).map(([label, value]) => (
                     <div key={label} className="bg-surface px-5 py-4">
-                      <dt className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-faint">
+                      <dt className="text-[13px] font-medium text-text-muted">
                         {label}
                       </dt>
                       <dd className="mt-1.5 font-mono text-sm text-text">{value}</dd>
@@ -97,7 +97,7 @@ export function Activity() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
                   <thead>
-                    <tr className="border-b border-border text-[10px] uppercase tracking-[0.08em] text-text-faint">
+                    <tr className="border-b border-border text-[13px] text-text-faint">
                       <th scope="col" className="px-5 py-2.5 font-semibold">When</th>
                       <th scope="col" className="px-5 py-2.5 font-semibold">Source</th>
                       <th scope="col" className="px-5 py-2.5 font-semibold">Status</th>
@@ -171,7 +171,7 @@ function GenerationJobs() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
                   <thead>
-                    <tr className="border-b border-border text-[10px] uppercase tracking-[0.08em] text-text-faint">
+                    <tr className="border-b border-border text-[13px] text-text-faint">
                       <th scope="col" className="px-5 py-2.5 font-semibold">When</th>
                       <th scope="col" className="px-5 py-2.5 font-semibold">Task</th>
                       <th scope="col" className="px-5 py-2.5 font-semibold">Status</th>
@@ -185,7 +185,7 @@ function GenerationJobs() {
                         <td className="px-5 py-2.5 font-mono text-[11px] whitespace-nowrap text-text-faint">
                           {formatTimestamp(job.created_at)}
                         </td>
-                        <td className="px-5 py-2.5 font-mono text-[11px] uppercase text-text-muted">
+                        <td className="px-5 py-2.5 font-mono text-[11px] text-text-muted">
                           {job.task_type}
                         </td>
                         <td className="px-5 py-2.5">
@@ -261,7 +261,7 @@ export function Evaluation() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
                   <thead>
-                    <tr className="border-b border-border text-[10px] uppercase tracking-[0.08em] text-text-faint">
+                    <tr className="border-b border-border text-[13px] text-text-faint">
                       <th scope="col" className="px-5 py-2.5 font-semibold">Artifact</th>
                       <th scope="col" className="px-5 py-2.5 font-semibold">Kind</th>
                       <th scope="col" className="px-5 py-2.5 text-right font-semibold">Size</th>
@@ -373,7 +373,7 @@ function ConfigTree({ node, depth }: { node: unknown; depth: number }) {
             {typeof value === 'object' && value !== null ? (
               <>
                 <p
-                  className="pt-2 pb-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-faint"
+                  className="pt-2 pb-0.5 text-[13px] font-medium text-text-muted"
                   style={{ paddingLeft: 20 + depth * 14 }}
                 >
                   {key}

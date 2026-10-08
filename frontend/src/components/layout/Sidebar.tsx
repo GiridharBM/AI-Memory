@@ -86,7 +86,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex-1 overflow-y-auto px-3 py-4">
         {GROUPS.map((group) => (
           <div key={group.heading} className="mb-5 last:mb-0">
-            <h2 className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-faint">
+            <h2 className="px-2 pb-2 text-[13px] font-medium text-text-muted">
               {group.heading}
             </h2>
             <ul className="space-y-0.5">
@@ -101,12 +101,18 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         event.preventDefault()
                         go(item.path)
                       }}
-                      className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors duration-150 ${
+                      className={`relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors duration-150 ${
                         isActive
                           ? 'bg-elevated text-text'
                           : 'text-text-muted hover:bg-elevated/60 hover:text-text'
                       }`}
                     >
+                      {isActive ? (
+                        <span
+                          aria-hidden="true"
+                          className="absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full bg-accent"
+                        />
+                      ) : null}
                       <span
                         aria-hidden="true"
                         className={`w-4 shrink-0 text-center text-[13px] ${

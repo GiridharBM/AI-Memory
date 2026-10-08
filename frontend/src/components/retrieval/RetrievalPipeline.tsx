@@ -34,13 +34,13 @@ export function RetrievalPipeline({
 
   return (
     <div className="px-5 py-4">
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-faint">
+      <p className="mb-3 text-[13px] font-medium text-text-muted">
         User query
       </p>
       <StageRow stage={config.stages.find((s) => s.id === 'query_processing')!} />
 
       <div className="ml-3 border-l border-border pl-4">
-        <p className="py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-faint">
+        <p className="py-2 text-[13px] font-medium text-text-muted">
           Retrieval legs
         </p>
         <ul className="space-y-1.5">
@@ -53,7 +53,7 @@ export function RetrievalPipeline({
       </div>
 
       <div className="ml-3 border-l border-border pl-4">
-        <p className="py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-faint">
+        <p className="py-2 text-[13px] font-medium text-text-muted">
           {detail ? 'Fusion, gating and generation' : 'Fusion and generation'}
         </p>
         <ul className="space-y-1.5">
@@ -124,9 +124,7 @@ export function ScoreValue({
 }) {
   return (
     <div title={hint}>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-faint">
-        {label}
-      </p>
+      <p className="text-[13px] font-medium text-text-muted">{label}</p>
       <p className="mt-0.5 font-mono text-xs text-text">
         {value === null || value === undefined ? (
           <span className="text-text-faint italic">Not available</span>

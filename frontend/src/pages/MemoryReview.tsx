@@ -149,14 +149,18 @@ function CandidateCard({
     )
 
   return (
-    <li className="rounded-md border border-border px-4 py-3.5">
+    <li
+      className={`border-l-2 pl-4 ${
+        pending ? 'border-accent' : 'border-border opacity-80'
+      }`}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge
           status={item.status === 'pending' ? 'ready' : 'disabled'}
           label={item.status}
           size="sm"
         />
-        <span className="font-mono text-[11px] uppercase text-text-muted">
+        <span className="font-mono text-[11px] text-text-muted">
           {item.category}
         </span>
         <span className="font-mono text-[11px] text-text-faint">
@@ -174,7 +178,7 @@ function CandidateCard({
           className="mt-2.5 w-full rounded-md border border-border bg-bg px-3 py-2 text-[13px] text-text focus:border-accent focus:outline-none"
         />
       ) : (
-        <p className="mt-2 text-[13px] leading-relaxed whitespace-pre-wrap text-text">
+        <p className="mt-1.5 font-display text-[17px] leading-snug text-text">
           {item.edited_text ?? item.text}
         </p>
       )}
@@ -185,10 +189,10 @@ function CandidateCard({
       ) : null}
 
       <div className="mt-2.5 rounded-md bg-elevated/40 px-3 py-2.5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-faint">
-          Why · user message {item.seq}
+        <p className="text-[12px] font-medium text-text-muted">
+          Why this memory · user message {item.seq}
         </p>
-        <p className="mt-1 text-[13px] text-text-muted italic">
+        <p className="mt-1 font-display text-[15px] leading-snug text-text italic">
           “{item.grounding.quoted_text}”
         </p>
         <p className="mt-1 truncate font-mono text-[11px] text-text-faint">
@@ -233,7 +237,7 @@ function CandidateCard({
               type="button"
               disabled={busy !== null}
               onClick={() => approve(editing)}
-              className="rounded-md border border-accent/40 bg-accent-dim px-3.5 py-1.5 text-[13px] font-medium text-accent-soft transition-colors hover:border-accent hover:bg-accent/20 disabled:opacity-50"
+              className="rounded-md bg-accent px-4 py-1.5 text-[13px] font-medium text-on-accent transition-colors hover:bg-accent-soft disabled:opacity-50"
             >
               {busy === 'approve' ? 'Approving…' : editing ? 'Approve with edits' : 'Approve'}
             </button>
@@ -284,7 +288,7 @@ function CandidateCard({
                 onChange={(event) => setReason(event.target.value)}
                 placeholder="Rejection reason (required)…"
                 aria-label="Rejection reason"
-                className="w-full rounded-md border border-border bg-bg px-3 py-2 text-[13px] text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
+                className="min-w-0 flex-1 rounded-md border border-border bg-bg px-3 py-2 text-[13px] text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
               />
               <button
                 type="submit"
@@ -460,7 +464,7 @@ function MemoryDetail({
               onChange={(event) => setSupersedeText(event.target.value)}
               placeholder="New version text…"
               aria-label="New version text"
-              className="w-full rounded-md border border-border bg-bg px-3 py-2 text-[13px] text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
+              className="min-w-0 flex-1 rounded-md border border-border bg-bg px-3 py-2 text-[13px] text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
             />
             <button
               type="submit"

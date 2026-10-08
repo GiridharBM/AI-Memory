@@ -94,7 +94,7 @@ export function Search() {
             <button
               type="submit"
               disabled={pending || query.trim().length === 0}
-              className="ml-auto shrink-0 rounded-md bg-accent px-4 py-1.5 text-[13px] font-medium text-bg transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
+              className="ml-auto shrink-0 rounded-md bg-accent px-4 py-1.5 text-[13px] font-medium text-on-accent transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pending ? 'Searching…' : 'Search'}
             </button>

@@ -33,7 +33,7 @@ export function CardHeader({
   return (
     <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
       <div>
-        <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+        <h2 className="font-display text-[17px] font-medium tracking-tight text-text">
           {title}
         </h2>
         {subtitle ? <p className="mt-1 text-[13px] text-text-faint">{subtitle}</p> : null}
