@@ -14,9 +14,14 @@ import { navigate } from '../../lib/router'
 export function RetrievalPipeline({
   config,
   detail = false,
+  toggle,
 }: {
   config: RetrievalConfig | null
   detail?: boolean
+  toggle?: {
+    busy: boolean
+    onToggle: (stageId: 'hyde' | 'rerank' | 'answerability') => void
+  } | null
 }) {
   if (config === null) {
     return (
@@ -46,7 +51,7 @@ export function RetrievalPipeline({
         <ul className="space-y-1.5">
           {parallel.map((stage) => (
             <li key={stage.id}>
-              <StageRow stage={stage} />
+              <StageRow stage={stage} toggle={toggle} />
             </li>
           ))}
         </ul>
@@ -59,7 +64,7 @@ export function RetrievalPipeline({
         <ul className="space-y-1.5">
           {linear.map((stage) => (
             <li key={stage.id}>
-              <StageRow stage={stage} />
+              <StageRow stage={stage} toggle={toggle} />
             </li>
           ))}
         </ul>
@@ -73,13 +78,26 @@ export function RetrievalPipeline({
   )
 }
 
-function StageRow({ stage }: { stage: { id: string; label: string; active: boolean; detail?: string | null } }) {
-  return (
-    <div
-      className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 ${
-        stage.active ? 'border-border bg-elevated' : 'border-dashed border-border/70 bg-transparent'
-      }`}
-    >
+const TOGGLEABLE_STAGES = ['hyde', 'rerank', 'answerability'] as const
+
+type ToggleableStage = (typeof TOGGLEABLE_STAGES)[number]
+
+function StageRow({
+  stage,
+  toggle,
+}: {
+  stage: { id: string; label: string; active: boolean; detail?: string | null }
+  toggle?: {
+    busy: boolean
+    onToggle: (stageId: ToggleableStage) => void
+  } | null
+}) {
+  const toggleable =
+    toggle !== null &&
+    toggle !== undefined &&
+    (TOGGLEABLE_STAGES as readonly string[]).includes(stage.id)
+  const inner = (
+    <>
       <span className="flex min-w-0 items-center gap-2">
         <span
           aria-hidden="true"
@@ -101,7 +119,32 @@ function StageRow({ stage }: { stage: { id: string; label: string; active: boole
         ) : null}
         <StatusBadge status={stage.active ? 'ready' : 'disabled'} size="sm" />
       </span>
-    </div>
+    </>
+  )
+  if (!toggleable) {
+    return (
+      <div
+        className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 ${
+          stage.active ? 'border-border bg-elevated' : 'border-dashed border-border/70 bg-transparent'
+        }`}
+      >
+        {inner}
+      </div>
+    )
+  }
+  return (
+    <button
+      type="button"
+      disabled={toggle?.busy}
+      aria-pressed={stage.active}
+      title={`${stage.active ? 'Disable' : 'Enable'} ${stage.label} for future searches`}
+      onClick={() => toggle?.onToggle(stage.id as ToggleableStage)}
+      className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-md border px-3 py-2 text-left transition-colors focus:border-accent focus:outline-none disabled:cursor-wait disabled:opacity-60 ${
+        stage.active ? 'border-border bg-elevated' : 'border-dashed border-border/70 bg-transparent hover:border-accent/60'
+      }`}
+    >
+      {inner}
+    </button>
   )
 }
 

@@ -16,7 +16,8 @@ from importlib.metadata import version as package_version
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, ConfigDict, StrictBool
 
 from app.application.system_facts import OLLAMA_NUM_CTX, SUPPORTED_INGESTION_TYPES
 from app.interfaces.web import deps
@@ -221,7 +222,50 @@ def get_retrieval() -> dict[str, Any]:
 
 
 def deps_retrieval() -> dict[str, Any]:
-    return _retrieval_config(deps.get_settings())
+    return _retrieval_config(deps.get_effective_settings())
+
+
+class RetrievalConfigUpdate(BaseModel):
+    """Toggle experimental retrieval stages; only provided fields change."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    hyde_enabled: StrictBool | None = None
+    reranker_enabled: StrictBool | None = None
+    answerability_enabled: StrictBool | None = None
+
+
+@router.get("/config/retrieval")
+def get_retrieval_config() -> dict[str, Any]:
+    """Canonical runtime state of the experimental retrieval stages."""
+
+    if deps.settings_error() is not None:
+        raise HTTPException(status_code=503, detail=deps.settings_error())
+    return deps.get_retrieval_flags()
+
+
+@router.post("/config/retrieval")
+def update_retrieval_config(update: RetrievalConfigUpdate) -> dict[str, Any]:
+    """Enable/disable experimental retrieval stages for future searches.
+
+    Uses POST (like every other PAM mutation) so the Vite dev-server CORS
+    policy, which allows GET and POST, needs no change. Only explicitly
+    provided fields are applied; the response is the resulting canonical
+    backend state. Services are rebuilt so subsequent searches observe it.
+    """
+
+    if deps.settings_error() is not None:
+        raise HTTPException(status_code=503, detail=deps.settings_error())
+    provided = update.model_dump(exclude_none=True)
+    if not provided:
+        raise HTTPException(status_code=422, detail="No retrieval setting provided.")
+    try:
+        flags = deps.get_retrieval_flags()
+        for field, value in provided.items():
+            flags = deps.set_retrieval_flag(field, value)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return flags
 
 
 @router.get("/activity")

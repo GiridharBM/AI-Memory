@@ -59,7 +59,7 @@ def settings_error() -> str | None:
 def get_search_service() -> SearchService:
     """Return the cached hybrid search service (dense + BM25 + RRF)."""
 
-    return SearchService.create_default(get_settings())
+    return SearchService.create_default(get_effective_settings())
 
 
 @lru_cache(maxsize=1)
@@ -86,7 +86,7 @@ def get_qa_workflow() -> QAWorkflow:
     wall-clock deadline; the route runs it in FastAPI's threadpool.
     """
 
-    return QAWorkflow.create_default(get_settings())
+    return QAWorkflow.create_default(get_effective_settings())
 
 
 def invalidate_caches() -> None:
@@ -95,6 +95,74 @@ def invalidate_caches() -> None:
     get_search_service.cache_clear()
     get_qa_workflow.cache_clear()
     get_vector_store.cache_clear()
+
+
+# Experimental retrieval stages the GUI may toggle at runtime (HyDE query
+# expansion, cross-encoder reranking, answerability gating). These are
+# process-runtime overrides over the YAML-loaded settings: they affect
+# future searches served by this process only and are never written back
+# to configuration files. Fresh processes and the CLI keep file defaults
+# (all three disabled) until explicitly toggled here.
+RETRIEVAL_TOGGLES = ("hyde_enabled", "reranker_enabled", "answerability_enabled")
+
+_retrieval_overrides: dict[str, bool] = {}
+
+
+def get_retrieval_flags() -> dict[str, bool]:
+    """Canonical runtime state of the three experimental retrieval stages."""
+
+    settings = get_settings()
+    base = {
+        "hyde_enabled": settings.hyde.enabled,
+        "reranker_enabled": settings.reranker.enabled,
+        "answerability_enabled": settings.answerability.enabled,
+    }
+    return {name: _retrieval_overrides.get(name, value) for name, value in base.items()}
+
+
+def set_retrieval_flag(name: str, enabled: bool) -> dict[str, bool]:
+    """Set one experimental stage flag; rebuild services so future searches observe it.
+
+    Only one flag changes per call — the other two are never touched.
+    Raises ``ValueError`` for unknown names or non-boolean values, leaving
+    all state (including caches) exactly as it was.
+    """
+
+    if name not in RETRIEVAL_TOGGLES:
+        raise ValueError(f"Unknown retrieval stage: {name}.")
+    if not isinstance(enabled, bool):
+        raise ValueError("Retrieval stage state must be a boolean.")
+    _retrieval_overrides[name] = enabled
+    invalidate_caches()
+    return get_retrieval_flags()
+
+
+def clear_retrieval_overrides() -> None:
+    """Drop all runtime overrides (used by tests to isolate flag state)."""
+
+    _retrieval_overrides.clear()
+    invalidate_caches()
+
+
+def get_effective_settings() -> Settings:
+    """File-loaded settings with runtime retrieval overrides applied.
+
+    Identical to :func:`get_settings` when nothing was toggled; the cached
+    search/QA services are built from this so toggles take effect for
+    future searches after :func:`invalidate_caches`.
+    """
+
+    base = get_settings()
+    flags = get_retrieval_flags()
+    return base.model_copy(
+        update={
+            "hyde": base.hyde.model_copy(update={"enabled": flags["hyde_enabled"]}),
+            "reranker": base.reranker.model_copy(update={"enabled": flags["reranker_enabled"]}),
+            "answerability": base.answerability.model_copy(
+                update={"enabled": flags["answerability_enabled"]}
+            ),
+        }
+    )
 
 
 def read_ledger() -> list[dict[str, Any]] | None:

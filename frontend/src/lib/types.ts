@@ -22,6 +22,12 @@ export interface RetrievalStage {
   detail?: string | null
 }
 
+export interface RetrievalFlags {
+  hyde_enabled: boolean
+  reranker_enabled: boolean
+  answerability_enabled: boolean
+}
+
 export interface RetrievalConfig {
   top_k_default: number
   rrf_k: number

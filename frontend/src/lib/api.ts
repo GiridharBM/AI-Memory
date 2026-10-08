@@ -35,6 +35,7 @@ import type {
   MemoryRecord,
   MindMapResponse,
   ProvenanceResponse,
+  RetrievalFlags,
   SearchResponse,
   SourceDetail,
   SourcesResponse,
@@ -87,6 +88,9 @@ export const api = {
   system: () => request<SystemResponse>('/system'),
   health: () => request<HealthResponse>('/health'),
   retrieval: () => request<{ available: boolean; config_error?: string } & SystemResponse['retrieval']>('/retrieval'),
+  retrievalFlags: () => request<RetrievalFlags>('/config/retrieval'),
+  updateRetrievalFlags: (body: Partial<RetrievalFlags>) =>
+    post<RetrievalFlags>('/config/retrieval', body),
   activity: (limit = 50) => request<ActivityResponse>(`/activity?limit=${limit}`),
   config: () => request<ConfigResponse>('/config'),
   storage: () => request<StorageResponse>('/storage'),

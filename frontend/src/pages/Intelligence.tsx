@@ -1,12 +1,36 @@
+import { useState } from 'react'
+
 import { PageHeader } from '../components/dashboard/MetricCard'
 import { AsyncBoundary, Card, CardHeader, EmptyState, NotAvailable, StatusBadge } from '../components/common/Card'
-import { api } from '../lib/api'
+import { ApiError, api } from '../lib/api'
 import { formatBytes, formatTimestamp, useApi } from '../lib/hooks'
 import { RetrievalPipeline } from '../components/retrieval/RetrievalPipeline'
 
 /** Retrieval pipeline inspector: what is actually enabled, from config. */
 export function Retrieval() {
   const state = useApi(() => api.retrieval(), [])
+  const flags = useApi(() => api.retrievalFlags(), [])
+  const [toggling, setToggling] = useState<string | null>(null)
+  const [toggleError, setToggleError] = useState<string | null>(null)
+
+  async function onToggleStage(stageId: 'hyde' | 'rerank' | 'answerability') {
+    if (toggling !== null || flags.data === null) return
+    const field =
+      stageId === 'hyde' ? 'hyde_enabled' : stageId === 'rerank' ? 'reranker_enabled' : 'answerability_enabled'
+    setToggling(stageId)
+    setToggleError(null)
+    try {
+      // The backend returns the canonical state; both views reload from it
+      // so the UI can never disagree with the runtime configuration.
+      await api.updateRetrievalFlags({ [field]: !flags.data[field] })
+      flags.reload()
+      state.reload()
+    } catch (cause) {
+      setToggleError(cause instanceof ApiError ? cause.message : String(cause))
+    } finally {
+      setToggling(null)
+    }
+  }
 
   return (
     <>
@@ -28,7 +52,23 @@ export function Retrieval() {
                   title="Pipeline"
                   subtitle="Stages drawn from the running configuration; disabled stages are shown as disabled"
                 />
-                <RetrievalPipeline config={data} detail />
+                <RetrievalPipeline
+                  config={data}
+                  detail
+                  toggle={
+                    flags.data === null
+                      ? null
+                      : {
+                          busy: toggling !== null,
+                          onToggle: (stageId) => void onToggleStage(stageId),
+                        }
+                  }
+                />
+                {toggleError ?? flags.error ? (
+                  <p role="alert" className="px-5 pb-4 text-[13px] text-danger">
+                    {toggleError ?? flags.error}
+                  </p>
+                ) : null}
               </Card>
 
               <Card>
