@@ -4,7 +4,7 @@
 
 **A local-first AI memory system that turns your notes, documents, and files into a searchable, connected knowledge base — retrieved and answered by a local LLM.**
 
-![Status](https://img.shields.io/badge/status-V2.0_RC-success)
+![Status](https://img.shields.io/badge/status-V2.1.0-success)
 ![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
 ![Local First](https://img.shields.io/badge/design-local--first%20%7C%20private-informational)
 
@@ -12,20 +12,20 @@
 
 ---
 
-## Current Release Candidate
+## Current Release
 
-**PAM V2.0** (release candidate — tag `v2.0.0` pending) builds on the V1.1.0
-foundation with an async **generation system**: scoped generation jobs
-(flashcards, quizzes, reports, PPTX presentations, AI-enriched mind maps,
-SDXL images) with persisted artifacts and evidence-set provenance, plus
-memory-scope selection (all/documents/topics/nodes) over the existing
-hybrid retrieval backend.
+**PAM V2.1.0** (released — tag `v2.1.0`) builds on the V2.0 generation
+system with **conversation sessions** and a **human-approved personal-memory
+lifecycle**: explicit per-conversation memory extraction, candidate review,
+durable versioned memories, a Memory Review UI, and memory-backed question
+answering over approved memories with provenance.
 
-**Previous release:** **PAM V1.1.0** (tag `v1.1.0`) remains the latest
-*published* release until the V2.0 tag is created. V1.1 focused on
+**Previous release:** **PAM V2.0** (tag `v2.0.0`) added the async generation
+system described below. **PAM V1.1.0** (tag `v1.1.0`) focused on
 **reliability, source management, ingestion safety, CLI usability, and
-truthful status** — not on retrieval-quality improvements. The retrieval
-pipeline stays frozen (see [Retrieval Status](#retrieval-status)).
+truthful status** — not on retrieval-quality improvements. The document
+retrieval pipeline stays frozen (see [Retrieval Status](#retrieval-status));
+memory retrieval is a separate lexical seam that does not modify it.
 
 ### V2 capabilities (verified)
 
@@ -45,6 +45,29 @@ pipeline stays frozen (see [Retrieval Status](#retrieval-status)).
 - **Multimodal ingestion** — images (OCR/vision/EXIF/diagrams), audio
   transcription, video ingestion alongside the existing document pipeline.
 
+### V2.1 capabilities (verified)
+
+- **Conversation sessions** — persistent conversations with immutable,
+  server-sequenced messages (`user` clients submit; `assistant` messages are
+  created by PAM after QA runs) and per-conversation isolation.
+- **Explicit memory extraction** — `POST /api/memories/extract` proposes
+  candidates from one conversation's eligible user messages only; assistant-only
+  claims and failed generations are excluded, and all privileged fields
+  (IDs, timestamps, status, provenance) are server-assigned.
+- **Mandatory human approval** — a candidate becomes a durable memory only
+  through approve; reject (reason required) is terminal and auditable; there
+  is no automatic extraction-to-memory path.
+- **Durable versioned memories** — approved memories carry stable logical IDs
+  and versions; supersession creates a new version and preserves history
+  (no tombstones, no deletion).
+- **Memory Review UI** — review queue (pending/approved/rejected filter),
+  approve/edit/reject actions, version list, and provenance display.
+- **Approved-memory QA** — ACTIVE memories are retrieved with deterministic
+  lexical matching (threshold 0.5, top 3) and appended to QA context after
+  document evidence; memory citations use `memory:<logical_id>@v<n>` and flow
+  into the existing evidence snapshots; a matching memory can rescue an
+  otherwise-abstaining query.
+
 ### Known V2 limitations
 
 - **SDXL requires a CUDA-enabled PyTorch build** (cu128+ for Blackwell GPUs).
@@ -57,8 +80,19 @@ pipeline stays frozen (see [Retrieval Status](#retrieval-status)).
 - **`projects` scopes are representable but unsupported** and fail closed.
 - **SDXL renders weak/unreliable in-image text** (short words occasionally
   legible); diagrams illustrate structure, not exact labels.
-- **V2.0 is unreleased** until the release commit and `v2.0.0` tag are created;
-  see [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md).
+- **V2.0 is released** (tag `v2.0.0`); V2.1.0 (tag `v2.1.0`) is the current
+  release; see [`docs/releases/VERSION_2_1_0_FINAL_REPORT.md`](./docs/releases/VERSION_2_1_0_FINAL_REPORT.md).
+
+### Known V2.1 memory limitations
+
+- **Lexical memory retrieval** — approved memories are matched with
+  deterministic token overlap (lowercase alphanumeric tokens, no stemming),
+  not embeddings or semantic search; memory retrieval never uses BM25/RRF.
+- **Conservative matching** — a memory participates only at overlap ≥ 0.5,
+  at most 3 memories per answer, ACTIVE versions only; superseded versions
+  and rejected candidates are excluded.
+- **No automatic extraction** — candidates are proposed only by explicit
+  per-conversation extraction; nothing is remembered without human approval.
 
 ---
 
@@ -69,6 +103,13 @@ PAM is a **local-first** personal AI memory system. It ingests your local files 
 - **retrieve** relevant knowledge with hybrid (semantic + keyword) search, and
 - **ask grounded questions** against that knowledge with a local LLM.
 
+PAM also holds **conversations** (persistent sessions with immutable,
+server-sequenced messages) and learns **durable personal memories** from
+them: explicit extraction proposes candidates from your messages, you approve
+what PAM may remember in the Memory Review UI, and approved memories
+participate in later answers with provenance — still entirely on your machine
+through local Ollama.
+
 Everything runs on your machine through a local [Ollama](https://ollama.com) server. PAM is **local-first**: normal local-file processing and local AI inference run on the user's machine. The explicit GitHub and YouTube ingestion commands are network-source operations and may access external services, so the system does not guarantee that no content ever leaves the machine during those opt-in operations.
 
 ---
@@ -77,8 +118,7 @@ Everything runs on your machine through a local [Ollama](https://ollama.com) ser
 
 Verified in the current V1.1.0 implementation:
 
-- **Document ingestion** — `pam ingest file <path>` auto-detects and ingests many local formats; typed subcommands (`markdown`, `pdf`, `txt`) and network sources (`github`, `youtube`) are also available.
-- **Source listing** — `pam sources` lists the sources currently indexed, from durable state (read-only).
+- **Document ingestion** — `pam ingest file <path>` auto-detects and ingests many local formats; typed subcommands (`markdown`, `pdf`, `txt`) and network sources (`github`, `youtube`) are also available.- **Source listing** — `pam sources` lists the sources currently indexed, from durable state (read-only).
 - **Source removal** — `pam remove <source>` removes a source's vectors, knowledge-graph nodes/edges, and manifest entries. It never deletes vault notes.
 - **Status** — `pam status` shows a concise, truthful overview of current PAM state (read-only).
 - **Local retrieval & QA** — hybrid search (`pam search`) and grounded question answering (`pam ask`) over your local knowledge base.
@@ -89,6 +129,12 @@ Verified in the current V1.1.0 implementation:
 - **Secret-bearing source blocking** — local secret/credential files are blocked before any content is read or processed (see [Security](#security)).
 - **Bounded QA timeout** — the QA generation call is bounded by a configured timeout (default 120 s) so a single answer cannot hang indefinitely.
 
+Verified in V2.1.0 (API + GUI; see `docs/releases/VERSION_2_1_0_FINAL_REPORT.md`):
+
+- **Conversations** — persistent sessions with immutable, server-sequenced messages and per-conversation isolation.
+- **Memory extraction & approval** — explicit per-conversation extraction; candidates are reviewed by a human and only approval creates a durable, versioned memory (atomic local JSON persistence).
+- **Memory Review UI** — review queue, approve/edit/reject, version history, and provenance display.
+- **Memory-backed QA** — approved ACTIVE memories are retrieved lexically and cited as `memory:<logical_id>@v<n>` evidence alongside document sources; `pam ask` shares the same QA workflow.
 ---
 
 ## Architecture
@@ -111,7 +157,15 @@ Retrieval (hybrid: semantic + keyword, fused)
 QA / Citations (grounded answer + system-facts fast path)
       │
       ▼
-CLI (pam)
+CLI (pam) / GUI
+```
+
+Personal-memory lane (V2.1, additive — the document path above is frozen):
+
+```
+Conversation → user message → explicit extraction → candidate
+      → human approval → durable versioned memory (ACTIVE)
+      → lexical retrieval → QA context → answer + memory evidence
 ```
 
 **System-facts** is a fast path: questions about the tool itself (version, status, feature flags, source/chunk counts) are answered deterministically from application state — the retrieval, reranker, HyDE, and answerability pipeline is not invoked for those.
@@ -167,6 +221,19 @@ pam ingest github https://github.com/owner/repository
 pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
+Conversations and personal memories are managed through the local API and
+GUI (no dedicated CLI commands exist for them):
+
+- `pam ask "question"` — grounded answer; shares the QA workflow, so approved
+  memories can contribute evidence alongside document sources.
+- GUI Conversations page — persistent sessions and conversation QA.
+- GUI Memory Review page (`/memory-review`) — review queue, approve/edit/reject,
+  version history, provenance.
+- `POST /api/memories/extract` — propose candidates from one conversation
+  (explicit only); `POST /api/memories/candidates/{id}/approve|reject|edit`;
+  `GET /api/memories` and `GET /api/memories/{id}/provenance` for durable
+  memories and their provenance.
+
 ---
 
 ## Source Management
@@ -188,6 +255,12 @@ pam ingest youtube https://www.youtube.com/watch?v=VIDEO_ID
 
 If no sufficiently relevant context is retrieved (e.g. the top match falls below the minimum cosine threshold), PAM **abstains** rather than guessing. The QA generation call is bounded by a configured timeout (default 120 s).
 
+Approved personal memories are an **additional evidence source**: ACTIVE
+memories matching the question (deterministic lexical overlap ≥ 0.5, at most
+3) are appended after document evidence and cited as
+`memory:<logical_id>@v<n>`. A matching memory can rescue an otherwise-abstaining
+query; an unrelated, rejected, or superseded memory never participates.
+
 ---
 
 ## Security
@@ -204,17 +277,20 @@ This is a targeted ingestion-safety guard, not a claim of comprehensive general-
 
 PAM has a substantial automated test suite. Verification is reported as a **dated snapshot** rather than a single marketing number. The latest known verification state is documented in the project's testing/release records (`docs/PROJECT_STATUS.md`, `docs/TESTING_AND_VERIFICATION.md`, and the release provenance records in `docs/releases/`).
 
-The most recent verification snapshot reflects **1712 tests passed / 57 deselected / 0 failed** (full `pytest tests/` run; the 57 deselected are `integration`-marked). Ruff passes and `mypy app/` reports 0 production errors. This snapshot is associated with the final academic state; it was not independently verified against remote GitHub CI (remote CI is not claimed green). The former CLI remove logging-isolation flake was fixed (`ea8a95b — fix: stabilize CLI remove isolation test`). The evaluation dataset-contract tests (`test_eval_dataset.py`) pass (32). The current release state and known test exceptions are maintained in the project's status and release documentation, not as a static badge here.
+The most recent verification snapshot reflects **2337 tests passed / 2 skipped / 57 deselected / 0 failed** (full `pytest tests/` run; the 57 deselected are `integration`-marked; the 2 skips are pre-existing platform skips for URL-shaped directory names, not failures). Ruff passes and `mypy app/` reports 0 V2.1 errors apart from 5 known pre-existing `reranker.py` errors. This snapshot is associated with the V2.1.0 release; it was not independently verified against remote GitHub CI (remote CI is not claimed green). The former CLI remove logging-isolation flake was fixed (`ea8a95b — fix: stabilize CLI remove isolation test`). The evaluation dataset-contract tests (`test_eval_dataset.py`) pass (32). The current release state and known test exceptions are maintained in the project's status and release documentation, not as a static badge here.
 
 ---
 
 ## Retrieval Status
 
-**The retrieval pipeline is intentionally frozen for V1.1.0.**
+**The document retrieval pipeline is intentionally frozen.**
 
 - Retrieval-improvement experiments were conducted before and around the V1.1 target.
 - Further retrieval improvements remain **experimental / deferred**.
 - PAM does **not** claim that retrieval is perfect.
+- Approved-memory retrieval is a **separate lexical seam** (deterministic token
+  overlap over ACTIVE memories only): it does not use embeddings, BM25, RRF,
+  or reranking, and it does not modify the frozen document pipeline.
 
 The measured frozen-retrieval evaluation included a notable false-positive rate. Important context: many measured false positives were **content-sufficiency misses** — retrieved text could be topically on-topic but lack the exact fact required to answer a query. This is one reason evidence verification and retrieval improvements remain deferred. Detailed numbers belong in the evaluation/testing documentation, not this README.
 
@@ -253,6 +329,7 @@ PAM depends on a running local Ollama runtime; there is no hosted/cloud answer p
 ## Documentation
 
 - **[`docs/` hub](./docs/README.md)** — navigation for all current and historical documentation.
+- **[V2.1.0 final report](./docs/releases/VERSION_2_1_0_FINAL_REPORT.md)** — released V2.1 memory lifecycle and memory-backed QA.
 - **[Project status](./docs/PROJECT_STATUS.md)** — canonical current-state document (V1.1.0).
 - **[Architecture](./docs/architecture.md)** — system architecture with Mermaid flowcharts.
 - **[Getting started](./docs/GETTING_STARTED.md)** — set up PAM from zero.
