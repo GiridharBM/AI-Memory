@@ -8,6 +8,17 @@ from app.domain.conversation import Message
 
 MAX_HISTORY_CHARS = 2000
 
+#: Instruction prepended to runtime memory sections (V2.1-C). Blocks labeled
+#: ``Source: memory:*`` are USER-CONFIRMED PERSONAL FACTS from human-approved
+#: memories: reliable statements about the user, citable like any other
+#: source. Kept separate from ``QA_SYSTEM_PROMPT`` so the default
+#: document-only prompt stays byte-identical when no memory matches.
+MEMORY_CONTEXT_PREAMBLE = (
+    "The following source(s) are USER-CONFIRMED PERSONAL FACTS from the "
+    "user's approved memories. Treat them as reliable statements about the "
+    "user and cite them like any other source."
+)
+
 QA_SYSTEM_PROMPT = """
 You are a grounded question-answering assistant for a local personal knowledge base.
 

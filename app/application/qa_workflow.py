@@ -27,7 +27,14 @@ import time
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from pathlib import Path
 
+from app.application.memory_context import (
+    MemoryMatch,
+    build_memory_context,
+    memory_match_to_hit,
+    retrieve_memories,
+)
 from app.application.system_facts import SystemFactsRouter, SystemFactsService
 from app.core.config import Settings
 from app.core.logging import get_logger
@@ -40,6 +47,7 @@ from app.infrastructure.llm import (
     OllamaTextResponse,
     OllamaTimeoutError,
 )
+from app.infrastructure.memories import MemoryStore
 from app.infrastructure.reranker import CrossEncoderReranker, RerankerConfig
 from app.infrastructure.search import SearchHit, SearchService
 from app.prompts.qa import QA_SYSTEM_PROMPT, build_history_block, build_qa_user_prompt
@@ -389,14 +397,18 @@ class QAWorkflow:
         answerability_gate: AnswerabilityGate | None = None,
         generation_timeout_seconds: float | None = None,
         system_facts: SystemFactsService | None = None,
+        manifest_root: Path | None = None,
     ) -> None:
         self._search_service = search_service
         self._ollama_client = ollama_client
         self._model = model
+        self._min_cosine = min_cosine
         self._reranker = reranker
-        self._answerability_gate = answerability_gate
+        self._min_rerank_score = min_rerank_score
         self._generation_timeout_seconds = generation_timeout_seconds
+        self._answerability_gate = answerability_gate
         self._system_facts = system_facts
+        self._manifest_root = manifest_root
         self._system_facts_router = SystemFactsRouter()
         self._abstention_gate = AbstentionGate(
             min_cosine=min_cosine,
@@ -454,7 +466,22 @@ class QAWorkflow:
             answerability_gate=answerability_gate,
             generation_timeout_seconds=settings.qa.timeout_seconds,
             system_facts=SystemFactsService(settings),
+            manifest_root=settings.paths.manifest_root,
         )
+
+    def _retrieve_memories(self, question: str) -> list[MemoryMatch]:
+        """V2.1-C ACTIVE memory matches for ``question`` (possibly empty).
+
+        The memory store is instantiated per call: this workflow is cached
+        via ``lru_cache`` in ``deps``, while ``MemoryStore`` loads once per
+        instance — holding one here would hide newly approved memories
+        until process restart. With no ``manifest_root`` configured this
+        returns ``[]`` and the document-only flow is byte-identical.
+        """
+
+        if self._manifest_root is None:
+            return []
+        return retrieve_memories(question, MemoryStore(self._manifest_root))
 
     def ask(
         self,
@@ -518,25 +545,51 @@ class QAWorkflow:
         hits = hits[:top_k]
 
         abstention = self._abstention_gate.evaluate(hits)
-        if abstention.abstain:
-            logger.info(
-                "Abstaining from answer.",
-                extra={"reason": abstention.reason, "question": question},
-            )
-            return _abstention_answer(question, abstention.reason)
+        document_blocked = abstention.abstain
+        abstention_reason = abstention.reason
 
         # Post-retrieval answerability gate (Phase 3G-B): verify evidence supports
-        # the question before invoking the QA generation LLM.
-        if self._answerability_gate is not None:
+        # the question before invoking the QA generation LLM. Document hits only;
+        # memory sufficiency is evaluated separately below.
+        if not document_blocked and self._answerability_gate is not None:
             evidence_result: AnswerabilityResult = self._answerability_gate.verify(question, hits)
             if not evidence_result.sufficient:
+                document_blocked = True
+                abstention_reason = str(evidence_result.reason)
+
+        # V2.1-C independent memory context: ACTIVE approved memories scored
+        # locally against the question. Document gates above still operate on
+        # document hits only; a usable memory section is a separate downstream
+        # sufficiency signal that can rescue an otherwise-abstaining query.
+        # With no matching memories every path below is byte-identical to the
+        # document-only flow.
+        context = build_context(hits)
+        memory_matches = self._retrieve_memories(question)
+        memory_section = build_memory_context(
+            memory_matches,
+            start_number=len(hits) + 1,
+            max_chars=max(0, MAX_CONTEXT_CHARS - len(context)),
+        )
+        if document_blocked and not memory_section:
+            if abstention.abstain:
+                logger.info(
+                    "Abstaining from answer.",
+                    extra={"reason": abstention.reason, "question": question},
+                )
+            else:
                 logger.info(
                     "Answerability gate: abstaining.",
-                    extra={"reason": evidence_result.reason, "question": question},
+                    extra={"reason": abstention_reason, "question": question},
                 )
-                return _abstention_answer(question, str(evidence_result.reason))
-
-        context = build_context(hits)
+            return _abstention_answer(question, abstention_reason)
+        memory_hits = (
+            [memory_match_to_hit(match) for match in memory_matches]
+            if memory_section
+            else []
+        )
+        if memory_section:
+            context = f"{context}\n\n{memory_section}" if context else memory_section
+        combined_hits = [*hits, *memory_hits]
         prompt = build_qa_user_prompt(
             question, context, history=build_history_block(history)
         )
@@ -585,7 +638,7 @@ class QAWorkflow:
                 "Unable to generate an answer: the model returned an empty response."
             )
 
-        citations, invalid_numbers, duplicates = resolve_citations(response.response, hits)
+        citations, invalid_numbers, duplicates = resolve_citations(response.response, combined_hits)
         if invalid_numbers:
             logger.warning(
                 "QA answer cites source numbers outside the retrieved context.",
@@ -594,7 +647,7 @@ class QAWorkflow:
 
         return QAAnswer(
             answer=response.response,
-            sources=list(hits),
+            sources=list(combined_hits),
             model=response.model,
             outcome=OUTCOME_ANSWERED,
             citations=citations,
@@ -604,7 +657,7 @@ class QAWorkflow:
             telemetry=ObservationTelemetry.answered(
                 question=question,
                 answer=response.response,
-                hits=len(hits),
+                hits=len(combined_hits),
                 citations=len(citations),
                 invalid_citations=len(invalid_numbers),
                 duplicate_citations=duplicates,

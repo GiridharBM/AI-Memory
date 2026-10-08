@@ -286,6 +286,16 @@ class MemoryService:
 
         return self._memories.list(limit=limit, offset=offset)
 
+    def active_memories(self) -> Sequence[Memory]:
+        """Every ACTIVE approved memory, oldest approval first.
+
+        Read-only lifecycle view for runtime memory context: superseded
+        versions are excluded here, never mutated. Delegates to the store
+        like the other list methods.
+        """
+
+        return self._memories.active_memories()
+
     def memory_versions(self, logical_id: str) -> list[Memory]:
         """Every stored version of one logical memory, oldest version first."""
 
