@@ -7,6 +7,11 @@ regression when reranker is off.
 
 from __future__ import annotations
 
+import sys
+from types import ModuleType
+
+import pytest
+
 from app.application.qa_workflow import (
     ABSTENTION_MESSAGE,
     AbstentionGate,
@@ -119,7 +124,21 @@ class TestCrossEncoderReranker:
         # All 10 returned (disabled mode returns original list)
         assert len(result) == 10
 
-    def test_unavailable_model_returns_original_order(self) -> None:
+    def test_unavailable_model_returns_original_order(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        class UnavailableModelLoader:
+            @classmethod
+            def from_pretrained(cls, model: str) -> None:
+                raise OSError(f"Model unavailable: {model}")
+
+        torch = ModuleType("torch")
+        transformers = ModuleType("transformers")
+        monkeypatch.setitem(sys.modules, "torch", torch)
+        transformers.AutoModelForSequenceClassification = UnavailableModelLoader
+        transformers.AutoTokenizer = UnavailableModelLoader
+        monkeypatch.setitem(sys.modules, "transformers", transformers)
+
         cfg = RerankerConfig(enabled=True, model="nonexistent/model-123")
         reranker = CrossEncoderReranker(cfg)
         hits = [_hit("A"), _hit("B")]
