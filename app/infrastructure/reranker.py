@@ -15,13 +15,9 @@ Model choice: ``cross-encoder/ms-marco-MiniLM-L-12-v2``
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import Any
 
 from app.core.logging import get_logger
-
-if TYPE_CHECKING:
-    import torch
-    from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 logger = get_logger(__name__)
 
@@ -59,9 +55,9 @@ class CrossEncoderReranker:
 
     def __init__(self, config: RerankerConfig | None = None) -> None:
         self._config = config or RerankerConfig()
-        self._model: AutoModelForSequenceClassification | None = None  # Lazy-loaded
-        self._tokenizer: AutoTokenizer | None = None
-        self._device: torch.device | None = None
+        self._model: Any | None = None  # Lazy-loaded
+        self._tokenizer: Any | None = None
+        self._device: Any | None = None
         self._load_attempted = False
         self._load_error: str | None = None
 
