@@ -40,7 +40,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest tests/ -ra --tb=short --cov=app --cov-report=term-missing --cov-report=xml
+          pytest tests/ -ra --tb=short -o faulthandler_timeout=120 --cov=app --cov-report=term-missing --cov-report=xml
 
       - name: Upload coverage
         if: matrix.python-version == '3.13'
