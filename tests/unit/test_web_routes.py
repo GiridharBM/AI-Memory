@@ -145,6 +145,21 @@ class TestSystemEndpoint:
         assert secret_detail not in response.text
         assert "Ollama health probe failed." in response.text
 
+    def test_diagnostics_does_not_return_directory_exception_details(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        secret_detail = "private-directory-error"
+        monkeypatch.setattr(
+            "app.cli.entry._check_writable_directory",
+            lambda _path: (False, secret_detail),
+        )
+
+        response = client.get("/api/diagnostics")
+
+        assert response.status_code == 200
+        assert secret_detail not in response.text
+        assert "Directory is not writable; check the server log." in response.text
+
     def test_reports_counts_from_the_persisted_store(self, client: TestClient) -> None:
         settings = deps.get_settings()
         _write_store(

@@ -504,7 +504,7 @@ class QAWorkflow:
                 fact = self._system_facts.resolve(intent)
                 logger.info(
                     "Answering from System Facts.",
-                    extra={"intent": intent, "question_length": len(question)},
+                    extra={"intent": intent},
                 )
                 return QAAnswer(
                     answer=fact.answer,
@@ -526,7 +526,7 @@ class QAWorkflow:
         )
         logger.info(
             "QA retrieval completed.",
-            extra={"question_length": len(question), "hits": len(hits), "top_k": top_k},
+            extra={"hits": len(hits), "top_k": top_k},
         )
 
         # Rerank if available
@@ -535,7 +535,6 @@ class QAWorkflow:
             logger.info(
                 "Reranking completed.",
                 extra={
-                    "question_length": len(question),
                     "reranked": len(hits),
                     "top_rerank_score": hits[0].rerank_score if hits else 0.0,
                 },
@@ -574,12 +573,12 @@ class QAWorkflow:
             if abstention.abstain:
                 logger.info(
                     "Abstaining from answer.",
-                    extra={"reason": abstention.reason, "question_length": len(question)},
+                    extra={"reason": abstention.reason},
                 )
             else:
                 logger.info(
                     "Answerability gate: abstaining.",
-                    extra={"reason": abstention_reason, "question_length": len(question)},
+                    extra={"reason": abstention_reason},
                 )
             return _abstention_answer(question, abstention_reason)
         memory_hits = (
@@ -632,7 +631,6 @@ class QAWorkflow:
         if not response.response.strip():
             logger.warning(
                 "QA generation returned an empty response (treated as failure).",
-                extra={"question_length": len(question)},
             )
             raise QAEmptyAnswerError(
                 "Unable to generate an answer: the model returned an empty response."
@@ -642,7 +640,7 @@ class QAWorkflow:
         if invalid_numbers:
             logger.warning(
                 "QA answer cites source numbers outside the retrieved context.",
-                extra={"invalid": invalid_numbers, "question_length": len(question)},
+                extra={"invalid": invalid_numbers},
             )
 
         return QAAnswer(

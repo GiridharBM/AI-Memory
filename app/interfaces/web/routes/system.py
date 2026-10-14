@@ -20,9 +20,11 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, StrictBool
 
 from app.application.system_facts import OLLAMA_NUM_CTX, SUPPORTED_INGESTION_TYPES
+from app.core.logging import get_logger
 from app.interfaces.web import deps
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 # RRF's k is a module-level default in app/infrastructure/search.py, not a
 # config key, so it is surfaced as a constant of the retrieval implementation
@@ -398,6 +400,12 @@ def get_diagnostics() -> dict[str, Any]:
         ("Cache root", settings.paths.cache_root),
     ):
         ok, detail = _check_writable_directory(path)
+        if not ok:
+            logger.error(
+                "Diagnostics found a configured directory that is not writable.",
+                extra={"directory_label": label},
+            )
+            detail = "Directory is not writable; check the server log."
         directories.append({"label": label, "ok": ok, "detail": detail})
 
     ocr = settings.intelligence.ocr
