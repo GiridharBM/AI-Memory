@@ -152,18 +152,14 @@ class DocumentIngestionService:
             logger.info(
                 "Ingested source document.",
                 extra={
-                    "source": document.source,
-                    "source_path": str(document.source_path) if document.source_path else None,
                     "source_type": document.source_type,
-                    "document_filename": document.filename,
                 },
             )
             return DocumentIngestionResult(document=document)
         except (UnsupportedSourceError, IngestionError) as exc:
             logger.error(
                 "Failed to ingest source document.",
-                extra={"source": self._source_label(normalized_source), "reason": str(exc)},
-                exc_info=True,
+                extra={"error_type": type(exc).__name__},
             )
             return DocumentIngestionResult(
                 error=DocumentIngestionError(

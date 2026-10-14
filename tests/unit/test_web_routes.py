@@ -20,9 +20,10 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.application.qa_workflow import OUTCOME_ABSTAINED, OUTCOME_ANSWERED, QAAnswer
-from app.core.config import Settings
+from app.core.config import ConfigurationError, Settings
 from app.infrastructure.search import SearchHit
 from app.interfaces.web import deps
+from app.interfaces.web.deps import ollama_health as _ollama_health
 from app.interfaces.web.server import create_app
 
 
@@ -83,6 +84,67 @@ def client(tmp_settings: Settings, monkeypatch: pytest.MonkeyPatch) -> TestClien
 
 
 class TestSystemEndpoint:
+    def test_configuration_error_details_are_not_returned_to_http_clients(
+        self, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        secret_path = "private-config-location"
+
+        def _fail() -> Settings:
+            raise ConfigurationError(f"Invalid config at {secret_path}")
+
+        monkeypatch.setattr(deps, "get_settings", _fail)
+
+        error = deps.settings_error()
+
+        assert error == (
+            "Application configuration is unavailable. Check the server log for details."
+        )
+        assert secret_path not in error
+        assert "Application configuration could not be loaded." in caplog.text
+
+    def test_ollama_probe_exception_details_are_not_returned(
+        self,
+        client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        secret_detail = "private-token-value"
+
+        class _FailingOllamaClient:
+            def __init__(self, _settings: object) -> None:
+                pass
+
+            def is_available(self) -> bool:
+                return True
+
+            def model_exists(self, _model: str) -> bool:
+                raise RuntimeError(secret_detail)
+
+        monkeypatch.setattr(deps, "OllamaClient", _FailingOllamaClient)
+        monkeypatch.setattr(deps, "ollama_health", _ollama_health)
+
+        for path in ("/api/health", "/api/system", "/api/diagnostics"):
+            monkeypatch.setattr(deps, "_health_cache", None)
+            response = client.get(path)
+
+            assert response.status_code == 200
+            assert secret_detail not in response.text
+            assert "Ollama model check failed." in response.text
+
+        class _FailingHealthClient:
+            def __init__(self, _settings: object) -> None:
+                pass
+
+            def is_available(self) -> bool:
+                raise RuntimeError(secret_detail)
+
+        monkeypatch.setattr(deps, "OllamaClient", _FailingHealthClient)
+        monkeypatch.setattr(deps, "_health_cache", None)
+        response = client.get("/api/health")
+
+        assert response.status_code == 200
+        assert secret_detail not in response.text
+        assert "Ollama health probe failed." in response.text
+
     def test_reports_counts_from_the_persisted_store(self, client: TestClient) -> None:
         settings = deps.get_settings()
         _write_store(

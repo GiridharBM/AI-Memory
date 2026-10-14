@@ -323,7 +323,7 @@ class IngestionWorkflow:
     ) -> IngestionWorkflowResult:
         """Run the complete document-to-Obsidian workflow."""
 
-        logger.info("Starting ingestion workflow.", extra={"source": str(source)})
+        logger.info("Starting ingestion workflow.")
 
         # Fail closed on an unreadable index before any durable write.  A store
         # that failed to load looks empty, so continuing would save only the new
@@ -482,7 +482,6 @@ class IngestionWorkflow:
                     logger.warning(
                         "Skipping email attachment beyond max_attachments.",
                         extra={
-                            "path": path_str,
                             "max_attachments": metadata.max_attachments,
                         },
                     )
@@ -500,10 +499,9 @@ class IngestionWorkflow:
     ) -> None:
         child_result = self._ingestion_service.ingest(path_str)
         if not child_result.succeeded or child_result.document is None:
-            reason = child_result.error.reason if child_result.error else "Unknown ingestion error."
             logger.warning(
                 "Skipping failed email attachment.",
-                extra={"path": path_str, "reason": reason},
+                extra={"error_type": type(child_result.error).__name__},
             )
             return
         child_document = child_result.document
@@ -522,7 +520,6 @@ class IngestionWorkflow:
         except Exception:
             logger.exception(
                 "Skipping failed email attachment after ingestion.",
-                extra={"path": path_str, "parent_id": parent_id},
             )
 
     def _cleanup_attachment_temp_files(self, paths: list[str]) -> None:
@@ -663,7 +660,6 @@ class IngestionWorkflow:
                 "Routed processor completed.",
                 extra={
                     "processor": processor_name,
-                    "source": document.source,
                     "extracted_length": len(result.extracted_text),
                 },
             )
@@ -676,13 +672,13 @@ class IngestionWorkflow:
             if processor_name in vision_required:
                 logger.error(
                     "Vision processor failed for vision-required type, not falling back.",
-                    extra={"processor": processor_name, "source": document.source},
+                    extra={"processor": processor_name},
                     exc_info=True,
                 )
                 raise
             logger.warning(
                 "Routed processor failed, falling back to original document.",
-                extra={"processor": processor_name, "source": document.source},
+                extra={"processor": processor_name},
                 exc_info=True,
             )
             return document, None, None
@@ -716,7 +712,7 @@ class IngestionWorkflow:
         try:
             structure = analyzer.analyze(text, source)
         except Exception:
-            logger.warning("Structure analysis failed.", extra={"source": source}, exc_info=True)
+            logger.warning("Structure analysis failed.", exc_info=True)
             return None
         return structure.model_dump(mode="json")
 
@@ -756,15 +752,12 @@ class IngestionWorkflow:
             except Exception:
                 logger.warning(
                     "Structure analysis failed (entity extraction continues).",
-                    extra={"source": source},
                     exc_info=True,
                 )
         try:
             entities = extractor.extract(text, source, source_type, structure)
         except Exception:
-            logger.warning(
-                "Entity extraction failed.", extra={"source": source}, exc_info=True
-            )
+            logger.warning("Entity extraction failed.", exc_info=True)
             return None
         return list(entities)
 
@@ -792,9 +785,7 @@ class IngestionWorkflow:
         try:
             relationships = detector.detect(entities)
         except Exception:
-            logger.warning(
-                "Relationship detection failed.", extra={"source": source}, exc_info=True
-            )
+            logger.warning("Relationship detection failed.", exc_info=True)
             return None
         return list(relationships)
 
@@ -821,9 +812,7 @@ class IngestionWorkflow:
         try:
             graph = builder.build(entities, relationships, source)
         except Exception:
-            logger.warning(
-                "Document graph construction failed.", extra={"source": source}, exc_info=True
-            )
+            logger.warning("Document graph construction failed.", exc_info=True)
             return None
         return graph_to_dict(graph)
 
@@ -860,7 +849,6 @@ class IngestionWorkflow:
         except Exception:
             logger.warning(
                 "Table extraction failed.",
-                extra={"source": document.source},
                 exc_info=True,
             )
             return None
@@ -896,7 +884,6 @@ class IngestionWorkflow:
         except Exception:
             logger.warning(
                 "Embedded-image extraction failed.",
-                extra={"source": document.source},
                 exc_info=True,
             )
             return None
@@ -937,7 +924,6 @@ class IngestionWorkflow:
         except Exception:
             logger.warning(
                 "Code structure analysis failed.",
-                extra={"source": document.source},
                 exc_info=True,
             )
             return None
@@ -1017,7 +1003,6 @@ class IngestionWorkflow:
         except Exception as exc:
             logger.warning(
                 "Knowledge engine step failed.",
-                extra={"source": document.source},
                 exc_info=True,
             )
             outcome.embedding_succeeded = False
@@ -1059,7 +1044,6 @@ class IngestionWorkflow:
         except Exception:
             logger.warning(
                 "Knowledge graph step failed.",
-                extra={"source": document.source},
                 exc_info=True,
             )
             outcome.graph_succeeded = False
@@ -1068,9 +1052,7 @@ class IngestionWorkflow:
             logger.warning(
                 "No chunks stored.",
                 extra={
-                    "source": document.source,
                     "chunks_created": outcome.chunks_created,
-                    "error": outcome.error,
                 },
             )
 

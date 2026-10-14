@@ -56,10 +56,13 @@ class HyDETransform:
         try:
             response = self._generate(_HYDE_SYSTEM_PROMPT, query)
             if not response or not response.strip():
-                logger.warning("HyDE: empty response for query=%r", query[:80])
+                logger.warning("HyDE: empty response.")
                 return None
             text = response.strip()[: self._max_length]
             return text
-        except Exception:
-            logger.warning("HyDE: generation failed for query=%r", query[:80], exc_info=True)
+        except Exception as exc:
+            logger.warning(
+                "HyDE: generation failed.",
+                extra={"error_type": type(exc).__name__},
+            )
             return None

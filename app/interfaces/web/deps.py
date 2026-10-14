@@ -22,9 +22,12 @@ from typing import Any
 
 from app.application import QAWorkflow
 from app.core.config import ConfigurationError, Settings, load_settings
+from app.core.logging import get_logger
 from app.infrastructure.llm import OllamaClient
 from app.infrastructure.search import SearchService
 from app.infrastructure.vector_store import VectorStore
+
+logger = get_logger(__name__)
 
 # How long an Ollama reachability probe stays fresh. The dashboard polls, so
 # without this every render would hit the model server.
@@ -40,7 +43,7 @@ def get_settings() -> Settings:
 
 
 def settings_error() -> str | None:
-    """Return why configuration is unusable, or ``None`` when it loads.
+    """Return a safe configuration status, or ``None`` when settings load.
 
     The GUI renders ``STATUS UNKNOWN`` rather than fabricating health when this
     is set; it must never crash the whole UI on a config problem.
@@ -48,11 +51,14 @@ def settings_error() -> str | None:
 
     try:
         get_settings()
-    except ConfigurationError as exc:
-        return str(exc)
-    except Exception as exc:  # defensive: a GUI must survive odd config states
-        return f"{type(exc).__name__}: {exc}"
-    return None
+    except ConfigurationError:
+        logger.exception("Application configuration could not be loaded.")
+    except Exception:
+        logger.exception("Unexpected error while loading application configuration.")
+    else:
+        return None
+
+    return "Application configuration is unavailable. Check the server log for details."
 
 
 @lru_cache(maxsize=1)
@@ -212,16 +218,18 @@ def ollama_health(*, force: bool = False) -> dict[str, Any]:
             else:
                 try:
                     present = bool(client.model_exists(model))
-                except Exception as exc:  # a probe failure is not a "missing model"
-                    payload["detail"] = f"model check failed: {exc}"
+                except Exception:
+                    logger.exception("Ollama model availability check failed.")
+                    payload["detail"] = "Ollama model check failed."
                 else:
                     payload["model_present"] = present
                     if not present:
                         payload["detail"] = f"model not listed: {model}"
         else:
             payload["detail"] = f"could not reach {settings.ollama.host}"
-    except Exception as exc:
-        payload["detail"] = f"{type(exc).__name__}: {exc}"
+    except Exception:
+        logger.exception("Ollama health probe failed.")
+        payload["detail"] = "Ollama health probe failed."
 
     _health_cache = (time.monotonic(), payload)
     return payload

@@ -57,9 +57,14 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const url = new URL(`${BASE}${path}`, window.location.origin)
+  if (url.origin !== window.location.origin || !url.pathname.startsWith(`${BASE}/`)) {
+    throw new ApiError(0, 'Invalid PAM API request.')
+  }
+
   let response: Response
   try {
-    response = await fetch(`${BASE}${path}`, {
+    response = await fetch(url, {
       ...init,
       headers: init?.body instanceof FormData ? init.headers : { 'Content-Type': 'application/json' },
     })
