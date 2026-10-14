@@ -1,18 +1,40 @@
 # Log
 
-- 2026-07-08T18:01:40.219611+00:00 - created [[Machine Learning|Machine Learning]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\test.md
-- 2026-07-08T18:53:57.626490+00:00 - updated [[Machine Learning|machine-learning-overview]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\test.md
-- 2026-07-09T17:26:12.318557+00:00 - created [[artificial-intelligence-basics|artificial-intelligence-basics]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\ai-basics.md
-- 2026-07-20T18:14:42.699242+00:00 - updated [[meet-gpt-5-6|meet-gpt-5-6]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\Meet _GPT-5.6.md
-- 2026-07-20T18:19:09.134358+00:00 - updated [[Agile|DevOps_Terms_A_to_Z_Glossary]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\DevOps Terms A to Z Glossary.md
-- 2026-07-20T20:20:30.331732+00:00 - updated [[Machine Learning|Machine_Learning]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\test.md
-- 2026-07-22T13:59:37.407364+00:00 - updated [[artificial-intelligence-basics|Artificial Intelligence Basics]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\ai-basics.md
-- 2026-07-22T14:49:27.444995+00:00 - updated [[AI_News_&_Artificial_Intelligence|AI_News_and_Artificial_Intelligence]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\AI_News_&_Artificial_Intelligence.md
-- 2026-07-22T18:38:52.074060+00:00 - created [[Python Decorators|Python Decorators]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\test-functional.md
-- 2026-07-22T18:56:45.578973+00:00 - created [[Python-Programming|Python-Programming]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\python.md
-- 2026-07-22T19:04:02.692442+00:00 - created [[Chinese Open-Weight Models and U.S. Policy Uncertainty|Chinese Open-Weight Models and U.S. Policy Uncertainty]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\Chinese open-weight models are cheap. Washington is deciding what that costs.md
-- 2026-07-23T17:08:53.033409+00:00 - updated [[20_AI_Concepts_Explained_in_40_Minutes|20_AI_Concepts_Explained_in_40_Minutes]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\20_AI_Concepts_Explained_in_40_Minutes.md
-- 2026-07-23T17:16:25.493741+00:00 - updated [[Artificial-intelligence-concepts|Artificial Intelligence Concepts]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\AI_Concepts.md
-- 2026-07-23T17:37:27.782955+00:00 - created [[Gemini_3_6_Flash_Review_Benchmarks_Price_API_2026|Gemini_3_6_Flash_Review_Benchmarks_Price_API_2026]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\buildfastwithai.txt
-- 2026-07-23T17:53:07.054369+00:00 - created [[Introduction to Machine Learning|Introduction to Machine Learning]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\image.png
-- 2026-07-23T18:20:49.877340+00:00 - created [[How-Artificial-Intelligence-Works|How-Artificial-Intelligence-Works]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\images (1).jpg
+- 2026-08-10T14:34:19.561914+00:00 - created [[Our-Organization|Our-Organization]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\Our Organization.md
+- 2026-08-10T14:50:04.431548+00:00 - created [[Meet GPT-5.6 Game Development Demo|Meet GPT-5.6 Game Development Demo]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\Meet _GPT-5.6 2.md
+- 2026-08-10T15:01:44.917913+00:00 - created [[OpenHands Platform for AI Developers|OpenHands Platform for AI Developers]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\OpenHands An Open Platform for AI Software Developers as Generalist Agents.md
+- 2026-08-10T15:21:34.301666+00:00 - created [[DAA Assignment 4 Notes|DAA Assignment 4 Notes]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\DAA assignment-4.pdf
+- 2026-08-10T15:35:49.690955+00:00 - created [[sigmamusicart-song-english-edm-296526|sigmamusicart-song-english-edm-296526]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\sigmamusicart-song-english-edm-296526.mp3
+- 2026-08-10T15:48:56.001440+00:00 - created [[TiHAN-IIT Hyderabad Overview|TiHAN-IIT Hyderabad Overview]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\WhatsApp Image 2026-07-16 at 7.18.48 PM.jpeg
+- 2026-08-11T14:06:39.311657+00:00 - created [[PCB Board Design A Step-by-Step Guide for Beginners|PCB Board Design A Step-by-Step Guide for Beginners]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\PCB Board Design A Step-by-Step Guide for Beginners.md
+- 2026-08-12T19:42:20.344216+00:00 - created [[pam_smoke_test|pam_smoke_test]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\pam_smoke_test.txt
+- 2026-08-13T14:21:12.076141+00:00 - created [[What I Learned From LeetCode|What I Learned From LeetCode]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\What I Learned From LeetCode.md
+- 2026-08-14T08:47:49.460790+00:00 - created [[Jharkhand_Students_Protest_2026|Jharkhand_Students_Protest_2026]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\Jharkhand job exam stir Protest enters 21st day, students plan ‘Tiranga Yatra’ on August 15.md
+- 2026-08-14T13:21:10.965887+00:00 - created [[Understanding Neural Networks - Deep Learning Chapter 1|Understanding Neural Networks - Deep Learning Chapter 1]] from D:\LLM-Wiki\LLM-Wiki\data\inbox\But what is a neural network  Deep learning chapter 1.md
+- 2026-08-24T17:58:02.525202+00:00 - created [[AWS_CloudFormation_Getting_Started|AWS_CloudFormation_Getting_Started]] from D:\Projects\Personal AI Memory\data\inbox\AWS CloudFormation.pdf
+- 2026-08-24T18:00:44.959990+00:00 - created [[AWS_Foundations_Getting_Started_Certificate|AWS_Foundations_Getting_Started_Certificate]] from D:\Projects\Personal AI Memory\data\inbox\AWS Foundations Getting Started.pdf
+- 2026-08-25T07:19:28.384309+00:00 - created [[Data Analysis with Python Coursera Completion Certificate|Data Analysis with Python Coursera Completion Certificate]] from D:\Projects\Personal AI Memory\data\inbox\Data Analysis with Python Coursera.pdf
+- 2026-08-25T07:51:43.828970+00:00 - created [[Docker Commands Cheat Sheet|Docker Commands Cheat Sheet]] from D:\Projects\Personal AI Memory\data\inbox\Docker CheatSheet ApnaCollege.pdf
+- 2026-08-25T07:56:04.670113+00:00 - created [[Docker_Introduction_Certificate|Docker_Introduction_Certificate]] from D:\Projects\Personal AI Memory\data\inbox\Docker_Introduction.pdf
+- 2026-08-25T15:13:10.151787+00:00 - created [[Turing_Machines_Module_5|Turing_Machines_Module_5]] from D:\Projects\Personal AI Memory\data\inbox\FLAT MODULE 5 NOTES .pdf
+- 2026-08-25T15:25:00.470904+00:00 - created [[Getting-Started-with-DevOps-on-AWS|Getting-Started-with-DevOps-on-AWS]] from D:\Projects\Personal AI Memory\data\inbox\Getting Started with DevOps on AWS.pdf
+- 2026-08-25T15:31:16.936704+00:00 - created [[Introduction to Cloud Certificate - GiridharBM|Introduction to Cloud Certificate - GiridharBM]] from D:\Projects\Personal AI Memory\data\inbox\Introduction to Cloud.pdf
+- 2026-08-25T15:48:25.278461+00:00 - created [[Module-5-Graph-Theory|Module-5-Graph-Theory]] from D:\Projects\Personal AI Memory\data\inbox\Module 5-Graph Theory.pdf
+- 2026-08-25T18:14:37.111120+00:00 - created [[PAM_V1_LEARNING_GUIDE|PAM_V1_LEARNING_GUIDE]] from D:\Projects\Personal AI Memory\data\inbox\PAM_V1_LEARNING_GUIDE.pdf
+- 2026-08-26T03:37:44.743435+00:00 - created [[python-for-data-science-certificate|python-for-data-science-certificate]] from D:\Projects\Personal AI Memory\data\inbox\python for data science.pdf
+- 2026-08-26T04:12:11.016361+00:00 - created [[Web_Module_5_Pure_React|Web_Module_5_Pure_React]] from D:\Projects\Personal AI Memory\data\inbox\Web Module 5 notes.pdf
+- 2026-08-26T04:16:31.811023+00:00 - updated [[AWS_CloudFormation_Getting_Started|AWS-CloudFormation-Getting-Started-Certificate]] from D:\Projects\Personal AI Memory\data\inbox\AWS CloudFormation.pdf
+- 2026-08-26T04:22:28.370925+00:00 - updated [[AWS_Foundations_Getting_Started_Certificate|AWS_Foundations_Getting_Started_Certificate]] from D:\Projects\Personal AI Memory\data\inbox\AWS Foundations Getting Started.pdf
+- 2026-08-26T04:34:03.153192+00:00 - updated [[Data Analysis with Python Coursera Completion Certificate|Data Analysis with Python Coursera Completion Certificate]] from D:\Projects\Personal AI Memory\data\inbox\Data Analysis with Python Coursera.pdf
+- 2026-08-26T04:43:15.113723+00:00 - updated [[Docker Commands Cheat Sheet|Docker Cheat Sheet Commands]] from D:\Projects\Personal AI Memory\data\inbox\Docker CheatSheet ApnaCollege.pdf
+- 2026-08-26T04:48:03.941082+00:00 - updated [[Docker_Introduction_Certificate|Docker_Introduction_Certificate]] from D:\Projects\Personal AI Memory\data\inbox\Docker_Introduction.pdf
+- 2026-08-27T03:42:34.279481+00:00 - created [[Auto_Testing_Project_Overview|Auto_Testing_Project_Overview]] from D:\Projects\Personal AI Memory\data\inbox\Auto_Testing_Faculty_Explanation.pdf
+- 2026-08-27T04:03:17.210742+00:00 - created [[GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report|GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report]] from D:\Projects\Personal AI Memory\data\inbox\GPU_Accelerated_Generative_AI_Testing_Platform_Project_Report.pdf
+- 2026-09-02T17:18:49.582119+00:00 - created [[smoke-test-20260902113115|smoke-test-20260902113115]] from C:\Users\girid\AppData\Local\Temp\opencode\pam_smoke_ingest_20260902_113115.md
+- 2026-09-04T09:50:45.293841+00:00 - created [[Large Language Models Explained Briefly|Large Language Models Explained Briefly]] from D:\Projects\Personal AI Memory\data\inbox\Large Language Models explained briefly.md
+- 2026-09-05T15:45:47.920176+00:00 - created [[1. AI & ML Foundations - Stop Thinking of Features as Columns The Geometric Key to ML|1. AI & ML Foundations - Stop Thinking of Features as Columns The Geometric Key to ML]] from D:\Projects\Personal AI Memory\data\inbox\1. AI & ML Foundations  Stop Thinking of Features as Columns The Geometric Key to ML.md
+- 2026-09-05T16:23:24.992261+00:00 - created [[I Built an LLM From Scratch|I Built an LLM From Scratch]] from D:\Projects\Personal AI Memory\data\inbox\I Built an LLM From Scratch.md
+- 2026-09-05T16:45:13.459225+00:00 - created [[Build-Stateful-AI-Agent-Chatbot-From-Scratch-Using-LangGraph-Groq-and-LangSmith|Build-Stateful-AI-Agent-Chatbot-From-Scratch-Using-LangGraph-Groq-and-LangSmith]] from D:\Projects\Personal AI Memory\data\inbox\Build a Stateful AI Agent chatbot from Scratch (LangGraph, Groq and langSmith tutorial).md
+- 2026-09-05T17:23:34.128484+00:00 - created [[Local AI Setup and Model Execution|Local AI Setup and Model Execution]] from D:\Projects\Personal AI Memory\data\inbox\Local AI Explained How to Run AI Models on Your Computer.md
+- 2026-09-20T16:39:13.771757+00:00 - created [[Data Visualization Best Practices|Data Visualization Best Practices]] from D:\Projects\Personal AI Memory\data\inbox\sosulski-kristen-data-visualization-made-simple_-insights-into-becoming-visual-2019-routledge.pdf
+- 2026-09-30T15:16:00.505355+00:00 - created [[GBM-Glasses-V1-Overview|GBM-Glasses-V1-Overview]] from D:\Projects\Personal AI Memory\data\staging\pam-gui-uploads\README.md

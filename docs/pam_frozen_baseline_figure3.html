@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAM Frozen Academic Baseline — Figure 3</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Times New Roman", Times, serif;
+    background: #ffffff;
+    color: #1a1a1a;
+    line-height: 1.35;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  .container {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .table-wrapper {
+    width: 100%;
+    max-width: 680px;
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12px;
+    font-family: "Times New Roman", Times, serif;
+  }
+  thead {
+    background: #1a1a1a;
+    color: #ffffff;
+  }
+  th {
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 11.5px;
+    border-bottom: 2px solid #1a1a1a;
+  }
+  th.value { text-align: right; width: 140px; }
+  th.exact { text-align: right; width: 200px; }
+  tbody tr { border-bottom: 1px solid #e0e0e0; }
+  tbody tr:last-child { border-bottom: 2px solid #1a1a1a; }
+  tbody tr.section-header {
+    background: #f5f5f5;
+    font-weight: 700;
+  }
+  tbody tr.section-header td {
+    padding: 8px 10px 6px;
+    border-top: 2px solid #ccc;
+    border-bottom: 1px solid #ccc;
+  }
+  td {
+    padding: 6px 10px;
+    vertical-align: middle;
+  }
+  td.metric { font-weight: 500; color: #333; }
+  td.value { text-align: right; font-variant-numeric: tabular-nums; font-family: "Times New Roman", Times, serif; }
+  td.exact { text-align right; font-family: monospace; font-size: 10.5px; color: #555; background: #fafafa; }
+  .config-box {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1.7;
+    max-width: 680px;
+    width: 100%;
+  }
+  .config-box strong { display: block; margin-bottom: 4px; font-size: 11.5px; }
+  .caption {
+    margin-top: 16px;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.5;
+    color: #333;
+    max-width: 680px;
+  }
+  .caption strong { font-weight: 700; }
+  .footnotes {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #555;
+    line-height: 1.6;
+    max-width: 680px;
+  }
+  .footnotes p { margin: 2px 0; }
+  .footnotes sup { font-size: 9px; vertical-align: super; }
+  .source-ref {
+    margin-top: 8px;
+    font-size: 10px;
+    color: #666;
+    max-width: 680px;
+  }
+  @media print { body { padding: 0; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="value">Value (rounded)</th>
+          <th class="exact">Authoritative value from phase_5d_frozen_baseline.json</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dataset -->
+        <tr class="section-header">
+          <td colspan="3">Dataset</td>
+        </tr>
+        <tr>
+          <td class="metric">Total queries</td>
+          <td class="value">199</td>
+          <td class="exact">199 (metadata.dataset = "v3.0 frozen (199 queries)")</td>
+        </tr>
+        <tr>
+          <td class="metric">Positive queries (with ground truth)</td>
+          <td class="value">157</td>
+          <td class="exact">157 (metrics.queries_with_ground_truth)</td>
+        </tr>
+        <tr>
+          <td class="metric">Negative queries</td>
+          <td class="value">42</td>
+          <td class="exact">42 (metrics.negative_queries)</td>
+        </tr>
+        <tr>
+          <td class="metric">Sources in corpus</td>
+          <td class="value">24</td>
+          <td class="exact">24 (metadata.corpus.sources)</td>
+        </tr>
+        <tr>
+          <td class="metric">Indexed chunks</td>
+          <td class="value">195</td>
+          <td class="exact">195 (metadata.corpus.chunks)</td>
+        </tr>
+
+        <!-- Retrieval Metrics -->
+        <tr class="section-header">
+          <td colspan="3">Retrieval Metrics (top_k = 5)</td>
+        </tr>
+        <tr>
+          <td class="metric">Hit@1</td>
+          <td class="value">0.841</td>
+          <td class="exact">0.8407643312101911 (metrics.hit_rate@1)</td>
+        </tr>
+        <tr>
+          <td class="metric">Hit@3</td>
+          <td class="value">0.911</td>
+          <td class="exact">0.910828025477707 (metrics.hit_rate@3)</td>
+        </tr>
+        <tr>
+          <td class="metric">Hit@5</td>
+          <td class="value">0.924</td>
+          <td class="exact">0.9235668789808917 (metrics.hit_rate@5)</td>
+        </tr>
+        <tr>
+          <td class="metric">Hit@10</td>
+          <td class="value">0.924</td>
+          <td class="exact">0.9235668789808917 (metrics.hit_rate@10)</td>
+        </tr>
+        <tr>
+          <td class="metric">MRR (Mean Reciprocal Rank)</td>
+          <td class="value">0.877</td>
+          <td class="exact">0.8772823779193205 (metrics.mrr)</td>
+        </tr>
+
+        <!-- Reliability -->
+        <tr class="section-header">
+          <td colspan="3">Reliability (Abstention Gate @ min_cosine = 0.45)</td>
+        </tr>
+        <tr>
+          <td class="metric">False Positive Rate (FPR)</td>
+          <td class="value">0.857</td>
+          <td class="exact">0.8571428571428571 (metrics.abstention.false_positive_rate)</td>
+        </tr>
+        <tr>
+          <td class="metric">False Negative Rate (FNR)</td>
+          <td class="value">0.000</td>
+          <td class="exact">0.0 (metrics.abstention.false_negative_rate)</td>
+        </tr>
+        <tr>
+          <td class="metric">Negative Rejection Rate</td>
+          <td class="value">0.143</td>
+          <td class="exact">0.14285714285714285 (metrics.abstention.negative_rejection_rate)</td>
+        </tr>
+        <tr>
+          <td class="metric">Abstention Rate</td>
+          <td class="value">0.030</td>
+          <td class="exact">0.03015075376884422 (metrics.abstention.abstention_rate)</td>
+        </tr>
+
+        <!-- Latency -->
+        <tr class="section-header">
+          <td colspan="3">Latency (ms)</td>
+        </tr>
+        <tr>
+          <td class="metric">p50 (median)</td>
+          <td class="value">37.4</td>
+          <td class="exact">37.4 (metrics.latency.p50_ms)</td>
+        </tr>
+        <tr>
+          <td class="metric">p95</td>
+          <td class="value">47.1</td>
+          <td class="exact">47.1 (metrics.latency.p95_ms)</td>
+        </tr>
+        <tr>
+          <td class="metric">Maximum</td>
+          <td class="value">7299.3</td>
+          <td class="exact">7299.3 (metrics.latency.max_ms)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="config-box">
+    <strong>Frozen Evaluation Configuration</strong>
+    <span>min_cosine = <strong>0.45</strong> (academic evaluation setting; <em>not</em> the current production default of 0.25)</span>
+    <span>top_k = 5</span>
+    <span>reranker_enabled = false</span>
+    <span>hyde_enabled = false</span>
+    <span>answerability_enabled = false</span>
+    <span>Dataset: v3.0 frozen (199 queries = 157 positive + 42 negative)</span>
+    <span>Corpus: 24 sources, 195 chunks</span>
+    <span>Evaluation date: 2026-08-27 21:10:04 (Phase 5D)</span>
+  </div>
+
+  <div class="caption">
+    <strong>Fig. 3.</strong> Frozen academic baseline retrieval and reliability results.
+  </div>
+
+  <div class="footnotes">
+    <p><sup>1</sup> All values reproduced directly from <code>eval/results/phase_5d_frozen_baseline.json</code> (authoritative frozen artifact). Rounded display values are shown for readability; the exact authoritative values are given in the rightmost column.</p>
+    <p><sup>2</sup> The abstention gate was active at min_cosine = 0.45 for this frozen baseline. The current production runtime default is min_cosine = 0.25 (see <code>app/application/qa_workflow.py</code>). Do not conflate the two.</p>
+    <p><sup>3</sup> FPR = 0.857 means 36/42 negative queries were accepted as positive (retrieved above threshold). Of these, 31 were content-sufficiency misses (relevant but insufficient), not irrelevant retrievals. FPR must not be presented as "85.7% accuracy."</p>
+    <p><sup>4</sup> Maximum latency (7299.3 ms) is an outlier (q001); p50 = 37.4 ms and p95 = 47.1 ms represent typical retrieval latency.</p>
+  </div>
+
+  <div class="source-ref">
+    Source: <code>eval/results/phase_5d_frozen_baseline.json</code> (metadata.phase="5D", metrics.experiment="5D_frozen_baseline")
+  </div>
+</div>
+</body>
+</html>

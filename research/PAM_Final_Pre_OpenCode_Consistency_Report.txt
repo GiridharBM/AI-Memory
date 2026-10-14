@@ -1,0 +1,17 @@
+PASS — Frozen query count 199
+PASS — 157 positive / 42 negative
+PASS — 24 sources / 195 chunks
+PASS — Hit@5 0.9236
+PASS — MRR 0.8773
+PASS — FPR 0.8571
+PASS — FNR 0
+PASS — p95 47.1 ms
+PASS — 31/36 content sufficiency
+PASS — BM25 k1=1.5
+PASS — BM25 b=0.75
+PASS — RRF k=60
+PASS — Academic min_cosine 0.45
+PASS — Runtime min_cosine distinction
+PASS — KG non-retrieval
+PASS — Network-source caveat
+PASS — Reference [1]-[6] present

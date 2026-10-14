@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAM Architecture — Figure 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    font-family: "Times New Roman", Times, serif; 
+    background: #ffffff; 
+    color: #1a1a1a; 
+    line-height: 1.35; 
+    min-height: 100vh;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding: 24px 16px;
+  }
+  .container { 
+    width: 100%; 
+    max-width: 850px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+  }
+  .diagram { 
+    width: 100%; 
+    max-width: 820px; 
+    background: #ffffff; 
+  }
+  .flow-stage { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin: 0 0 8px 0; 
+    position: relative; 
+  }
+  .flow-stage:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid #4a4a4a;
+  }
+  .stage-box { 
+    background: #f5f5f5; 
+    border: 1.5px solid #333; 
+    border-radius: 4px; 
+    padding: 8px 14px; 
+    text-align: center; 
+    font-size: 13px; 
+    font-weight: 600; 
+    min-width: 280px; 
+    max-width: 580px; 
+    width: fit-content;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+  .stage-box.primary { background: #eef3fa; border-color: #2a5c8a; color: #1a3a5c; }
+  .stage-box.storage { background: #fafafa; border-color: #666; border-style: dashed; color: #444; }
+  .stage-box.note { background: #fffef0; border-color: #b8a030; color: #5a5010; font-weight: 500; font-size: 12px; }
+  .stage-label { display: block; font-size: 11px; font-weight: 400; color: #666; margin-top: 3px; }
+  .storage-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 10px 0 4px; width: 100%; max-width: 780px; }
+  .storage-item { 
+    background: #fafafa; 
+    border: 1.5px dashed #666; 
+    border-radius: 4px; 
+    padding: 7px 12px; 
+    font-size: 11.5px; 
+    font-weight: 500; 
+    color: #444; 
+    white-space: nowrap;
+  }
+  .storage-item.kg { border-color: #999; background: #f7f7f7; position: relative; }
+  .storage-item.kg::after { content: "†"; font-size: 10px; vertical-align: super; color: #888; margin-left: 3px; }
+  .branch-row { display: flex; justify-content: center; gap: 30px; margin-top: 6px; width: 100%; max-width: 780px; }
+  .branch { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 320px; }
+  .branch-box { 
+    background: #f0f7f0; 
+    border: 1.5px solid #2d6b2d; 
+    border-radius: 4px; 
+    padding: 7px 12px; 
+    text-align: center; 
+    font-size: 12px; 
+    font-weight: 600; 
+    color: #1a4a1a; 
+    width: 100%; 
+    min-width: 180px;
+  }
+  .branch-box.abstain { background: #fdf0f0; border-color: #8a2a2a; color: #5c1a1a; }
+  .branch-label { font-size: 10px; color: #666; margin-top: 3px; }
+  .caption { 
+    margin-top: 18px; 
+    font-size: 12px; 
+    text-align: center; 
+    line-height: 1.5; 
+    color: #333;
+    max-width: 780px;
+  }
+  .caption strong { font-weight: 700; }
+  .footnotes { 
+    margin-top: 12px; 
+    font-size: 10.5px; 
+    color: #555; 
+    line-height: 1.6; 
+    max-width: 780px;
+  }
+  .footnotes p { margin: 3px 0; }
+  .footnotes sup { font-size: 9px; vertical-align: super; }
+  .legend { 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 14px; 
+    margin: 10px 0 4px; 
+    font-size: 10px; 
+    color: #555;
+    max-width: 780px;
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 14px; height: 10px; border-radius: 2px; border: 1px solid #999; }
+  .legend-swatch.primary { background: #eef3fa; border-color: #2a5c8a; }
+  .legend-swatch.storage { background: #fafafa; border-color: #666; border-style: dashed; }
+  .legend-swatch.branch { background: #f0f7f0; border-color: #2d6b2d; }
+  .legend-swatch.abstain { background: #fdf0f0; border-color: #8a2a2a; }
+  .legend-swatch.note { background: #fffef0; border-color: #b8a030; }
+  .source-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 4px 0 8px; width: 100%; max-width: 780px; }
+  .source-tag { 
+    background: #eef3fa; 
+    border: 1px solid #2a5c8a; 
+    border-radius: 3px; 
+    padding: 3px 8px; 
+    font-size: 10px; 
+    font-weight: 500; 
+    color: #1a3a5c; 
+  }
+  .source-tag.network { background: #fdf0f0; border-color: #8a2a2a; color: #5c1a1a; }
+  .models-row { 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 10px; 
+    margin: 6px 0 4px; 
+    font-size: 11px; 
+    color: #444; 
+    max-width: 780px;
+  }
+  .model-tag { background: #f0f7f0; border: 1px solid #2d6b2d; border-radius: 3px; padding: 3px 8px; font-weight: 500; }
+  .model-tag.embed { background: #eef3fa; border-color: #2a5c8a; }
+  @media print { body { padding: 0; } .container { max-width: 100%; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="diagram" role="img" aria-label="PAM system architecture diagram showing the major processing flow from user sources through security, parsing, chunking, embeddings, hybrid retrieval with RRF, abstention/QA pipeline, local Ollama LLM, to grounded answer with citations or abstention. Persistent storage components shown alongside.">
+    
+    <!-- Source row -->
+    <div class="flow-stage">
+      <div class="stage-box primary">User / Sources</div>
+      <div class="stage-label">Local files & opt-in network sources</div>
+    </div>
+    <div class="source-row">
+      <span class="source-tag">PDF</span>
+      <span class="source-tag">DOCX</span>
+      <span class="source-tag">TXT</span>
+      <span class="source-tag">Markdown</span>
+      <span class="source-tag">Code / Text</span>
+      <span class="source-tag network">GitHub (opt-in)</span>
+      <span class="source-tag network">YouTube (opt-in)</span>
+    </div>
+
+    <!-- Security / Validation -->
+    <div class="flow-stage">
+      <div class="stage-box primary">Security / Validation</div>
+      <div class="stage-label">Protected-file check (secret patterns blocked pre-read)</div>
+    </div>
+
+    <!-- Parsing / Extraction / Normalization -->
+    <div class="flow-stage">
+      <div class="stage-box primary">Parsing / Extraction / Normalization</div>
+      <div class="stage-label">Format-specific parsers → common internal representation</div>
+    </div>
+
+    <!-- Chunking -->
+    <div class="flow-stage">
+      <div class="stage-box primary">Semantic Chunking</div>
+      <div class="stage-label">Retrieval-friendly chunks with context preservation</div>
+    </div>
+
+    <!-- Embeddings + BM25 indexing -->
+    <div class="flow-stage">
+      <div class="stage-box primary">Embeddings + BM25 Indexing</div>
+      <div class="stage-label">
+        <span class="model-tag embed">Embeddings: nomic-embed-text (768-dim, local Ollama)</span>
+        <span class="model-tag">BM25: k₁=1.5, b=0.75</span>
+      </div>
+    </div>
+
+    <!-- Hybrid Retrieval + RRF -->
+    <div class="flow-stage">
+      <div class="stage-box primary">Hybrid Retrieval + Reciprocal Rank Fusion (RRF, k=60)</div>
+      <div class="stage-label">Semantic + lexical combined; production strategy frozen</div>
+    </div>
+
+    <!-- Storage components row -->
+    <div class="storage-row" role="list" aria-label="Persistent storage components">
+      <div class="storage-item" role="listitem">Vector Store (cosine similarity)</div>
+      <div class="storage-item" role="listitem">BM25 Index</div>
+      <div class="storage-item kg" role="listitem">Knowledge Graph†</div>
+      <div class="storage-item" role="listitem">Document / Metadata Storage</div>
+      <div class="storage-item" role="listitem">Obsidian-Generated Notes (Vault)</div>
+      <div class="storage-item" role="listitem">Manifest / Ledger</div>
+      <div class="storage-item" role="listitem">Watcher / Queue</div>
+    </div>
+
+    <!-- Abstention / QA pipeline -->
+    <div class="flow-stage">
+      <div class="stage-box primary">Abstention / QA Pipeline</div>
+      <div class="stage-label">
+        min_cosine=0.25 (production default) • QA timeout=120 s<br>
+        Reranker: disabled • HyDE: disabled • Answerability: disabled
+      </div>
+    </div>
+
+    <!-- System-facts fast path note -->
+    <div class="flow-stage" style="margin-top: 2px;">
+      <div class="stage-box note" style="min-width: 220px;">System-Facts Fast Path (bypasses retrieval+LLM for PAM-internal queries)</div>
+    </div>
+
+    <!-- Local Ollama LLM -->
+    <div class="flow-stage">
+      <div class="stage-box primary">Local Ollama LLM</div>
+      <div class="stage-label">
+        <span class="model-tag">QA Model: qwen3:8b</span>
+        <span class="model-tag">Context: 8192 tokens (OLLAMA_CONTEXT_LENGTH=8192)</span>
+      </div>
+    </div>
+
+    <!-- Branch: Answer OR Abstention -->
+    <div class="branch-row">
+      <div class="branch">
+        <div class="branch-box">Grounded Answer + [SOURCE n] Citations</div>
+        <div class="branch-label">Evidence-supported response with traceable citations</div>
+      </div>
+      <div class="branch">
+        <div class="branch-box abstain">Abstention</div>
+        <div class="branch-label">Insufficient evidence — no hallucinated answer</div>
+      </div>
+    </div>
+
+    <!-- Local-first / network-source note -->
+    <div class="flow-stage" style="margin-top: 6px;">
+      <div class="stage-box note" style="min-width: 320px; max-width: 620px;">
+        Local-first: LLM inference, embedding generation, and retrieval run locally on the user&rsquo;s machine.<br>
+        Network operations occur only for explicit opt-in commands (GitHub, YouTube ingestion).<br>
+        No external inference APIs in the retrieval-to-answer path.
+      </div>
+    </div>
+
+    <!-- Compact technical notes -->
+    <div class="flow-stage" style="margin-top: 4px;">
+      <div class="stage-box note" style="min-width: 320px; max-width: 620px; font-size: 11px;">
+        <sup>†</sup> Knowledge Graph exists in storage but does <strong>not</strong> participate in the evaluated retrieval path (vector + BM25 via RRF only). PAM is <strong>not</strong> a Graph RAG system.<br>
+        min_cosine: production 0.25 • academic evaluation 0.45
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Caption -->
+  <div class="caption">
+    <strong>Fig. 1.</strong> PAM (Personal AI Memory) system architecture.
+  </div>
+
+  <!-- Legend only -->
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch primary"></span> Primary flow stage</span>
+    <span class="legend-item"><span class="legend-swatch storage"></span> Persistent storage component</span>
+    <span class="legend-item"><span class="legend-swatch branch"></span> Answer branch</span>
+    <span class="legend-item"><span class="legend-swatch abstain"></span> Abstention branch</span>
+    <span class="legend-item"><span class="legend-swatch note"></span> Informational note</span>
+  </div>
+
+</div>
+</body>
+</html>

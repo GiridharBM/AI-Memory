@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "PAM Pipeline — from Personal Sources to Grounded Answers",
+    "output": "docs/pipeline.html",
+    "viewBox": [1080, 640],
+    "quality_profile": "showcase"
+  },
+  "stages": [
+    { "label": "Sources" },
+    { "label": "Ingest" },
+    { "label": "Chunk & Embed" },
+    { "label": "Store" },
+    { "label": "Retrieve & Answer" }
+  ],
+  "nodes": [
+    { "id": "sources", "type": "external", "label": "Personal Sources", "sublabel": "files · code · github · yt", "stage": 0, "row": 0, "width": 150 },
+    { "id": "ingest", "type": "backend", "label": "Ingest + Extract", "sublabel": "ingestors · entities", "stage": 1, "row": 0 },
+    { "id": "chunk", "type": "backend", "label": "Semantic Chunker", "sublabel": "sentence-aware segments", "stage": 2, "row": 0 },
+    { "id": "embed", "type": "backend", "label": "Embedding Service", "sublabel": "nomic · 768-dim", "stage": 2, "row": 1 },
+    { "id": "graph", "type": "database", "label": "Knowledge Graph", "sublabel": "stored · not queried", "stage": 2, "row": 2 },
+    { "id": "store", "type": "database", "label": "Vector Store", "sublabel": "cosine · versioned", "stage": 3, "row": 0 },
+    { "id": "bm25", "type": "backend", "label": "BM25 Index", "sublabel": "k1=1.5 · b=0.75", "stage": 3, "row": 1 },
+    { "id": "hybrid", "type": "backend", "label": "Hybrid RRF", "sublabel": "dense + BM25 · k=60", "stage": 4, "row": 0 },
+    { "id": "gate", "type": "security", "label": "Cosine Gate", "sublabel": "min_cosine 0.45", "stage": 4, "row": 1 },
+    { "id": "answer", "type": "external", "label": "Local LLM Answer", "sublabel": "qwen3:8b · [SOURCE N]", "stage": 4, "row": 2 }
+  ],
+  "flows": [
+    { "from": "sources", "to": "ingest", "label": "raw documents", "variant": "emphasis", "route": "straight" },
+    { "from": "ingest", "to": "chunk", "label": "normalized text", "variant": "emphasis", "route": "straight" },
+    { "from": "chunk", "to": "embed", "label": "chunks", "variant": "emphasis", "route": "straight", "labelAt": [530, 200] },
+    { "from": "embed", "to": "store", "label": "768-dim vectors", "variant": "emphasis", "route": "auto" },
+    { "from": "store", "to": "bm25", "label": "corpus snapshot", "variant": "dashed", "labelAt": [745, 200] },
+    { "from": "store", "to": "hybrid", "label": "dense candidates", "variant": "emphasis", "route": "straight" },
+    { "from": "bm25", "to": "hybrid", "label": "lexical ranks", "variant": "default" },
+    { "from": "hybrid", "to": "gate", "label": "fused candidates", "variant": "emphasis", "route": "straight", "labelAt": [960, 200] },
+    { "from": "gate", "to": "answer", "label": "accepted context", "variant": "emphasis", "route": "straight", "labelAt": [960, 314] },
+    { "from": "ingest", "to": "graph", "label": "entities · relations", "variant": "dashed", "labelAt": [423, 314] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "End-to-end path", "items": ["Sources → ingest → chunk → embed → vector store", "Hybrid retrieval fuses dense + BM25 with RRF (k=60)", "Cosine gate decides whether evidence is sufficient"] },
+    { "dot": "amber", "title": "Retrieval reliability", "items": ["Frozen academic corpus: 24 sources · 195 chunks · 199 queries", "Baseline Hit@5 = 0.9236 · p95 latency = 47.1 ms", "31/36 false positives were relevant-but-insufficient evidence"] },
+    { "dot": "rose", "title": "Evaluated, not deployed", "items": ["Cross-encoder reranker and evidence verifiers were measured", "None met the guardrails (FPR, FNR, latency)", "Knowledge graph is stored but never queried here"] }
+  ]
+}
