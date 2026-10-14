@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -74,7 +75,9 @@ def _tmp_pdf() -> Path:
     """Create a minimal valid one-page PDF for testing."""
     try:
         import fitz
-        pdf_path = Path(tempfile.mktemp(suffix=".pdf"))
+        fd, name = tempfile.mkstemp(suffix=".pdf")
+        os.close(fd)
+        pdf_path = Path(name)
         doc = fitz.open()
         page = doc.new_page()
         page.insert_text((72, 72), "Test content")
@@ -82,7 +85,9 @@ def _tmp_pdf() -> Path:
         doc.close()
         return pdf_path
     except Exception:
-        return Path(tempfile.mktemp(suffix=".pdf"))
+        fd, name = tempfile.mkstemp(suffix=".pdf")
+        os.close(fd)
+        return Path(name)
 
 
 # ── TextProcessor ──────────────────────────────────────────────────────

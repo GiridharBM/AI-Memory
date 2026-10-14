@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -13,7 +14,9 @@ from app.infrastructure.document_intelligence.ocr.engines import VisionOcrEngine
 def _tmp_pdf(n_pages: int = 4) -> Path:
     import fitz
 
-    pdf_path = Path(tempfile.mktemp(suffix=".pdf"))
+    fd, name = tempfile.mkstemp(suffix=".pdf")
+    os.close(fd)
+    pdf_path = Path(name)
     doc = fitz.open()
     for page_no in range(n_pages):
         page = doc.new_page()

@@ -19,6 +19,7 @@ import time
 from contextlib import suppress
 from pathlib import Path
 from typing import Annotated, Any
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
@@ -34,6 +35,14 @@ UPLOAD_SUBDIR = "pam-gui-uploads"
 # Uploads are staged outside the watched inbox on purpose: if ``pam watch`` is
 # running it would otherwise ingest the same file concurrently with this route.
 _MAX_UPLOAD_BYTES = 512 * 1024 * 1024
+_INGEST_URL_HOSTS = {
+    "github.com",
+    "youtube.com",
+    "www.youtube.com",
+    "m.youtube.com",
+    "youtu.be",
+    "www.youtu.be",
+}
 
 
 class SearchRequest(BaseModel):
@@ -189,6 +198,22 @@ async def post_ingest(
     if file is not None:
         target = await _stage_upload(file)
         return _run_ingest(target, expected_source_type=source_type or None)
+
+    try:
+        parsed_url = urlparse(target_url)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Only GitHub and YouTube URLs are supported; upload local files directly.",
+        ) from exc
+    if (
+        parsed_url.scheme not in {"http", "https"}
+        or parsed_url.netloc.lower() not in _INGEST_URL_HOSTS
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Only GitHub and YouTube URLs are supported; upload local files directly.",
+        )
 
     return _run_ingest(target_url, expected_source_type=source_type or None)
 

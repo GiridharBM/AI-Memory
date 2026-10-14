@@ -581,6 +581,52 @@ class TestIngestEndpoint:
     def test_requires_a_file_or_url(self, client: TestClient) -> None:
         assert client.post("/api/ingest").status_code == 400
 
+    def test_url_field_rejects_local_paths_and_unapproved_hosts(
+        self,
+        client: TestClient,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        local_file = tmp_path / "private.txt"
+        local_file.write_text("private content", encoding="utf-8")
+
+        def _must_not_run(*_args: object, **_kwargs: object) -> object:
+            raise AssertionError("unapproved URL input must not reach ingestion")
+
+        monkeypatch.setattr(
+            "app.interfaces.web.routes.interact.IngestionWorkflow.create_default", _must_not_run
+        )
+
+        for source in (
+            str(local_file),
+            f"file:///{local_file.as_posix().lstrip('/')}",
+            "http://127.0.0.1/private.txt",
+            "https://example.com/private.txt",
+            "https://github.com.example.com/user/repo",
+            "https://github.com@attacker.example/user/repo",
+        ):
+            response = client.post("/api/ingest", data={"url": source})
+            assert response.status_code == 400, source
+            assert "upload local files directly" in response.json()["detail"], source
+
+    def test_url_field_accepts_supported_youtube_host(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        ingested: list[str] = []
+
+        def _run_ingest(
+            source: str | Path, expected_source_type: str | None = None
+        ) -> dict[str, str]:
+            ingested.append(str(source))
+            return {"status": "processed"}
+
+        monkeypatch.setattr("app.interfaces.web.routes.interact._run_ingest", _run_ingest)
+
+        response = client.post("/api/ingest", data={"url": "https://youtu.be/abc123"})
+
+        assert response.status_code == 200
+        assert ingested == ["https://youtu.be/abc123"]
+
     def test_capabilities_come_from_the_live_registry(self, client: TestClient) -> None:
         body = client.get("/api/ingest/capabilities").json()
 
