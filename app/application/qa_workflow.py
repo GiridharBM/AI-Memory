@@ -502,10 +502,7 @@ class QAWorkflow:
             intent = self._system_facts_router.route(question)
             if intent is not None:
                 fact = self._system_facts.resolve(intent)
-                logger.info(
-                    "Answering from System Facts.",
-                    extra={"intent": intent},
-                )
+                logger.info("Answering from System Facts.")
                 return QAAnswer(
                     answer=fact.answer,
                     sources=[],
@@ -524,21 +521,12 @@ class QAWorkflow:
         hits = self._search_service.search(
             question, top_k=search_top_k, min_score=min_score, filter=filter,
         )
-        logger.info(
-            "QA retrieval completed.",
-            extra={"hits": len(hits), "top_k": top_k},
-        )
+        logger.info("QA retrieval completed.")
 
         # Rerank if available
         if self._reranker and self._reranker.is_available and hits:
             hits = self._reranker.rerank(question, hits, top_k=top_k)
-            logger.info(
-                "Reranking completed.",
-                extra={
-                    "reranked": len(hits),
-                    "top_rerank_score": hits[0].rerank_score if hits else 0.0,
-                },
-            )
+            logger.info("Reranking completed.")
 
         # Truncate to top_k after reranking
         hits = hits[:top_k]
@@ -571,15 +559,9 @@ class QAWorkflow:
         )
         if document_blocked and not memory_section:
             if abstention.abstain:
-                logger.info(
-                    "Abstaining from answer.",
-                    extra={"reason": abstention.reason},
-                )
+                logger.info("Abstaining from answer.")
             else:
-                logger.info(
-                    "Answerability gate: abstaining.",
-                    extra={"reason": abstention_reason},
-                )
+                logger.info("Answerability gate: abstaining.")
             return _abstention_answer(question, abstention_reason)
         memory_hits = (
             [memory_match_to_hit(match) for match in memory_matches]
@@ -638,10 +620,7 @@ class QAWorkflow:
 
         citations, invalid_numbers, duplicates = resolve_citations(response.response, combined_hits)
         if invalid_numbers:
-            logger.warning(
-                "QA answer cites source numbers outside the retrieved context.",
-                extra={"invalid": invalid_numbers},
-            )
+            logger.warning("QA answer cites source numbers outside the retrieved context.")
 
         return QAAnswer(
             answer=response.response,

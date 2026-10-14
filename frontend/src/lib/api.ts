@@ -45,6 +45,13 @@ import type {
 
 const BASE = '/api'
 
+function encodePathSegment(value: string): string {
+  if (value === '.' || value === '..' || value.includes('/') || value.includes('\\')) {
+    throw new ApiError(0, 'Invalid PAM API request.')
+  }
+  return encodeURIComponent(value)
+}
+
 /** A failed PAM call. `detail` is the backend's own message, never invented. */
 export class ApiError extends Error {
   readonly status: number
@@ -102,7 +109,7 @@ export const api = {
   diagnostics: () => request<DiagnosticsResponse>('/diagnostics'),
   evaluation: () => request<EvaluationResponse>('/evaluation'),
   sources: () => request<SourcesResponse>('/sources'),
-  source: (id: string) => request<SourceDetail>(`/sources/${id}`),
+  source: (id: string) => request<SourceDetail>(`/sources/${encodePathSegment(id)}`),
   capabilities: () => request<CapabilitiesResponse>('/ingest/capabilities'),
   search: (body: {
     query: string
@@ -117,28 +124,33 @@ export const api = {
     post<Conversation>('/conversations', body),
   listConversations: (limit = 50, offset = 0) =>
     request<ConversationsResponse>(`/conversations?limit=${limit}&offset=${offset}`),
-  getConversation: (id: string) => request<Conversation>(`/conversations/${id}`),
+  getConversation: (id: string) =>
+    request<Conversation>(`/conversations/${encodePathSegment(id)}`),
   appendMessage: (id: string, body: { role: 'user'; content: string }) =>
-    post<ConversationMessage>(`/conversations/${id}/messages`, body),
+    post<ConversationMessage>(`/conversations/${encodePathSegment(id)}/messages`, body),
   listMessages: (id: string, limit = 50, offset = 0) =>
     request<ConversationMessagesResponse>(
-      `/conversations/${id}/messages?limit=${limit}&offset=${offset}`,
+      `/conversations/${encodePathSegment(id)}/messages?limit=${limit}&offset=${offset}`,
     ),
   archiveConversation: (id: string) =>
-    post<Conversation>(`/conversations/${id}/archive`, {}),
+    post<Conversation>(`/conversations/${encodePathSegment(id)}/archive`, {}),
   askInConversation: (id: string, body: { question: string; top_k?: number }) =>
-    post<ConversationAskResponse>(`/conversations/${id}/ask`, body),
+    post<ConversationAskResponse>(`/conversations/${encodePathSegment(id)}/ask`, body),
   extractMemories: (conversationId: string) =>
     post<CandidateListResponse>('/memories/extract', { conversation_id: conversationId }),
   listCandidates: (limit = 50, offset = 0) =>
     request<CandidateListResponse>(`/memories/candidates?limit=${limit}&offset=${offset}`),
-  getCandidate: (id: string) => request<MemoryCandidate>(`/memories/candidates/${id}`),
+  getCandidate: (id: string) =>
+    request<MemoryCandidate>(`/memories/candidates/${encodePathSegment(id)}`),
   approveCandidate: (id: string, body: { edited_text?: string }) =>
-    post<ApproveCandidateResponse>(`/memories/candidates/${id}/approve`, body),
+    post<ApproveCandidateResponse>(
+      `/memories/candidates/${encodePathSegment(id)}/approve`,
+      body,
+    ),
   rejectCandidate: (id: string, body: { reason: string }) =>
-    post<MemoryCandidate>(`/memories/candidates/${id}/reject`, body),
+    post<MemoryCandidate>(`/memories/candidates/${encodePathSegment(id)}/reject`, body),
   editCandidate: (id: string, body: { edited_text: string }) =>
-    post<MemoryCandidate>(`/memories/candidates/${id}/edit`, body),
+    post<MemoryCandidate>(`/memories/candidates/${encodePathSegment(id)}/edit`, body),
   listMemories: (limit = 50, offset = 0, logicalId?: string) => {
     const params = new URLSearchParams()
     params.set('limit', String(limit))
@@ -146,13 +158,16 @@ export const api = {
     if (logicalId !== undefined) params.set('logical_id', logicalId)
     return request<MemoryListResponse>(`/memories?${params.toString()}`)
   },
-  getMemory: (id: string) => request<MemoryRecord>(`/memories/${id}`),
+  getMemory: (id: string) =>
+    request<MemoryRecord>(`/memories/${encodePathSegment(id)}`),
   supersedeMemory: (
     logicalId: string,
     body: { text: string; category: MemoryCategory; confidence: number },
-  ) => post<MemoryRecord>(`/memories/${logicalId}/supersede`, body),
+  ) => post<MemoryRecord>(`/memories/${encodePathSegment(logicalId)}/supersede`, body),
   memoryProvenance: (id: string) =>
-    request<MemoryProvenanceResponse>(`/memories/${id}/provenance`),
+    request<MemoryProvenanceResponse>(
+      `/memories/${encodePathSegment(id)}/provenance`,
+    ),
   ingest: (form: FormData) => request<IngestResponse>('/ingest', { method: 'POST', body: form }),
   createGeneration: (body: {
     task_type: GenerationTask
@@ -160,15 +175,19 @@ export const api = {
     config?: Record<string, string | number | boolean | null>
     model_role?: string
   }) => post<GenerationJob>('/generation', body),
-  getJob: (id: string) => request<GenerationJob>(`/jobs/${id}`),
+  getJob: (id: string) => request<GenerationJob>(`/jobs/${encodePathSegment(id)}`),
   listJobs: () => request<JobsResponse>('/jobs'),
-  cancelJob: (id: string) => post<GenerationJob>(`/jobs/${id}/cancel`, {}),
+  cancelJob: (id: string) =>
+    post<GenerationJob>(`/jobs/${encodePathSegment(id)}/cancel`, {}),
   listArtifacts: () => request<ArtifactsResponse>('/artifacts'),
-  getArtifact: (id: string) => request<ArtifactSummary>(`/artifacts/${id}`),
+  getArtifact: (id: string) =>
+    request<ArtifactSummary>(`/artifacts/${encodePathSegment(id)}`),
   getArtifactVersions: (id: string) =>
-    request<ArtifactVersion>(`/artifacts/${id}/versions`),
+    request<ArtifactVersion>(`/artifacts/${encodePathSegment(id)}/versions`),
   getArtifactProvenance: (id: string) =>
-    request<ProvenanceResponse>(`/artifacts/${id}/provenance`),
+    request<ProvenanceResponse>(
+      `/artifacts/${encodePathSegment(id)}/provenance`,
+    ),
   getMindMap: (nodeId?: string, depth?: number) => {
     const params = new URLSearchParams()
     if (nodeId !== undefined) params.set('node_id', nodeId)
@@ -177,5 +196,6 @@ export const api = {
     return request<MindMapResponse>(`/mindmap${query ? `?${query}` : ''}`)
   },
   /** Direct download URL for binary artifact content (PPTX). No JSON fetch. */
-  artifactContentUrl: (id: string) => `/api/artifacts/${id}/content`,
+  artifactContentUrl: (id: string) =>
+    `/api/artifacts/${encodePathSegment(id)}/content`,
 }

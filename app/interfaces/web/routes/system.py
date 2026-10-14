@@ -399,13 +399,15 @@ def get_diagnostics() -> dict[str, Any]:
         ("Log root", settings.paths.log_root),
         ("Cache root", settings.paths.cache_root),
     ):
-        ok, detail = _check_writable_directory(path)
+        ok, _ = _check_writable_directory(path)
         if not ok:
             logger.error(
                 "Diagnostics found a configured directory that is not writable.",
                 extra={"directory_label": label},
             )
             detail = "Directory is not writable; check the server log."
+        else:
+            detail = "Writable."
         directories.append({"label": label, "ok": ok, "detail": detail})
 
     ocr = settings.intelligence.ocr
