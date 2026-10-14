@@ -477,8 +477,13 @@ class TestStaticSpa:
             "headers": [(b"host", b"testserver")],
         }
         chunks: list[bytes] = []
+        request_received = False
 
         async def receive() -> dict[str, Any]:
+            nonlocal request_received
+            if request_received:
+                await asyncio.Event().wait()
+            request_received = True
             return {"type": "http.request", "body": b"", "more_body": False}
 
         async def send(message: dict[str, Any]) -> None:
