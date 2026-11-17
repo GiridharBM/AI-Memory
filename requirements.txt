@@ -21,5 +21,5 @@ olefile>=0.47
 # separately per https://pytorch.org/get-started/locally/ on the image
 # machine. CI and non-GPU paths use a stub runtime and never import torch.
 diffusers>=0.35.0
-accelerate>=1.0.0
+accelerate>=1.15.0
 Pillow>=10.0.0
